@@ -1,0 +1,210 @@
+
+.mobile-input-wrap span {
+    font-size: 15px;
+}
+.mobile-input-wrap input {
+    padding-left: 70px; 
+    width: 100%;
+    height: 40px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+.mobile-input-prefix {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    pointer-events: none;
+    color: #333;
+}
+.otp-inputs {
+    display: inline-flex;
+    justify-content: center;
+    gap: 15px;
+    width: 100%;
+}
+.otp-field {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+    text-align: center;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+#msg91_send_otp, #msg91_verify_otp {
+    padding: 10px 15px;
+    font-size: 16px;
+    margin-top: 10px;
+    background-color: #DA3E01;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+}
+#msg91_send_otp:disabled, #msg91_verify_otp:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+.otp-send-status{
+    margin-top: 10px;
+    font-size: 14px;
+    text-align: center;
+}
+.otp-verify-status{
+    padding: 10px;
+    text-align: center;
+}
+#otp-form-wrap {
+    margin: 0 auto;
+    max-width: 300px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.images {
+    max-width:100%;
+     max-height:150px; 
+     margin-bottom: 15px;
+}
+.popup-image {
+    max-width:100%;
+     max-height:200px; 
+     margin-bottom: 15px;
+     object-fit: contain;
+}
+.lable {
+    text-align: center;
+     margin-bottom: 10px;
+}
+.lable-style {
+    font-size: 23px; font-weight: 900;
+}
+.descripition {
+    font-size: 16px; font-weight: 400; color: #00000069;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    display: block;
+}
+#country_code {
+    position: absolute; top: 50%; left: 10px; transform: translateY(-50%); color: #555
+}
+.common-width {
+    width: 100%;
+    margin-top: 10px;
+}
+#otp_input_wrap {
+    display:none; margin-top:15px;
+}
+.verify-otp {
+    text-align:center;
+    width: 100%;
+}
+#resend_otp {
+    background: none;
+    color: #00000094;
+    border: none;
+    cursor: not-allowed;
+    margin-top: 10px;
+}
+#msg91_selected_countries option:checked {
+    background-color: #007bff; 
+    color: white;
+}
+.mobile-input-wrap {
+    position: relative;
+    width: 100%;
+}
+.input-wrapper {
+    position: relative;
+    width: 100%;
+}
+.country-select {
+    max-height: 300px;
+    height: 45px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-right: none;
+    background-color: #fff;
+}
+#msg91_mobile {
+    padding: 10px 10px 10px 100px; 
+    font-size: 18px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+ height: 45px; 
+ border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+.input-wrapper select, .input-wrapper input {
+    height: 45px;
+}
+#otp-popup-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+#otp-popup-modal #otp-form-wrap {
+    background-color: white;
+    padding: 40px;
+    margin: 20px;
+    border-radius: 10px;
+    max-width: 500px;
+    width: 100%;
+    box-sizing: border-box;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+#otp-popup-modal #otp-form-wrap {
+background-color: white;
+padding: 20px;
+border-radius: 10px;
+width: 100%; 
+box-sizing: border-box;
+}
+#otp-popup-modal #otp-form-wrap img {
+width: 100%;
+}
+#otp-popup-modal button {
+    cursor: pointer;
+}
+.msg-close-icon {
+    height: 0;
+    background: none; 
+    border: none; 
+    font-size: 24px; 
+    cursor: pointer;
+     outline: none;
+}
+.msg91-common-align {
+    text-align: center;
+}
+
+
+
+
+
+
+
+
+
+
+
