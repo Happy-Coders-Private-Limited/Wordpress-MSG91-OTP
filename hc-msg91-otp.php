@@ -1,17 +1,16 @@
 <?php
 /**
- * Plugin Name: MSG91 OTP for woocommerce
- * Description: Easily integrate OTP verification with MSG91. Secure, customizable, and efficient OTP sending, verifying, and resending with a timer. Perfect for enhancing user authentication.
- * Version: 1.0
- * Author: HAPPY CODERS
+ * Plugin Name: Happy Coders OTP Login
+ * Description: Happy Coders OTP Login integrates seamless OTP-based authentication using MSG91. Easily send, verify, and resend OTPs with a customizable timer—enhancing your website’s security and user experience.
+ * Version: 1.1
+ * Author: Happy Coders
  * Author URI: https://www.happycoders.in/
- * Developers: Raguvaran R, Muthupandi P, Gopi Ananth C, Suresh Kumar R, 
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  */
 
 defined('ABSPATH') || exit;
-require_once plugin_dir_path(__FILE__) . 'includes/msg91-settings.php';
+require_once plugin_dir_path(__FILE__) . 'includes/hc-msg91-settings.php';
 require_once plugin_dir_path(__FILE__) . 'includes/countries.php';
 
 add_action('plugins_loaded', function () {
