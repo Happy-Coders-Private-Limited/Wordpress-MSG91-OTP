@@ -1,5 +1,5 @@
 <?php
-function msg91_iso_to_flag($iso) {
+function hc_msg91_iso_to_flag($iso) {
     $iso = strtoupper($iso);
     $flag = '';
     for ($i = 0; $i < strlen($iso); $i++) {
@@ -7,7 +7,7 @@ function msg91_iso_to_flag($iso) {
     }
     return $flag;
 }
-function msg91_get_countries_with_iso() {
+function hc_msg91_get_countries_with_iso() {
     return [
         ['name' => 'Afghanistan', 'code' => '+93', 'iso' => 'AF'],
         ['name' => 'Albania', 'code' => '+355', 'iso' => 'AL'],
