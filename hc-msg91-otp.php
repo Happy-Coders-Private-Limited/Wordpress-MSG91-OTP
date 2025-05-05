@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Happy Coders OTP Login
  * Description: Happy Coders OTP Login integrates seamless OTP-based authentication using MSG91. Easily send, verify, and resend OTPs with a customizable timer—enhancing your website’s security and user experience.
- * Version: 1.1
+ * Version: 1.2
  * Author: Happy Coders
  * Author URI: https://www.happycoders.in/
  * License: GPL-2.0-or-later
@@ -11,7 +11,7 @@
 
 defined('ABSPATH') || exit;
 require_once plugin_dir_path(__FILE__) . 'includes/hc-msg91-settings.php';
-require_once plugin_dir_path(__FILE__) . 'includes/countries.php';
+require_once plugin_dir_path(__FILE__) . 'includes/hc-countries.php';
 
 add_action('plugins_loaded', function () {
     $locale = determine_locale();
@@ -50,8 +50,8 @@ function __msg91($text) {
 }
 
 add_action('wp_enqueue_scripts', function() {
-    wp_enqueue_script('msg91-otp-js', plugin_dir_url(__FILE__) . 'assets/js/msg91-otp.js', ['jquery'], time(), true);
-    wp_enqueue_style('msg91-otp-css', plugin_dir_url(__FILE__) . 'assets/css/msg91-otp.css', [], time());
+    wp_enqueue_script('msg91-otp-js', plugin_dir_url(__FILE__) . 'assets/js/hc-msg91-otp.js', ['jquery'], time(), true);
+    wp_enqueue_style('msg91-otp-css', plugin_dir_url(__FILE__) . 'assets/css/hc-msg91-otp.css', [], time());
     
     wp_localize_script('msg91-otp-js', 'msg91_ajax_obj', [
         'ajax_url' => admin_url('admin-ajax.php'),
@@ -112,21 +112,26 @@ function msg91_get_options() {
     ];
 }
 
-function msg91_country_select($options) {
+function hc_msg91_country_select($options) {
     $html = '';
-    $countries = msg91_get_countries_with_iso();
+    $all_countries = hc_msg91_get_countries_with_iso();
     $selected_countries = get_option('msg91_selected_countries', ['+91']); 
     $show_flag = get_option('msg91_flag_show', 0);
 
-    foreach ($countries as $country) {
-        $selected = in_array($country['code'], $selected_countries) ? 'selected' : ''; 
-        $flag = msg91_iso_to_flag($country['iso']); 
+    $filtered_countries = array_filter($all_countries, function($country) use ($selected_countries) {
+        return in_array($country['code'], $selected_countries);
+    });
+
+    foreach ($filtered_countries as $country) {
+        $selected = 'selected'; 
+        $flag = hc_msg91_iso_to_flag($country['iso']); 
         $flag_html = $show_flag ? $flag : '';
         $html .= "<option value='{$country['code']}' data-flag='$flag' $selected>$flag_html {$country['code']}</option>";
     }
 
     return "<select name='msg91_country_code' id='msg91_country_code' class='country-select'>{$html}</select>";
 }
+
 
 add_shortcode('msg91_otp_form', function () {
     $options = msg91_get_options();
@@ -139,11 +144,12 @@ add_shortcode('msg91_otp_form', function () {
         $options['top_verify_image'] = plugin_dir_url(__FILE__) . 'assets/images/verify-otp.png';
     }
 
-    if (isset($_COOKIE['msg91_verified_mobile'])) {
-        $user = get_user_by('login', sanitize_text_field($_COOKIE['msg91_verified_mobile']));
-        if ($user) {
-            return '<div style="text-align: center;"><h3>Welcome, ' . esc_html($user->display_name) . '!</h3></div><button id="next-to-address" style="margin-top: 20px;">Next</button>';
-        }
+    if (is_user_logged_in()) {
+        $user = wp_get_current_user(); 
+        return '<div style="text-align: center;">
+                    <h3>Welcome, ' . esc_html($user->display_name) . '!</h3>
+                    <button id="next-to-address" style="margin-top: 20px;">Next</button>
+                </div>';
     }
 
     return render_msg91_otp_form($options, false);
@@ -158,11 +164,12 @@ add_action('wp_footer', function () {
     if (empty($options['top_verify_image'])) {
         $options['top_verify_image'] = plugin_dir_url(__FILE__) . 'assets/images/verify-otp.png';
     }
-    if (isset($_COOKIE['msg91_verified_mobile'])) {
-        $user = get_user_by('login', sanitize_text_field($_COOKIE['msg91_verified_mobile']));
-        if ($user) {
-            return '<div style="text-align: center;"><h3>Welcome, ' . esc_html($user->display_name) . '!</h3></div><button id="next-to-address" style="margin-top: 20px;">Next</button>';
-        }
+    if (is_user_logged_in()) {
+        $user = wp_get_current_user(); 
+        return '<div style="text-align: center;">
+                    <h3>Welcome, ' . esc_html($user->display_name) . '!</h3>
+                    <button id="next-to-address" style="margin-top: 20px;">Next</button>
+                </div>';
     }
     echo render_msg91_otp_form($options, true);
 });
@@ -200,7 +207,7 @@ function render_msg91_otp_form($options, $is_popup = false) {
             </div>
 
             <div class="mobile-input-wrap">
-                <?php echo msg91_country_select($options); ?>
+                <?php echo hc_msg91_country_select($options); ?>
                 <input type="tel" id="msg91_mobile" maxlength="10" pattern="\d*" placeholder="Mobile Number" oninput="this.value = this.value.replace(/[^0-9]/g, '');" />
             </div>
             <div id="otp-send-status" class="otp-send-status"></div>
@@ -311,11 +318,23 @@ function msg91_auto_login_user() {
         $user = get_user_by('ID', $user_id);
     }
     wp_set_current_user($user->ID);
-    wp_set_auth_cookie($user->ID);
+    wp_set_auth_cookie($user->ID, true);
+    $session_lifetime = 60 * 60 * 24 * 30; 
+    ini_set('session.gc_maxlifetime', $session_lifetime);
+    session_set_cookie_params($session_lifetime);
+    if (!session_id()) {
+        session_start();
+    }
+
+    setcookie('msg91_verified_mobile', $mobile, time() + (30 * 24 * 60 * 60), COOKIEPATH, COOKIE_DOMAIN);
+    setcookie('msg91_verified_user_id', $user->ID, time() + (30 * 24 * 60 * 60), COOKIEPATH, COOKIE_DOMAIN);
+
 
     wp_send_json_success([
         'message' => 'User logged in successfully',
-        'name' => $user->display_name
+        'name' => $user->display_name,
+        'user_id' => $user->ID
+        
     ]);
 }
 
@@ -333,9 +352,36 @@ function verify_msg91_otp_ajax() {
     $result = json_decode($body, true);
 
     if (isset($result['type']) && $result['type'] === 'success') {
-    
+        $user = get_user_by('login', $mobile);
+
+        if ($user) {
+            wp_set_current_user($user->ID);
+            wp_set_auth_cookie($user->ID, true);
+
+            setcookie('msg91_verified_mobile', $mobile, time() + (30 * 24 * 60 * 60), COOKIEPATH, COOKIE_DOMAIN);
+            setcookie('msg91_verified_user_id', $user->ID, time() + (30 * 24 * 60 * 60), COOKIEPATH, COOKIE_DOMAIN);
+        
+            $session_lifetime = 60 * 60 * 24 * 30; 
+            ini_set('session.gc_maxlifetime', $session_lifetime);
+            session_set_cookie_params($session_lifetime);
+            if (!session_id()) {
+                session_start();
+            }
+        
+            wp_send_json_success([
+                'message' => 'OTP Verified Successfully, User logged in',
+                'user_id' => $user->ID
+            ]);
+        } else {
+            msg91_auto_login_user();
+        }
         setcookie('msg91_verified_mobile', $mobile, time() + (30 * 24 * 60 * 60), COOKIEPATH, COOKIE_DOMAIN);
-        wp_send_json_success(['message' => 'OTP Verified Successfully']);
+         setcookie('msg91_verified_user_id', $user->ID, time() + (30 * 24 * 60 * 60), COOKIEPATH, COOKIE_DOMAIN);
+
+        wp_send_json_success([
+            'message' => 'OTP Verified Successfully',
+            'user_id' => get_current_user_id() 
+        ]);
     } else {
         wp_send_json_error(['message' => $result['message'] ?? 'OTP verification failed']);
     }

@@ -48,7 +48,7 @@ add_action('admin_init', function() {
 function msg91_otp_settings_page() {
     ?>
     <div class="wrap">
-        <h1><?php echo __msg91('MSG91 OTP Settings'); ?></h1>
+        <h1><?php echo __msg91('Happy Coders MSG91 OTP Settings'); ?></h1>
         <form method="post" action="options.php">
             <?php settings_fields('msg91_otp_settings_group'); ?>
             <?php do_settings_sections('msg91_otp_settings_group'); ?>
@@ -143,9 +143,6 @@ function msg91_otp_settings_page() {
                     <td><input type="text" name="msg91_sendotp_validation_msg" value="<?php echo esc_attr(get_option('msg91_sendotp_validation_msg')); ?>" size="50" /></td>
                 </tr>
 
-
-
-        
                 <tr valign="top">
                     <th scope="row"><?php echo __msg91('Image URL for Verify OTP Form'); ?></th>
                     <td>
@@ -204,14 +201,14 @@ function msg91_otp_settings_page() {
                         <select name="msg91_default_country" id="msg91_default_country">
                             <?php 
                                 $default_country = get_option('msg91_default_country', '+91'); 
-                                $countries = msg91_get_countries_with_iso();
+                                $countries = hc_msg91_get_countries_with_iso();
                                                             
                                 foreach ($countries as $country) {
                                     $dial_code = $country['code'];
                                     $name = $country['name'];
                                     $iso = $country['iso'];
                                     $selected = $default_country === $dial_code ? 'selected' : ''; 
-                                    $flag = msg91_iso_to_flag($iso);
+                                    $flag = hc_msg91_iso_to_flag($iso);
                                     echo "<option value='$dial_code' $selected>$flag $name ($dial_code)</option>"; 
                                 }
                             ?>
@@ -231,14 +228,14 @@ function msg91_otp_settings_page() {
                         <select name="msg91_selected_countries[]" id="msg91_selected_countries" multiple="multiple" style="width: 100%; height: 150px;">
                             <?php 
                                 $default_countries = get_option('msg91_selected_countries', ['+91']); 
-                                $countries = msg91_get_countries_with_iso(); 
+                                $countries = hc_msg91_get_countries_with_iso(); 
                                 foreach ($countries as $country) {
                                     $dial_code = $country['code'];
                                     $name = $country['name'];
                                     $iso = $country['iso'];
                             
                                     $selected = in_array($dial_code, $default_countries) ? 'selected' : ''; 
-                                    $flag = msg91_iso_to_flag($iso);
+                                    $flag = hc_msg91_iso_to_flag($iso);
                                     
                                     $background_color = ($selected) ? 'background-color: #009ee8; color: white;' : '';
                                     
