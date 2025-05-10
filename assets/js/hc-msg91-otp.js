@@ -4,7 +4,7 @@ jQuery(document).ready(function ($) {
         let $container = $button.closest('#otp-form-wrap'); 
     
         let mobile = $container.find('#msg91_mobile').val().trim();
-        let countryCode = $container.find('#country_code').text().trim();
+        let countryCode = $container.find('#msg91_country_code').val();
         let msg = msg91_ajax_obj.sendotp_validation_msg || 'Please enter a valid mobile number (between 5 and 12 digits).';
     
         if (!mobile || mobile.length < 5 || mobile.length > 12) {
@@ -19,6 +19,7 @@ jQuery(document).ready(function ($) {
         $.post(msg91_ajax_obj.ajax_url, {
             action: 'send_msg91_otp_ajax',
             mobile: mobileWithCode
+            
         }, function (res) {
             if (res) {
                 if (res.success) {
@@ -50,8 +51,11 @@ jQuery(document).ready(function ($) {
     $(document).on('click', '#msg91_verify_otp', function () {
         let $button = $(this);
         let $container = $button.closest('#otp-form-wrap');
-    
         let mobile = $container.find('#msg91_mobile').val().trim();
+        let countryCode = $container.find('#msg91_country_code').val();
+
+        let mobileWithCode = countryCode + mobile;
+
         let otp = $container.find('#otp1').val().trim() +
                   $container.find('#otp2').val().trim() +
                   $container.find('#otp3').val().trim() +
@@ -69,7 +73,7 @@ jQuery(document).ready(function ($) {
     
         $.post(msg91_ajax_obj.ajax_url, {
             action: 'verify_msg91_otp_ajax',
-            mobile: mobile,
+            mobile: mobileWithCode,
             otp: otp
         }, function (res) {
             if (res && res.success) {
@@ -118,7 +122,7 @@ jQuery(document).ready(function ($) {
         let $container = $button.closest('#otp-form-wrap');
     
         let mobile = $container.find('#msg91_mobile').val().trim();
-        let countryCode = $container.find('#country_code').text().trim();
+         let countryCode = $container.find('#msg91_country_code').val();
     
         let msg = msg91_ajax_obj.sendotp_validation_msg || 'Please enter a valid mobile number (between 5 and 12 digits).';
         if (!mobile || mobile.length < 5 || mobile.length > 12) {
@@ -200,13 +204,18 @@ document.getElementById('msg91_country_code').addEventListener('change', functio
 
 document.addEventListener("DOMContentLoaded", function () {
     const popupModal = document.getElementById("otp-popup-modal");
-    const classTriggers = document.querySelectorAll('.otp-popup-trigger');
-    classTriggers.forEach(function(trigger) {
-        trigger.addEventListener("click", function () {
-            popupModal.style.display = "block";
-        });
+
+    document.addEventListener("click", function (e) {
+        const trigger = e.target.closest('.otp-popup-trigger');
+        if (trigger) {
+            e.preventDefault();
+            if (popupModal) {
+                popupModal.style.display = "block";
+            }
+        }
     });
-    window.openMsg91OtpPopup = function() {
+
+    window.openMsg91OtpPopup = function () {
         if (popupModal) {
             popupModal.style.display = "block";
         }
