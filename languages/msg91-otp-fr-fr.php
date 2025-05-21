@@ -1,4 +1,10 @@
 <?php
+/**
+ * MSG91 OTP - Translation for French (France)
+ *
+ * @package hc-msg91-otp
+ */
+
 return array(
 	'MSG91 OTP Settings'                => 'Paramètres MSG91 OTP',
 	'MSG91 OTP'                         => 'MSG91 OTP',
