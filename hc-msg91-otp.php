@@ -12,6 +12,18 @@
 defined('ABSPATH') || exit;
 require_once plugin_dir_path(__FILE__) . 'includes/hc-msg91-settings.php';
 require_once plugin_dir_path(__FILE__) . 'includes/hc-countries.php';
+require_once plugin_dir_path(__FILE__) . 'includes/hc-msg91-transactional-sms.php'; 
+
+
+function hc_msg91_init_woocommerce_hooks() {
+    // Now it's safe to check for WooCommerce and add hooks
+    if (class_exists('WooCommerce')) {
+        // Call a function that lives in hc-msg91-transactional-sms.php to register WC hooks
+        if (function_exists('hc_msg91_register_wc_sms_hooks')) {
+            hc_msg91_register_wc_sms_hooks();
+        }
+    }
+}
 
 add_action('plugins_loaded', function () {
     $locale = determine_locale();
@@ -22,9 +34,88 @@ add_action('plugins_loaded', function () {
     } else {
         $GLOBALS['msg91_otp_translations'] = [];
     }
-});
-add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'msg91_otp_plugin_action_links');
 
+    hc_msg91_init_woocommerce_hooks();
+});
+
+if (!function_exists('determine_locale')) {
+    function determine_locale() {
+        return get_user_locale();
+    }
+}
+
+register_activation_hook(__FILE__, 'hc_msg91_activate_plugin');
+register_deactivation_hook(__FILE__, 'hc_msg91_deactivate_plugin');
+
+function hc_msg91_activate_plugin() {
+    msg91_create_blocked_numbers_table(); // Call existing function
+
+    // Default OTP form texts (if not already set)
+    $options_to_set = [
+        'msg91_sendotp_lable'           => 'Mobile Number',
+        'msg91_sendotp_dec'             => 'we will send you an OTP',
+        'msg91_sendotp_button_text'     => 'Send OTP',
+        'msg91_sendotp_validation_msg'  => 'Please enter the valid mobile number',
+        'msg91_verifyotp_lable'         => 'Enter OTP',
+        'msg91_verifyotp_dec'           => 'Enter your 4-digit OTP',
+        'msg91_verifyotp_button_text'   => 'Verify OTP',
+        'msg91_verifyotp_validation_msg'=> 'Please enter the OTP',
+        'msg91_perday_otplimit'         => 5,
+        'msg91_resend_timer'            => 60, // Default resend timer
+    ];
+
+    foreach ($options_to_set as $option_name => $default_value) {
+        if (get_option($option_name) === false) { // Check if option does not exist
+            update_option($option_name, $default_value);
+        }
+    }
+    
+    // Default values for new SMS settings (set only if they don't exist)
+    $sms_defaults = [
+        'msg91_sms_ncr_enable' => 0, 'msg91_sms_ncr_template_id' => '', 'msg91_sms_ncr_notes' => 'New Customer: VAR1=CustomerName, VAR2=SiteName, VAR3=ShopURL',
+        'msg91_sms_npo_enable' => 0, 'msg91_sms_npo_template_id' => '', 'msg91_sms_npo_notes' => 'New Order: VAR1=CustomerName, VAR2=OrderID, VAR3=OrderTotal, VAR4=SiteName, VAR5=ShopURL',
+        'msg91_sms_osh_enable' => 0, 'msg91_sms_osh_template_id' => '', 'msg91_sms_osh_status_slug' => 'shipped', 'msg91_sms_osh_notes' => 'Order Shipped: VAR1=CustomerName, VAR2=OrderID, VAR3=TrackingID, VAR4=ShippingProvider, VAR5=TrackingLink, VAR6=SiteName',
+        'msg91_sms_odl_enable' => 0, 'msg91_sms_odl_template_id' => '', 'msg91_sms_odl_status_slug' => 'delivered', 'msg91_sms_odl_notes' => 'Order Delivered: VAR1=CustomerName, VAR2=OrderID, VAR3=SiteName',
+        'msg91_sms_oac_enable' => 0, 'msg91_sms_oac_template_id' => '', 'msg91_sms_oac_delay_hours' => 1, 'msg91_sms_oac_notes' => 'Abandoned Cart: VAR1=CustomerName, VAR2=CartItemsCount, VAR3=CartTotal, VAR4=SiteName, VAR5=CartURL',
+    ];
+
+    foreach ($sms_defaults as $key => $value) {
+        if (get_option($key) === false) {
+            update_option($key, $value);
+        }
+    }
+}
+
+
+function msg91_create_blocked_numbers_table() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'msg91_blocked_number';
+    $charset_collate = $wpdb->get_charset_collate();
+
+    $sql = "CREATE TABLE $table_name (
+        id INT(11) NOT NULL AUTO_INCREMENT,
+        mobile_number VARCHAR(20) NOT NULL,
+        ip_address VARCHAR(45) NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id)
+    ) $charset_collate;";
+    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+    dbDelta($sql);
+}
+
+function hc_msg91_deactivate_plugin() {
+    msg91_delete_blocked_numbers_table();
+    wp_clear_scheduled_hook('hc_msg91_trigger_abandoned_cart_sms');
+}
+
+function msg91_delete_blocked_numbers_table() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'msg91_blocked_number';
+    $sql = "DROP TABLE IF EXISTS $table_name;";
+    $wpdb->query($sql); 
+}
+
+add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'msg91_otp_plugin_action_links');
 function msg91_otp_plugin_action_links($links) {
     $settings_link = '<a href="' . admin_url('options-general.php?page=msg91-otp-settings') . '">Settings</a>';
     array_unshift($links, $settings_link);
@@ -42,8 +133,6 @@ function msg91_otp_plugin_row_meta($plugin_meta, $plugin_file, $plugin_data, $st
     }
     return $plugin_meta;
 }
-
-
 
 function __msg91($text) {
     return $GLOBALS['msg91_otp_translations'][$text] ?? $text;
@@ -63,32 +152,6 @@ add_action('wp_enqueue_scripts', function() {
     ]);
 });
 
-register_activation_hook(__FILE__, 'msg91_create_blocked_numbers_table');
-register_deactivation_hook(__FILE__, 'msg91_delete_blocked_numbers_table');
-
-function msg91_create_blocked_numbers_table() {
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'msg91_blocked_number';
-    $charset_collate = $wpdb->get_charset_collate();
-
-    $sql = "CREATE TABLE $table_name (
-        id INT(11) NOT NULL AUTO_INCREMENT,
-        mobile_number VARCHAR(20) NOT NULL,
-        ip_address VARCHAR(45) NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (id)
-    ) $charset_collate;";
-    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-    dbDelta($sql);
-}
-
-function msg91_delete_blocked_numbers_table() {
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'msg91_blocked_number';
-    $sql = "DROP TABLE IF EXISTS $table_name;";
-    $wpdb->query($sql); 
-}
-
 add_action('wp_ajax_send_msg91_otp_ajax', 'send_msg91_otp_ajax');
 add_action('wp_ajax_nopriv_send_msg91_otp_ajax', 'send_msg91_otp_ajax');
 
@@ -101,14 +164,14 @@ function msg91_get_options() {
         'send_otp_desc_color' => get_option('msg91_sendotp_dec_color', '#000000'),
         'send_otp_button_text' => get_option('msg91_sendotp_button_text', 'Send OTP'),
         'send_otp_button_color' => get_option('msg91_sendotp_button_color', '#0073aa'),
-        'top_image' => get_option('msg91_top_image', plugin_dir_url(__FILE__) . 'assets/images/send-otp.png'),
+        'top_image' => get_option('msg91_top_image', plugin_dir_url(dirname(__FILE__)) . 'assets/images/send-otp.png'),
         'verify_otp_lable' => get_option('msg91_verifyotp_lable', 'Enter Mobile'),
         'verify_otp_lable_color' => get_option('msg91_verifyotp_lable_color', '#000000'),
         'verify_otp_dec' => get_option('msg91_verifyotp_dec', 'Enter your 4-digit OTP'),
         'verify_otp_dec_color' => get_option('msg91_verifyotp_desc_color', '#000000'),
         'verify_otp_buttontext' => get_option('msg91_verifyotp_button_text', 'Verify OTP'),
         'verify_otp_button_color' => get_option('msg91_verifyotp_button_color', '#0073aa'),
-        'top_verify_image' => get_option('msg91_top_verify_image', plugin_dir_url(__FILE__) . 'assets/images/verify-otp.png'),
+        'top_verify_image' => get_option('msg91_top_verify_image', plugin_dir_url(dirname(__FILE__)) . 'assets/images/verify-otp.png'),
     ];
 }
 
@@ -137,11 +200,11 @@ add_shortcode('msg91_otp_form', function () {
     $options = msg91_get_options();
    
     if (empty($options['top_image'])) {
-        $options['top_image'] = plugin_dir_url(__FILE__) . 'assets/images/send-otp.png';
+        $options['top_image'] = plugin_dir_url(dirname(__FILE__)) . 'assets/images/send-otp.png';
     }
  
     if (empty($options['top_verify_image'])) {
-        $options['top_verify_image'] = plugin_dir_url(__FILE__) . 'assets/images/verify-otp.png';
+        $options['top_verify_image'] = plugin_dir_url(dirname(__FILE__)) . 'assets/images/verify-otp.png';
     }
 
     if (is_user_logged_in()) {
@@ -159,10 +222,10 @@ add_shortcode('msg91_otp_form', function () {
 add_action('wp_footer', function () {
     $options = msg91_get_options();
     if (empty($options['top_image'])) {
-        $options['top_image'] = plugin_dir_url(__FILE__) . 'assets/images/send-otp.png';
+        $options['top_image'] = plugin_dir_url(dirname(__FILE__)) . 'assets/images/send-otp.png';
     }
     if (empty($options['top_verify_image'])) {
-        $options['top_verify_image'] = plugin_dir_url(__FILE__) . 'assets/images/verify-otp.png';
+        $options['top_verify_image'] = plugin_dir_url(dirname(__FILE__)) . 'assets/images/verify-otp.png';
     }
     if (is_user_logged_in()) {
         $user = wp_get_current_user(); 
@@ -304,8 +367,8 @@ function msg91_auto_login_user() {
         wp_send_json_error(['message' => 'Mobile number missing']);
     }
 
-    $username = $mobile;
-    $email = $username . '@example.com';
+    $username = str_replace('+', '', sanitize_text_field($_POST['mobile']));
+    $email = $username . '@oorna.org';
 
     $user = get_user_by('login', $username);
 
@@ -387,6 +450,53 @@ function verify_msg91_otp_ajax() {
     }
 }
 
+// Register custom order statuses
+add_action('init', 'hc_msg91_register_custom_order_statuses');
+function hc_msg91_register_custom_order_statuses() {
+    // Status: Shipped
+    register_post_status('wc-shipped', array(
+        'label'                     => _x('Shipped', 'Order status', 'hc-msg91-otp'),
+        'public'                    => true,
+        'exclude_from_search'       => false,
+        'show_in_admin_all_list'    => true,
+        'show_in_admin_status_list' => true,
+        'label_count'               => _n_noop('Shipped <span class="count">(%s)</span>', 'Shipped <span class="count">(%s)</span>', 'hc-msg91-otp')
+    ));
+
+    // Status: Delivered
+    register_post_status('wc-delivered', array(
+        'label'                     => _x('Delivered', 'Order status', 'hc-msg91-otp'),
+        'public'                    => true,
+        'exclude_from_search'       => false,
+        'show_in_admin_all_list'    => true,
+        'show_in_admin_status_list' => true,
+        'label_count'               => _n_noop('Delivered <span class="count">(%s)</span>', 'Delivered <span class="count">(%s)</span>', 'hc-msg91-otp')
+    ));
+}
+
+// Add custom statuses to WooCommerce order statuses list
+add_filter('wc_order_statuses', 'hc_msg91_add_custom_statuses_to_order_list');
+function hc_msg91_add_custom_statuses_to_order_list($order_statuses) {
+    $new_order_statuses = array();
+
+    // Add new statuses after 'Processing' or 'Completed'
+    foreach ($order_statuses as $key => $status) {
+        $new_order_statuses[$key] = $status;
+        if ('wc-processing' === $key || 'wc-completed' === $key) { // Choose where to insert them
+            $new_order_statuses['wc-shipped'] = _x('Shipped', 'Order status', 'hc-msg91-otp');
+            $new_order_statuses['wc-delivered'] = _x('Delivered', 'Order status', 'hc-msg91-otp');
+        }
+    }
+    // Ensure they are added if the above hooks didn't catch
+    if (!isset($new_order_statuses['wc-shipped'])) {
+        $new_order_statuses['wc-shipped'] = _x('Shipped', 'Order status', 'hc-msg91-otp');
+    }
+    if (!isset($new_order_statuses['wc-delivered'])) {
+        $new_order_statuses['wc-delivered'] = _x('Delivered', 'Order status', 'hc-msg91-otp');
+    }
+
+    return $new_order_statuses;
+}
 
 
 
