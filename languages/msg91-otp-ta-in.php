@@ -1,4 +1,10 @@
 <?php
+/**
+ * MSG91 OTP - Translation for Tamil (India)
+ *
+ * @package hc-msg91-otp
+ */
+
 return array(
 	'MSG91 OTP Settings'                => 'MSG91 OTP அமைப்புகள்',
 	'MSG91 OTP'                         => 'MSG91 OTP',
