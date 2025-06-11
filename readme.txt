@@ -4,7 +4,7 @@
 * Requires at least: 5.0
 * Tested up to: 6.8
 * Requires PHP: 7.4
-* Stable tag: 1.3
+* Stable tag: 1.4
 * License: GPLv2 or later
 * License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -16,7 +16,7 @@ Happy Coders OTP Login is a simple, secure, and customizable OTP login plugin fo
 
 The plugin supports full-screen and popup login forms, integrates smoothly with WooCommerce, and improves user experience by replacing traditional email/password logins with secure phone-based authentication.
 
-**NEW in version 1.3:**  
+**NEW in version 1.4:**  
 Now includes automatic SMS notifications for:
 - New user registrations  
 - WooCommerce order placed  
@@ -113,7 +113,7 @@ Change the site language from **Settings → General → Site Language**. The pl
 
 == Changelog ==
 
-= 1.3 =
+= 1.4 =
 * Added SMS notification for:
   - New user registration
   - Order placed
@@ -128,6 +128,6 @@ Change the site language from **Settings → General → Site Language**. The pl
 
 == Upgrade Notice ==
 
-= 1.3 =
+= 1.4 =
 New features: automatic SMS alerts for registration, order events, and cart cronjob. Recommended for WooCommerce store owners.
 

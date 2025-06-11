@@ -198,6 +198,9 @@ width: 100%;
     text-align: center;
 }
 
+.tab-content { display: none; }
+		.tab-content.active-tab { display: block; }
+
 
 
 

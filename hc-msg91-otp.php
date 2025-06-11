@@ -1,39 +1,48 @@
 <?php
 /**
  * Plugin Name: Happy Coders OTP Login
+ * Text Domain: Happy Coders OTP Login
  * Description: Seamless OTP-based login for WordPress/WooCommerce using MSG91. Supports mobile OTP login, and automatic SMS alerts for user registration, order placed, order shipped, order completed, and cart reminder via cronjob.
- * Version: 1.3
+ * Version: 1.4
  * Author: Happy Coders
  * Author URI: https://www.happycoders.in/
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
- * @package hc-msg91-otp
+ * @package happy-coders-otp-login
  */
 
+
+define( 'HC_MSG91_PLUGIN_FILE', __FILE__ );
+define( 'HC_MSG91_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+define( 'HC_MSG91_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+
+
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+    exit;
 }
 
-require_once plugin_dir_path( __FILE__ ) . 'includes/hc-msg91-settings.php';
-require_once plugin_dir_path( __FILE__ ) . 'includes/hc-countries.php';
-require_once plugin_dir_path( __FILE__ ) . 'includes/hc-msg91-transactional-sms.php';
+require_once HC_MSG91_PLUGIN_DIR . 'includes/hc-msg91-settings.php';
+require_once HC_MSG91_PLUGIN_DIR . 'includes/hc-countries.php';
+require_once HC_MSG91_PLUGIN_DIR . 'includes/hc-msg91-transactional-sms.php';
 
-function hc_msg91_init_woocommerce_hooks() {
-	// Now it's safe to check for WooCommerce and add hooks
-	if ( class_exists( 'WooCommerce' ) ) {
-		// Call a function that lives in hc-msg91-transactional-sms.php to register WC hooks
-		if ( function_exists( 'hc_msg91_register_wc_sms_hooks' ) ) {
-			hc_msg91_register_wc_sms_hooks();
-		}
-	}
+function happycoders_msg91_init_woocommerce_hooks() {
+    include_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+    if ( is_plugin_active( 'woocommerce/woocommerce.php' ) && class_exists( 'WooCommerce' ) ) {
+        if ( function_exists( 'hc_msg91_register_wc_sms_hooks' ) ) {
+            hc_msg91_register_wc_sms_hooks();
+        }
+    }
 }
+
+add_action( 'plugins_loaded', 'happycoders_msg91_init_woocommerce_hooks', 20 );
 
 add_action(
 	'plugins_loaded',
 	function () {
-		$locale    = determine_locale();
-		$lang_file = plugin_dir_path( __FILE__ ) . 'languages/msg91-otp-' . $locale . '.php';
+		$locale    = happycoders_determine_locale();
+		$lang_file = HC_MSG91_PLUGIN_DIR . 'languages/msg91-otp-' . $locale . '.php';
 
 		if ( file_exists( $lang_file ) ) {
 			$GLOBALS['msg91_otp_translations'] = include $lang_file;
@@ -44,16 +53,16 @@ add_action(
 );
 add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'msg91_otp_plugin_action_links' );
 
-if ( ! function_exists( 'determine_locale' ) ) {
-	function determine_locale() {
+if ( ! function_exists( 'happycoders_determine_locale' ) ) {
+	function happycoders_determine_locale() {
 		return get_user_locale();
 	}
 }
 
-register_activation_hook( __FILE__, 'hc_msg91_activate_plugin' );
-register_deactivation_hook( __FILE__, 'hc_msg91_deactivate_plugin' );
+register_activation_hook( __FILE__, 'happycoders_msg91_activate_plugin' );
+register_deactivation_hook( __FILE__, 'happycoders_msg91_deactivate_plugin' );
 
-function hc_msg91_activate_plugin() {
+function happycoders_msg91_activate_plugin() {
 	msg91_create_blocked_numbers_table();
 
 	// Default OTP form texts (if not already set)
@@ -105,7 +114,7 @@ function hc_msg91_activate_plugin() {
 	}
 }
 
-function hc_msg91_deactivate_plugin() {
+function happycoders_msg91_deactivate_plugin() {
 	msg91_delete_blocked_numbers_table();
 	wp_clear_scheduled_hook( 'hc_msg91_trigger_abandoned_cart_sms' );
 }
@@ -159,25 +168,35 @@ function msg91_otp_plugin_row_meta( $plugin_meta, $plugin_file, $plugin_data, $s
  */
 
 
-add_action(
-	'wp_enqueue_scripts',
-	function () {
-		wp_enqueue_script( 'msg91-otp-js', plugin_dir_url( __FILE__ ) . 'assets/js/hc-msg91-otp.js', array( 'jquery' ), time(), true );
-		wp_enqueue_style( 'msg91-otp-css', plugin_dir_url( __FILE__ ) . 'assets/css/hc-msg91-otp.css', array(), time() );
-		wp_localize_script(
-			'msg91-otp-js',
-			'msg91_ajax_obj',
-			array(
-				'ajax_url'                 => admin_url( 'admin-ajax.php' ),
-				'nonce'                    => wp_create_nonce( 'msg91_ajax_nonce_action' ),
-				'resend_timer'             => (int) get_option( 'msg91_resend_timer', 60 ),
-				'redirect_page'            => get_option( 'msg91_redirect_page' ),
-				'sendotp_validation_msg'   => get_option( 'msg91_sendotp_validation_msg', 'Please enter a valid mobile number (between 5 and 12 digits).' ),
-				'verifyotp_validation_msg' => get_option( 'msg91_verifyotp_validation_msg', 'Please enter the otp' ),
-			)
-		);
-	}
-);
+function hc_msg91_enqueue_scripts() {
+    wp_enqueue_script(
+        'msg91-otp-js',
+        HC_MSG91_PLUGIN_URL . 'assets/js/hc-msg91-otp.js',
+        array( 'jquery' ),
+        defined('HC_MSG91_VERSION') ? HC_MSG91_VERSION : time(),
+        true
+    );
+    wp_enqueue_style(
+        'msg91-otp-css',
+        HC_MSG91_PLUGIN_URL . 'assets/css/hc-msg91-otp.css',
+        array(),
+        defined('HC_MSG91_VERSION') ? HC_MSG91_VERSION : time()
+    );
+    wp_localize_script(
+        'msg91-otp-js',
+        'msg91_ajax_obj',
+        array(
+            'ajax_url'                 => admin_url( 'admin-ajax.php' ),
+            'nonce'                    => wp_create_nonce( 'msg91_ajax_nonce_action' ),
+            'resend_timer'             => (int) get_option( 'msg91_resend_timer', 60 ),
+            'redirect_page'            => get_option( 'msg91_redirect_page' ),
+            'sendotp_validation_msg'   => get_option( 'msg91_sendotp_validation_msg', 'Please enter a valid mobile number (between 5 and 12 digits).' ),
+            'verifyotp_validation_msg' => get_option( 'msg91_verifyotp_validation_msg', 'Please enter the otp' ),
+        )
+    );
+}
+add_action( 'wp_enqueue_scripts', 'hc_msg91_enqueue_scripts' );
+
 
 register_activation_hook( __FILE__, 'msg91_create_blocked_numbers_table' );
 register_deactivation_hook( __FILE__, 'msg91_delete_blocked_numbers_table' );
@@ -224,8 +243,8 @@ function msg91_delete_blocked_numbers_table() {
 	$sql        = "DROP TABLE IF EXISTS $table_name;";
 	$wpdb->query( $sql );
 }
-add_action( 'wp_ajax_send_msg91_otp_ajax', 'send_msg91_otp_ajax' );
-add_action( 'wp_ajax_nopriv_send_msg91_otp_ajax', 'send_msg91_otp_ajax' );
+add_action( 'wp_ajax_happycoders_send_msg91_otp_ajax', 'happycoders_send_msg91_otp_ajax' );
+add_action( 'wp_ajax_nopriv_happycoders_send_msg91_otp_ajax', 'happycoders_send_msg91_otp_ajax' );
 
 
 /**
@@ -254,23 +273,23 @@ add_action( 'wp_ajax_nopriv_send_msg91_otp_ajax', 'send_msg91_otp_ajax' );
  */
 function msg91_get_options() {
 	return array(
-		'send_otp_label'          => hc_msg91_get_option_with_default( 'msg91_sendotp_lable', 'Mobile Number' ),
-		'send_otp_label_color'    => hc_msg91_get_option_with_default( 'msg91_sendotp_lable_color', '#000000' ),
-		'send_otp_desc'           => hc_msg91_get_option_with_default( 'msg91_sendotp_dec', 'We will send you an OTP' ),
-		'send_otp_desc_color'     => hc_msg91_get_option_with_default( 'msg91_sendotp_dec_color', '#000000' ),
-		'send_otp_button_text'    => hc_msg91_get_option_with_default( 'msg91_sendotp_button_text', 'Send OTP' ),
-		'send_otp_button_color'   => hc_msg91_get_option_with_default( 'msg91_sendotp_button_color', '#0073aa' ),
-		'top_image'               => hc_msg91_get_option_with_default( 'msg91_top_image', plugin_dir_url( __FILE__ ) . 'assets/images/send-otp.png' ),
-		'verify_otp_lable'        => hc_msg91_get_option_with_default( 'msg91_verifyotp_lable', 'Enter Mobile' ),
-		'verify_otp_lable_color'  => hc_msg91_get_option_with_default( 'msg91_verifyotp_lable_color', '#000000' ),
-		'verify_otp_dec'          => hc_msg91_get_option_with_default( 'msg91_verifyotp_dec', 'Enter your 4-digit OTP' ),
-		'verify_otp_dec_color'    => hc_msg91_get_option_with_default( 'msg91_verifyotp_desc_color', '#000000' ),
-		'verify_otp_buttontext'   => hc_msg91_get_option_with_default( 'msg91_verifyotp_button_text', 'Verify OTP' ),
-		'verify_otp_button_color' => hc_msg91_get_option_with_default( 'msg91_verifyotp_button_color', '#0073aa' ),
-		'top_verify_image'        => hc_msg91_get_option_with_default( 'msg91_top_verify_image', plugin_dir_url( __FILE__ ) . 'assets/images/verify-otp.png' ),
+		'send_otp_label'          => happycoders_msg91_get_option_with_default( 'msg91_sendotp_lable', 'Mobile Number' ),
+		'send_otp_label_color'    => happycoders_msg91_get_option_with_default( 'msg91_sendotp_lable_color', '#000000' ),
+		'send_otp_desc'           => happycoders_msg91_get_option_with_default( 'msg91_sendotp_dec', 'We will send you an OTP' ),
+		'send_otp_desc_color'     => happycoders_msg91_get_option_with_default( 'msg91_sendotp_dec_color', '#000000' ),
+		'send_otp_button_text'    => happycoders_msg91_get_option_with_default( 'msg91_sendotp_button_text', 'Send OTP' ),
+		'send_otp_button_color'   => happycoders_msg91_get_option_with_default( 'msg91_sendotp_button_color', '#0073aa' ),
+		'top_image'               => happycoders_msg91_get_option_with_default( 'msg91_top_image', HC_MSG91_PLUGIN_URL . 'assets/images/send-otp.png' ),
+		'verify_otp_lable'        => happycoders_msg91_get_option_with_default( 'msg91_verifyotp_lable', 'Enter Mobile' ),
+		'verify_otp_lable_color'  => happycoders_msg91_get_option_with_default( 'msg91_verifyotp_lable_color', '#000000' ),
+		'verify_otp_dec'          => happycoders_msg91_get_option_with_default( 'msg91_verifyotp_dec', 'Enter your 4-digit OTP' ),
+		'verify_otp_dec_color'    => happycoders_msg91_get_option_with_default( 'msg91_verifyotp_desc_color', '#000000' ),
+		'verify_otp_buttontext'   => happycoders_msg91_get_option_with_default( 'msg91_verifyotp_button_text', 'Verify OTP' ),
+		'verify_otp_button_color' => happycoders_msg91_get_option_with_default( 'msg91_verifyotp_button_color', '#0073aa' ),
+		'top_verify_image'        => happycoders_msg91_get_option_with_default( 'msg91_top_verify_image', HC_MSG91_PLUGIN_URL . 'assets/images/verify-otp.png' ),
 	);
 }
-function hc_msg91_get_option_with_default( $option_name, $default_value ) {
+function happycoders_msg91_get_option_with_default( $option_name, $default_value ) {
 	$value = get_option( $option_name );
 	return ( $value === false || $value === '' ) ? $default_value : $value;
 }
@@ -288,9 +307,9 @@ function hc_msg91_get_option_with_default( $option_name, $default_value ) {
  * @param array $options The plugin options retrieved from the WordPress options table.
  * @return string The HTML for the country select dropdown.
  */
-function hc_msg91_country_select( $options ) {
+function happycoders_msg91_country_select( $options ) {
 	$html          = '';
-	$all_countries = hc_msg91_get_countries_with_iso();
+	$all_countries = happycoders_msg91_get_countries_with_iso();
 
 	$selected_countries = get_option( 'msg91_selected_countries', array( '+91' ) );
 
@@ -308,7 +327,7 @@ function hc_msg91_country_select( $options ) {
 
 	foreach ( $filtered_countries as $country ) {
 		$selected  = 'selected';
-		$flag      = hc_msg91_iso_to_flag( $country['iso'] );
+		$flag      = happycoders_msg91_iso_to_flag( $country['iso'] );
 		$flag_html = $show_flag ? $flag : '';
 		$html     .= sprintf(
 			/* translators: 1: Country code, 2: Flag icon, 3: Selected attribute, 4: Country name, 5: Country code */
@@ -330,10 +349,10 @@ add_shortcode(
 	function () {
 		$options = msg91_get_options();
 		if ( empty( $options['top_image'] ) ) {
-			$options['top_image'] = plugin_dir_url( __FILE__ ) . 'assets/images/send-otp.png';
+			$options['top_image'] = HC_MSG91_PLUGIN_URL . 'assets/images/send-otp.png';
 		}
 		if ( empty( $options['top_verify_image'] ) ) {
-			$options['top_verify_image'] = plugin_dir_url( __FILE__ ) . 'assets/images/verify-otp.png';
+			$options['top_verify_image'] = HC_MSG91_PLUGIN_URL . 'assets/images/verify-otp.png';
 		}
 
 		if ( is_user_logged_in() ) {
@@ -344,7 +363,7 @@ add_shortcode(
 					</div>';
 		}
 
-		return render_msg91_otp_form( $options, false );
+		return happycoders_msg91_otp_form( $options, false );
 	}
 );
 
@@ -354,10 +373,10 @@ add_action(
 	function () {
 		$options = msg91_get_options();
 		if ( empty( $options['top_image'] ) ) {
-			$options['top_image'] = plugin_dir_url( __FILE__ ) . 'assets/images/send-otp.png';
+			$options['top_image'] = HC_MSG91_PLUGIN_URL . 'assets/images/send-otp.png';
 		}
 		if ( empty( $options['top_verify_image'] ) ) {
-			$options['top_verify_image'] = plugin_dir_url( __FILE__ ) . 'assets/images/verify-otp.png';
+			$options['top_verify_image'] = HC_MSG91_PLUGIN_URL . 'assets/images/verify-otp.png';
 		}
 		if ( is_user_logged_in() ) {
 			$user = wp_get_current_user();
@@ -366,7 +385,7 @@ add_action(
 						<button id="next-to-address" style="margin-top: 20px;">Next</button>
 					</div>';
 		}
-		return render_msg91_otp_form( $options, true );
+		return happycoders_msg91_otp_form( $options, true );
 	}
 );
 
@@ -392,7 +411,7 @@ add_action(
  *
  * @return string The rendered form.
  */
-function render_msg91_otp_form( $options, $is_popup = false ) {
+function happycoders_msg91_otp_form( $options, $is_popup = false ) {
 	ob_start();
 	?>
 	<?php if ( $is_popup ) : ?>
@@ -427,7 +446,7 @@ function render_msg91_otp_form( $options, $is_popup = false ) {
 
 			<div class="mobile-input-wrap">
 				<?php
-				echo hc_msg91_country_select( $options );
+				echo happycoders_msg91_country_select( $options );
 				?>
 				<input type="tel" id="msg91_mobile" maxlength="10" pattern="\d*" placeholder="Mobile Number" oninput="this.value = this.value.replace(/[^0-9]/g, '' );" />
 			</div>
@@ -482,7 +501,7 @@ function render_msg91_otp_form( $options, $is_popup = false ) {
  *
  * @since 1.0.0
  */
-function send_msg91_otp_ajax() {
+function happycoders_send_msg91_otp_ajax() {
 	global $wpdb;
 	check_ajax_referer( 'msg91_ajax_nonce_action', 'security_nonce' );
 	$mobile        = sanitize_text_field( wp_unslash( isset( $_POST['mobile'] ) ? $_POST['mobile'] : '' ) );
@@ -493,7 +512,7 @@ function send_msg91_otp_ajax() {
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	$otp_count_today = $wpdb->get_var(
 		$wpdb->prepare(
-			'SELECT COUNT(*) FROM msg91_blocked_number WHERE mobile_number = %s AND DATE(created_at) = %s',
+			'SELECT COUNT(*) FROM ' . $table_name . ' WHERE mobile_number = %s AND DATE(created_at) = %s',
 			$mobile,
 			$today
 		)
@@ -515,7 +534,7 @@ function send_msg91_otp_ajax() {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		$wpdb->query(
 			$wpdb->prepare(
-				'INSERT INTO msg91_blocked_number (mobile_number, ip_address, created_at) VALUES (%s, %s, %s)',
+				'INSERT INTO ' . $table_name . ' (mobile_number, ip_address, created_at) VALUES (%s, %s, %s)',
 				$mobile,
 				$ip_address,
 				current_time( 'mysql' )
@@ -536,8 +555,8 @@ function send_msg91_otp_ajax() {
 		);
 	}
 }
-add_action( 'wp_ajax_send_msg91_otp_ajax', 'send_msg91_otp_ajax' );
-add_action( 'wp_ajax_nopriv_send_msg91_otp_ajax', 'send_msg91_otp_ajax' );
+add_action( 'wp_ajax_happycoders_send_msg91_otp_ajax', 'happycoders_send_msg91_otp_ajax' );
+add_action( 'wp_ajax_nopriv_happycoders_send_msg91_otp_ajax', 'happycoders_send_msg91_otp_ajax' );
 add_action( 'wp_ajax_msg91_auto_login_user', 'msg91_auto_login_user' );
 add_action( 'wp_ajax_nopriv_msg91_auto_login_user', 'msg91_auto_login_user' );
 
@@ -578,7 +597,7 @@ function msg91_auto_login_user() {
 	}
 	wp_set_current_user( $user->ID );
 	wp_set_auth_cookie( $user->ID, true );
-	hc_maybe_start_session( 60 * 60 * 24 * 30 );
+	happycoders_maybe_start_session( 60 * 60 * 24 * 30 );
 
 	setcookie( 'msg91_verified_mobile', $mobile, time() + ( 30 * 24 * 60 * 60 ), COOKIEPATH, COOKIE_DOMAIN );
 	setcookie( 'msg91_verified_user_id', $user->ID, time() + ( 30 * 24 * 60 * 60 ), COOKIEPATH, COOKIE_DOMAIN );
@@ -592,8 +611,8 @@ function msg91_auto_login_user() {
 		)
 	);
 }
-add_action( 'wp_ajax_verify_msg91_otp_ajax', 'verify_msg91_otp_ajax' );
-add_action( 'wp_ajax_nopriv_verify_msg91_otp_ajax', 'verify_msg91_otp_ajax' );
+add_action( 'wp_ajax_happycoders_verify_msg91_otp_ajax', 'happycoders_verify_msg91_otp_ajax' );
+add_action( 'wp_ajax_nopriv_happycoders_verify_msg91_otp_ajax', 'happycoders_verify_msg91_otp_ajax' );
 
 /**
  * Verify the OTP sent by MSG91 and log in the user if OTP is valid.
@@ -604,7 +623,7 @@ add_action( 'wp_ajax_nopriv_verify_msg91_otp_ajax', 'verify_msg91_otp_ajax' );
  *
  * @return mixed A JSON response with a success message and the user ID if the OTP is valid, or an error message if the OTP is invalid.
  */
-function verify_msg91_otp_ajax() {
+function happycoders_verify_msg91_otp_ajax() {
 	check_ajax_referer( 'msg91_ajax_nonce_action', 'security_nonce' );
 	$mobile = sanitize_text_field( wp_unslash( isset( $_POST['mobile'] ) ? $_POST['mobile'] : '' ) );
 	$otp    = sanitize_text_field( wp_unslash( isset( $_POST['otp'] ) ? $_POST['otp'] : '' ) );
@@ -630,7 +649,7 @@ function verify_msg91_otp_ajax() {
 			setcookie( 'msg91_verified_mobile', $mobile, time() + ( 30 * 24 * 60 * 60 ), COOKIEPATH, COOKIE_DOMAIN );
 			setcookie( 'msg91_verified_user_id', $user->ID, time() + ( 30 * 24 * 60 * 60 ), COOKIEPATH, COOKIE_DOMAIN );
 
-			hc_maybe_start_session( 60 * 60 * 24 * 30 );
+			happycoders_maybe_start_session( 60 * 60 * 24 * 30 );
 
 			wp_send_json_success(
 				array(
@@ -664,7 +683,7 @@ function verify_msg91_otp_ajax() {
  *
  * @param int $session_lifetime The lifetime of the session in seconds.
  */
-function hc_maybe_start_session( $session_lifetime ) {
+function happycoders_maybe_start_session( $session_lifetime ) {
 	if ( ! headers_sent() && ! session_id() ) {
 		session_set_cookie_params( $session_lifetime );
 		session_start();
@@ -678,18 +697,18 @@ function msg91_translate( $text ) {
 }
 
 // Register custom order statuses
-add_action( 'init', 'hc_msg91_register_custom_order_statuses' );
-function hc_msg91_register_custom_order_statuses() {
+add_action( 'init', 'happycoders_msg91_register_custom_order_statuses' );
+function happycoders_msg91_register_custom_order_statuses() {
 	// Status: Shipped
 	register_post_status(
 		'wc-shipped',
 		array(
-			'label'                     => _x( 'Shipped', 'Order status', 'hc-msg91-otp' ),
+			'label'                     => _x( 'Shipped', 'Order status', 'happy-coders-otp-login' ),
 			'public'                    => true,
 			'exclude_from_search'       => false,
 			'show_in_admin_all_list'    => true,
 			'show_in_admin_status_list' => true,
-			'label_count'               => _n_noop( 'Shipped <span class="count">(%s)</span>', 'Shipped <span class="count">(%s)</span>', 'hc-msg91-otp' ),
+			'label_count'               => _n_noop( 'Shipped <span class="count">(%s)</span>', 'Shipped <span class="count">(%s)</span>', 'happy-coders-otp-login' ),
 		)
 	);
 
@@ -697,36 +716,69 @@ function hc_msg91_register_custom_order_statuses() {
 	register_post_status(
 		'wc-delivered',
 		array(
-			'label'                     => _x( 'Delivered', 'Order status', 'hc-msg91-otp' ),
+			'label'                     => _x( 'Delivered', 'Order status', 'happy-coders-otp-login' ),
 			'public'                    => true,
 			'exclude_from_search'       => false,
 			'show_in_admin_all_list'    => true,
 			'show_in_admin_status_list' => true,
-			'label_count'               => _n_noop( 'Delivered <span class="count">(%s)</span>', 'Delivered <span class="count">(%s)</span>', 'hc-msg91-otp' ),
+			'label_count'               => _n_noop( 'Delivered <span class="count">(%s)</span>', 'Delivered <span class="count">(%s)</span>', 'happy-coders-otp-login' ),
 		)
 	);
 }
 
 // Add custom statuses to WooCommerce order statuses list
-add_filter( 'wc_order_statuses', 'hc_msg91_add_custom_statuses_to_order_list' );
-function hc_msg91_add_custom_statuses_to_order_list( $order_statuses ) {
+add_filter( 'wc_order_statuses', 'happycoders_msg91_add_custom_statuses_to_order_list' );
+function happycoders_msg91_add_custom_statuses_to_order_list( $order_statuses ) {
 	$new_order_statuses = array();
 
 	// Add new statuses after 'Processing' or 'Completed'
 	foreach ( $order_statuses as $key => $status ) {
 		$new_order_statuses[ $key ] = $status;
 		if ( 'wc-processing' === $key || 'wc-completed' === $key ) { // Choose where to insert them
-			$new_order_statuses['wc-shipped']   = _x( 'Shipped', 'Order status', 'hc-msg91-otp' );
-			$new_order_statuses['wc-delivered'] = _x( 'Delivered', 'Order status', 'hc-msg91-otp' );
+			$new_order_statuses['wc-shipped']   = _x( 'Shipped', 'Order status', 'happy-coders-otp-login' );
+			$new_order_statuses['wc-delivered'] = _x( 'Delivered', 'Order status', 'happy-coders-otp-login' );
 		}
 	}
 	// Ensure they are added if the above hooks didn't catch
 	if ( ! isset( $new_order_statuses['wc-shipped'] ) ) {
-		$new_order_statuses['wc-shipped'] = _x( 'Shipped', 'Order status', 'hc-msg91-otp' );
+		$new_order_statuses['wc-shipped'] = _x( 'Shipped', 'Order status', 'happy-coders-otp-login' );
 	}
 	if ( ! isset( $new_order_statuses['wc-delivered'] ) ) {
-		$new_order_statuses['wc-delivered'] = _x( 'Delivered', 'Order status', 'hc-msg91-otp' );
+		$new_order_statuses['wc-delivered'] = _x( 'Delivered', 'Order status', 'happy-coders-otp-login' );
 	}
 
 	return $new_order_statuses;
 }
+
+remove_action('woocommerce_login_form', 'woocommerce_login_form_start', 10); 
+remove_action('woocommerce_login_form', 'woocommerce_login_form', 20); 
+remove_action('woocommerce_login_form', 'woocommerce_login_form_end', 30); 
+
+// Remove WooCommerce register form
+remove_action('woocommerce_register_form', 'woocommerce_register_form_start', 10);
+remove_action('woocommerce_register_form', 'woocommerce_register_form', 20);
+remove_action('woocommerce_register_form', 'woocommerce_register_form_end', 30);
+
+// Remove login form on checkout
+remove_action('woocommerce_before_checkout_form', 'woocommerce_checkout_login_form', 10);
+
+// Add your custom shortcode
+add_action('woocommerce_before_customer_login_form', 'replace_wc_login_register_with_msg91_otp');
+function replace_wc_login_register_with_msg91_otp() {
+    if (!is_user_logged_in()) {
+        echo do_shortcode('[msg91_otp_form]');
+    }
+}
+
+add_action('woocommerce_before_checkout_form', 'custom_message_before_checkout', 5);
+function custom_message_before_checkout() {
+    if ( !is_user_logged_in() ) {
+        echo '<div class="woocommerce-info custom-login-notice">';
+        echo 'Please <a href="/my-account">click here</a> to login.';
+        echo '</div>';
+        
+    }
+}
+add_action('wp_loaded', function() {
+    remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_login_form', 10 );
+});
