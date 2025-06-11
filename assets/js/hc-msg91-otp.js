@@ -1,4 +1,5 @@
 jQuery(document).ready(function ($) {
+    
     $(document).on('click', '#msg91_send_otp', function () {
         let $button = $(this); 
         let $container = $button.closest('#otp-form-wrap'); 
@@ -17,11 +18,14 @@ jQuery(document).ready(function ($) {
         $button.prop('disabled', true).text('Sending...');
     
         $.post(msg91_ajax_obj.ajax_url, {
-            action: 'send_msg91_otp_ajax',
-            mobile: mobileWithCode
+            action: 'happycoders_send_msg91_otp_ajax',
+            mobile: mobileWithCode,
+             security_nonce: msg91_ajax_obj.nonce 
             
         }, function (res) {
+             console.log('OTP sent successfully, starting timer...');
             if (res) {
+                 console.log('OTP sent');
                 if (res.success) {
                     $container.find('#send_otp_section').hide();
                     $container.find('#otp_input_wrap').show();
@@ -31,6 +35,7 @@ jQuery(document).ready(function ($) {
                     $button.prop('disabled', false).text('Send OTP');
                 }
             } else {
+                 console.log('OTP');
                 $container.find('#otp-send-status').html('<span style="color:red;">Something went wrong. Try again.</span>');
                 $button.prop('disabled', false).text('Send OTP');
             }
@@ -72,9 +77,10 @@ jQuery(document).ready(function ($) {
         $button.prop('disabled', true).text('Verifying...');
     
         $.post(msg91_ajax_obj.ajax_url, {
-            action: 'verify_msg91_otp_ajax',
+            action: 'happycoders_verify_msg91_otp_ajax',
             mobile: mobileWithCode,
-            otp: otp
+            otp: otp,
+              security_nonce: msg91_ajax_obj.nonce 
         }, function (res) {
             if (res && res.success) {
                 $container.find('#otp-verify-status').html('<span style="color:green;">OTP Verified!</span>');
@@ -134,8 +140,9 @@ jQuery(document).ready(function ($) {
     
         $button.prop('disabled', true).text('Sending...');
         $.post(msg91_ajax_obj.ajax_url, {
-            action: 'send_msg91_otp_ajax',
-            mobile: mobileWithCode
+            action: 'happycoders_send_msg91_otp_ajax',
+            mobile: mobileWithCode,
+              security_nonce: msg91_ajax_obj.nonce 
         }, function (res) {
             if (res && res.success) {
                 startOTPTimer($container);
@@ -193,13 +200,25 @@ document.querySelectorAll('.otp-field').forEach((input, index, inputs) => {
     });
 });
 
-document.getElementById('msg91_country_code').addEventListener('change', function() {
-    var selectedOption = this.options[this.selectedIndex];
-    var dialCode = selectedOption.value;
-    var flag = selectedOption.getAttribute('data-flag');
-    document.getElementById('country-flag').innerHTML = flag + ' ' + dialCode;
 
-    this.style.display = 'none';
+
+document.addEventListener('DOMContentLoaded', function () {
+    const countryCodeSelect = document.getElementById('msg91_country_code');
+
+    if (countryCodeSelect) {
+        countryCodeSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const dialCode = selectedOption.value;
+            const flag = selectedOption.getAttribute('data-flag');
+            const flagContainer = document.getElementById('country-flag');
+
+            if (flagContainer) {
+                flagContainer.innerHTML = flag + ' ' + dialCode;
+            }
+
+            this.style.display = 'none';
+        });
+    }
 });
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -221,6 +240,30 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     };
 });
+
+
+jQuery(document).ready(function($) {
+			// Tab functionality
+			$('.nav-tab-wrapper a.nav-tab').click(function(e) {
+				e.preventDefault();
+				var tab_id = $(this).data('tab');
+
+				// Set active class on tab link
+				$('.nav-tab-wrapper a.nav-tab').removeClass('nav-tab-active');
+				$(this).addClass('nav-tab-active');
+
+				// Show/hide tab content
+				$('.tab-content').removeClass('active-tab').hide();
+				$('#' + tab_id).addClass('active-tab').show();
+
+				// Update hidden input for active tab
+				$('#msg91_active_tab_input').val(tab_id);
+			});
+});
+
+
+
+
 
 
 
