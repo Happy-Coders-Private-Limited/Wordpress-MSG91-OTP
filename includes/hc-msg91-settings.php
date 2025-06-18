@@ -19,12 +19,12 @@ add_action(
 	}
 );
 function hcotp_admin_enqueue_scripts() {
-	wp_enqueue_script( 'msg91-otp-js', HCOTP_PLUGIN_URL . 'assets/js/hc-msg91-otp.js', array( 'jquery' ), time(), true );
+	wp_enqueue_script( 'hcotp-main-js', HCOTP_PLUGIN_URL . 'assets/js/hc-msg91-otp.js', array( 'jquery' ), time(), true );
 	wp_enqueue_style( 'msg91-otp-css', HCOTP_PLUGIN_URL . 'assets/css/hc-msg91-otp.css', array(), time() );
 
 	wp_localize_script(
-		'msg91-otp-js',
-		'msg91_ajax_obj',
+		'hcotp-main-js',
+		'hcotp_params',
 		array(
 			'ajax_url'                 => admin_url( 'admin-ajax.php' ),
 			'nonce'                    => wp_create_nonce( 'msg91_ajax_nonce_action' ),
