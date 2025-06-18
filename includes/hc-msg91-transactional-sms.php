@@ -670,9 +670,9 @@ function hcotp_clear_abandoned_cart_check_on_order( $order_id ) {
 
 
 // Add a custom meta box to the order edit page
-add_action( 'add_meta_boxes', 'happycoders_msg91_add_shipment_details_meta_box' );
-function happycoders_msg91_add_shipment_details_meta_box() {
-	// error_log('HC MSG91: happycoders_msg91_add_shipment_details_meta_box function CALLED');
+add_action( 'add_meta_boxes', 'hcotp_add_shipment_details_meta_box' );
+function hcotp_add_shipment_details_meta_box() {
+	// error_log('HC MSG91: hcotp_add_shipment_details_meta_box function CALLED');
 	$screen = class_exists( '\Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController' ) && wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled()
 		? wc_get_page_screen_id( 'shop-order' )
 		: 'shop_order';
