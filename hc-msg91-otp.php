@@ -38,7 +38,7 @@ function hcotp_init_woocommerce_hooks() {
 
 add_action( 'plugins_loaded', 'hcotp_init_woocommerce_hooks', 20 );
 
-add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'msg91_otp_plugin_action_links' );
+add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'hcotp_plugin_action_links' );
 
 register_activation_hook( __FILE__, 'happycoders_msg91_activate_plugin' );
 register_deactivation_hook( __FILE__, 'happycoders_msg91_deactivate_plugin' );
@@ -107,7 +107,7 @@ function happycoders_msg91_deactivate_plugin() {
  * @param array $links The existing links for the plugin.
  * @return array The modified links with the settings link added.
  */
-function msg91_otp_plugin_action_links( $links ) {
+function hcotp_plugin_action_links( $links ) {
 	$settings_link = '<a href="' . admin_url( 'options-general.php?page=msg91-otp-settings' ) . '">Settings</a>';
 	array_unshift( $links, $settings_link );
 	return $links;
