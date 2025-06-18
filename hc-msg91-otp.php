@@ -26,7 +26,7 @@ require_once HCOTP_PLUGIN_DIR . 'includes/hc-msg91-settings.php';
 require_once HCOTP_PLUGIN_DIR . 'includes/hc-countries.php';
 require_once HCOTP_PLUGIN_DIR . 'includes/hc-msg91-transactional-sms.php';
 
-function happycoders_msg91_init_woocommerce_hooks() {
+function hcotp_init_woocommerce_hooks() {
 	include_once ABSPATH . 'wp-admin/includes/plugin.php';
 
 	if ( is_plugin_active( 'woocommerce/woocommerce.php' ) && class_exists( 'WooCommerce' ) ) {
@@ -36,15 +36,15 @@ function happycoders_msg91_init_woocommerce_hooks() {
 	}
 }
 
-add_action( 'plugins_loaded', 'happycoders_msg91_init_woocommerce_hooks', 20 );
+add_action( 'plugins_loaded', 'hcotp_init_woocommerce_hooks', 20 );
 
-add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'msg91_otp_plugin_action_links' );
+add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'hcotp_plugin_action_links' );
 
-register_activation_hook( __FILE__, 'happycoders_msg91_activate_plugin' );
-register_deactivation_hook( __FILE__, 'happycoders_msg91_deactivate_plugin' );
+register_activation_hook( __FILE__, 'hcotp_activate_plugin' );
+register_deactivation_hook( __FILE__, 'hcotp_deactivate_plugin' );
 
-function happycoders_msg91_activate_plugin() {
-	msg91_create_blocked_numbers_table();
+function hcotp_activate_plugin() {
+	hcotp_create_blocked_numbers_table();
 
 	// Default OTP form texts (if not already set)
 	$options_to_set = array(
@@ -95,8 +95,8 @@ function happycoders_msg91_activate_plugin() {
 	}
 }
 
-function happycoders_msg91_deactivate_plugin() {
-	msg91_delete_blocked_numbers_table();
+function hcotp_deactivate_plugin() {
+	hcotp_delete_blocked_numbers_table();
 	wp_clear_scheduled_hook( 'hc_msg91_trigger_abandoned_cart_sms' );
 }
 
@@ -107,12 +107,12 @@ function happycoders_msg91_deactivate_plugin() {
  * @param array $links The existing links for the plugin.
  * @return array The modified links with the settings link added.
  */
-function msg91_otp_plugin_action_links( $links ) {
+function hcotp_plugin_action_links( $links ) {
 	$settings_link = '<a href="' . admin_url( 'options-general.php?page=msg91-otp-settings' ) . '">Settings</a>';
 	array_unshift( $links, $settings_link );
 	return $links;
 }
-add_filter( 'plugin_row_meta', 'msg91_otp_plugin_row_meta', 10, 4 );
+add_filter( 'plugin_row_meta', 'hcotp_plugin_row_meta', 10, 4 );
 
 /**
  * Adds custom meta links to the plugin row in the plugins list table.
@@ -123,7 +123,7 @@ add_filter( 'plugin_row_meta', 'msg91_otp_plugin_row_meta', 10, 4 );
  * @param string $status       The plugin's status.
  * @return array The modified array of plugin meta data with additional links.
  */
-function msg91_otp_plugin_row_meta( $plugin_meta, $plugin_file, $plugin_data, $status ) {
+function hcotp_plugin_row_meta( $plugin_meta, $plugin_file, $plugin_data, $status ) {
 	if ( plugin_basename( __FILE__ ) === $plugin_file ) {
 		if ( stripos( $plugin_data['Author'], 'HAPPY CODERS' ) !== false ) {
 			$plugin_meta[] = '<a href="https://www.happycoders.in/msg91-plugin-documentation/" target="_blank">Documentation</a>';
@@ -147,7 +147,7 @@ function msg91_otp_plugin_row_meta( $plugin_meta, $plugin_file, $plugin_data, $s
  * @param string $text The text to be translated.
  * @return string The translated text or the original text if no translation is found.
  */
-function hc_msg91_enqueue_scripts() {
+function hcotp_enqueue_scripts() {
 	wp_enqueue_script(
 		'msg91-otp-js',
 		HCOTP_PLUGIN_URL . 'assets/js/hc-msg91-otp.js',
@@ -174,12 +174,12 @@ function hc_msg91_enqueue_scripts() {
 		)
 	);
 }
-add_action( 'wp_enqueue_scripts', 'hc_msg91_enqueue_scripts' );
+add_action( 'wp_enqueue_scripts', 'hcotp_enqueue_scripts' );
 
 
-register_activation_hook( __FILE__, 'msg91_create_blocked_numbers_table' );
-register_activation_hook( __FILE__, 'msg91_add_otp_column_to_users_table' );
-register_deactivation_hook( __FILE__, 'msg91_delete_blocked_numbers_table' );
+register_activation_hook( __FILE__, 'hcotp_create_blocked_numbers_table' );
+register_activation_hook( __FILE__, 'hcotp_add_otp_column_to_users_table' );
+register_deactivation_hook( __FILE__, 'hcotp_delete_blocked_numbers_table' );
 
 /**
  * Creates the database table for storing blocked mobile numbers.
@@ -195,7 +195,7 @@ register_deactivation_hook( __FILE__, 'msg91_delete_blocked_numbers_table' );
  * The table is created using the dbDelta function, which ensures that
  * the table is only created if it does not already exist.
  */
-function msg91_create_blocked_numbers_table() {
+function hcotp_create_blocked_numbers_table() {
 	global $wpdb;
 	$table_name      = $wpdb->prefix . 'msg91_blocked_number';
 	$charset_collate = $wpdb->get_charset_collate();
@@ -211,7 +211,7 @@ function msg91_create_blocked_numbers_table() {
 	dbDelta( $sql );
 }
 
-function msg91_add_otp_column_to_users_table() {
+function hcotp_add_otp_column_to_users_table() {
 	global $wpdb;
 	$table_name = $wpdb->users;
 
@@ -231,16 +231,16 @@ function msg91_add_otp_column_to_users_table() {
  * Drops the database table for storing blocked mobile numbers.
  *
  * This function is triggered during plugin deactivation and drops the
- * database table created by msg91_create_blocked_numbers_table.
+ * database table created by hcotp_create_blocked_numbers_table.
  */
-function msg91_delete_blocked_numbers_table() {
+function hcotp_delete_blocked_numbers_table() {
 	global $wpdb;
 	$table_name = $wpdb->prefix . 'msg91_blocked_number';
 	$sql        = "DROP TABLE IF EXISTS $table_name;";
 	$wpdb->query( $sql );
 }
-add_action( 'wp_ajax_happycoders_send_msg91_otp_ajax', 'happycoders_send_msg91_otp_ajax' );
-add_action( 'wp_ajax_nopriv_happycoders_send_msg91_otp_ajax', 'happycoders_send_msg91_otp_ajax' );
+add_action( 'wp_ajax_hcotp_send_otp_ajax', 'hcotp_send_otp_ajax' );
+add_action( 'wp_ajax_nopriv_hcotp_send_otp_ajax', 'hcotp_send_otp_ajax' );
 
 
 /**
@@ -267,28 +267,28 @@ add_action( 'wp_ajax_nopriv_happycoders_send_msg91_otp_ajax', 'happycoders_send_
  * - 'verify_otp_button_color': The background color of the verify OTP button.
  * - 'top_verify_image': URL of the image displayed at the top of the verify OTP form.
  */
-function msg91_get_options() {
+function hcotp_get_options() {
 	return array(
-		'send_otp_label'          => happycoders_msg91_get_option_with_default( 'msg91_sendotp_lable', 'Mobile Number' ),
-		'send_otp_label_color'    => happycoders_msg91_get_option_with_default( 'msg91_sendotp_lable_color', '#000000' ),
-		'send_otp_desc'           => happycoders_msg91_get_option_with_default( 'msg91_sendotp_dec', 'We will send you an OTP' ),
-		'send_otp_desc_color'     => happycoders_msg91_get_option_with_default( 'msg91_sendotp_dec_color', '#000000' ),
-		'send_otp_button_text'    => happycoders_msg91_get_option_with_default( 'msg91_sendotp_button_text', 'Send OTP' ),
-		'send_otp_button_color'   => happycoders_msg91_get_option_with_default( 'msg91_sendotp_button_color', '#0073aa' ),
-		'top_image'               => happycoders_msg91_get_option_with_default( 'msg91_top_image', HCOTP_PLUGIN_URL . 'assets/images/send-otp.png' ),
-		'verify_otp_lable'        => happycoders_msg91_get_option_with_default( 'msg91_verifyotp_lable', 'Enter Mobile' ),
-		'verify_otp_lable_color'  => happycoders_msg91_get_option_with_default( 'msg91_verifyotp_lable_color', '#000000' ),
-		'verify_otp_dec'          => happycoders_msg91_get_option_with_default( 'msg91_verifyotp_dec', 'Enter your 4-digit OTP' ),
-		'verify_otp_dec_color'    => happycoders_msg91_get_option_with_default( 'msg91_verifyotp_desc_color', '#000000' ),
-		'verify_otp_buttontext'   => happycoders_msg91_get_option_with_default( 'msg91_verifyotp_button_text', 'Verify OTP' ),
-		'verify_otp_button_color' => happycoders_msg91_get_option_with_default( 'msg91_verifyotp_button_color', '#0073aa' ),
-		'top_verify_image'        => happycoders_msg91_get_option_with_default( 'msg91_top_verify_image', HCOTP_PLUGIN_URL . 'assets/images/verify-otp.png' ),
-		'whatsapp_auth_enabled'   => happycoders_msg91_get_option_with_default( 'whatsapp_auth_enabled', 0 ),
-		'whatsapp_button_text'    => happycoders_msg91_get_option_with_default( 'whatsapp_button_text', 'Send OTP via Whatsapp' ),
+		'send_otp_label'          => hcotp_get_option_with_default( 'msg91_sendotp_lable', 'Mobile Number' ),
+		'send_otp_label_color'    => hcotp_get_option_with_default( 'msg91_sendotp_lable_color', '#000000' ),
+		'send_otp_desc'           => hcotp_get_option_with_default( 'msg91_sendotp_dec', 'We will send you an OTP' ),
+		'send_otp_desc_color'     => hcotp_get_option_with_default( 'msg91_sendotp_dec_color', '#000000' ),
+		'send_otp_button_text'    => hcotp_get_option_with_default( 'msg91_sendotp_button_text', 'Send OTP' ),
+		'send_otp_button_color'   => hcotp_get_option_with_default( 'msg91_sendotp_button_color', '#0073aa' ),
+		'top_image'               => hcotp_get_option_with_default( 'msg91_top_image', HCOTP_PLUGIN_URL . 'assets/images/send-otp.png' ),
+		'verify_otp_lable'        => hcotp_get_option_with_default( 'msg91_verifyotp_lable', 'Enter Mobile' ),
+		'verify_otp_lable_color'  => hcotp_get_option_with_default( 'msg91_verifyotp_lable_color', '#000000' ),
+		'verify_otp_dec'          => hcotp_get_option_with_default( 'msg91_verifyotp_dec', 'Enter your 4-digit OTP' ),
+		'verify_otp_dec_color'    => hcotp_get_option_with_default( 'msg91_verifyotp_desc_color', '#000000' ),
+		'verify_otp_buttontext'   => hcotp_get_option_with_default( 'msg91_verifyotp_button_text', 'Verify OTP' ),
+		'verify_otp_button_color' => hcotp_get_option_with_default( 'msg91_verifyotp_button_color', '#0073aa' ),
+		'top_verify_image'        => hcotp_get_option_with_default( 'msg91_top_verify_image', HCOTP_PLUGIN_URL . 'assets/images/verify-otp.png' ),
+		'whatsapp_auth_enabled'   => hcotp_get_option_with_default( 'whatsapp_auth_enabled', 0 ),
+		'whatsapp_button_text'    => hcotp_get_option_with_default( 'whatsapp_button_text', 'Send OTP via Whatsapp' ),
 
 	);
 }
-function happycoders_msg91_get_option_with_default( $option_name, $default_value ) {
+function hcotp_get_option_with_default( $option_name, $default_value ) {
 	$value = get_option( $option_name );
 	return ( $value === false || $value === '' ) ? $default_value : $value;
 }
@@ -306,7 +306,7 @@ function happycoders_msg91_get_option_with_default( $option_name, $default_value
  * @param array $options The plugin options retrieved from the WordPress options table.
  * @return string The HTML for the country select dropdown.
  */
-function happycoders_msg91_country_select( $options ) {
+function hcotp_country_select( $options ) {
 	$html          = '';
 	$all_countries = happycoders_msg91_get_countries_with_iso();
 
@@ -346,7 +346,7 @@ function happycoders_msg91_country_select( $options ) {
 add_shortcode(
 	'msg91_otp_form',
 	function () {
-		$options = msg91_get_options();
+		$options = hcotp_get_options();
 
 		if ( empty( $options['top_image'] ) ) {
 			$options['top_image'] = HCOTP_PLUGIN_URL . 'assets/images/send-otp.png';
@@ -363,7 +363,7 @@ add_shortcode(
 					</div>';
 		}
 
-		return happycoders_msg91_otp_form( $options, false );
+		return hcotp_otp_form( $options, false );
 	}
 );
 
@@ -371,7 +371,7 @@ add_shortcode(
 add_action(
 	'wp_footer',
 	function () {
-		$options = msg91_get_options();
+		$options = hcotp_get_options();
 		if ( empty( $options['top_image'] ) ) {
 			$options['top_image'] = HCOTP_PLUGIN_URL . 'assets/images/send-otp.png';
 		}
@@ -385,7 +385,7 @@ add_action(
 						<button id="next-to-address" style="margin-top: 20px;">Next</button>
 					</div>';
 		} else {
-			echo happycoders_msg91_otp_form( $options, true );
+			echo hcotp_otp_form( $options, true );
 		}
 	}
 );
@@ -412,7 +412,7 @@ add_action(
  *
  * @return string The rendered form.
  */
-function happycoders_msg91_otp_form( $options, $is_popup = false ) {
+function hcotp_otp_form( $options, $is_popup = false ) {
 	ob_start();
 
 	?>
@@ -448,7 +448,7 @@ function happycoders_msg91_otp_form( $options, $is_popup = false ) {
 
 			<div class="mobile-input-wrap">
 				<?php
-				echo happycoders_msg91_country_select( $options );
+				echo hcotp_country_select( $options );
 				?>
 				<input type="hidden" id="otpprocess" value="">
 				<input type="tel" id="msg91_mobile" maxlength="10" pattern="\d*" placeholder="Mobile Number" oninput="this.value = this.value.replace(/[^0-9]/g, '' );" />
@@ -515,7 +515,7 @@ function happycoders_msg91_otp_form( $options, $is_popup = false ) {
  *
  * @since 1.0.0
  */
-function happycoders_send_msg91_otp_ajax() {
+function hcotp_send_otp_ajax() {
 	global $wpdb;
 	check_ajax_referer( 'msg91_ajax_nonce_action', 'security_nonce' );
 
@@ -672,10 +672,10 @@ function happycoders_send_msg91_otp_ajax() {
 	}
 }
 
-add_action( 'wp_ajax_happycoders_send_msg91_otp_ajax', 'happycoders_send_msg91_otp_ajax' );
-add_action( 'wp_ajax_nopriv_happycoders_send_msg91_otp_ajax', 'happycoders_send_msg91_otp_ajax' );
-add_action( 'wp_ajax_msg91_auto_login_user', 'msg91_auto_login_user' );
-add_action( 'wp_ajax_nopriv_msg91_auto_login_user', 'msg91_auto_login_user' );
+add_action( 'wp_ajax_hcotp_send_otp_ajax', 'hcotp_send_otp_ajax' );
+add_action( 'wp_ajax_nopriv_hcotp_send_otp_ajax', 'hcotp_send_otp_ajax' );
+add_action( 'wp_ajax_hcotp_auto_login_user', 'hcotp_auto_login_user' );
+add_action( 'wp_ajax_nopriv_hcotp_auto_login_user', 'hcotp_auto_login_user' );
 
 /**
  * Automatically logs in a user based on their mobile number.
@@ -690,7 +690,7 @@ add_action( 'wp_ajax_nopriv_msg91_auto_login_user', 'msg91_auto_login_user' );
  *
  * Sends a JSON response indicating success or failure.
  */
-function msg91_auto_login_user() {
+function hcotp_auto_login_user() {
 	check_ajax_referer( 'msg91_ajax_nonce_action', 'security_nonce' );
 	$mobile = sanitize_text_field( wp_unslash( isset( $_POST['mobile'] ) ? $_POST['mobile'] : '' ) );
 	if ( empty( $mobile ) ) {
@@ -737,8 +737,8 @@ function msg91_auto_login_user() {
 		)
 	);
 }
-add_action( 'wp_ajax_happycoders_verify_msg91_otp_ajax', 'happycoders_verify_msg91_otp_ajax' );
-add_action( 'wp_ajax_nopriv_happycoders_verify_msg91_otp_ajax', 'happycoders_verify_msg91_otp_ajax' );
+add_action( 'wp_ajax_hcotp_verify_otp_ajax', 'hcotp_verify_otp_ajax' );
+add_action( 'wp_ajax_nopriv_hcotp_verify_otp_ajax', 'hcotp_verify_otp_ajax' );
 
 /**
  * Verify the OTP sent by MSG91 and log in the user if OTP is valid.
@@ -749,7 +749,7 @@ add_action( 'wp_ajax_nopriv_happycoders_verify_msg91_otp_ajax', 'happycoders_ver
  *
  * @return mixed A JSON response with a success message and the user ID if the OTP is valid, or an error message if the OTP is invalid.
  */
-function happycoders_verify_msg91_otp_ajax() {
+function hcotp_verify_otp_ajax() {
 	check_ajax_referer( 'msg91_ajax_nonce_action', 'security_nonce' );
 	$mobile     = sanitize_text_field( wp_unslash( isset( $_POST['mobile'] ) ? $_POST['mobile'] : '' ) );
 	$otpprocess = sanitize_text_field( wp_unslash( $_POST['otpprocess'] ?? '' ) );
@@ -795,7 +795,7 @@ function happycoders_verify_msg91_otp_ajax() {
 					)
 				);
 			} else {
-				msg91_auto_login_user();
+				hcotp_auto_login_user();
 			}
 			setcookie( 'msg91_verified_mobile', $mobile, time() + ( 30 * 24 * 60 * 60 ), COOKIEPATH, COOKIE_DOMAIN );
 			setcookie( 'msg91_verified_user_id', $user->ID, time() + ( 30 * 24 * 60 * 60 ), COOKIEPATH, COOKIE_DOMAIN );

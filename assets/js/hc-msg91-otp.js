@@ -20,7 +20,7 @@ jQuery(document).ready(function ($) {
         $button.prop('disabled', true).text('Sending...');
 
         $.post(msg91_ajax_obj.ajax_url, {
-            action: 'happycoders_send_msg91_otp_ajax',
+            action: 'hcotp_send_otp_ajax',
             mobile: mobileWithCode,
              otpprocess: 'sms',
              security_nonce: msg91_ajax_obj.nonce 
@@ -68,7 +68,7 @@ jQuery(document).ready(function ($) {
 
     
         $.post(msg91_ajax_obj.ajax_url, {
-            action: 'happycoders_send_msg91_otp_ajax',
+            action: 'hcotp_send_otp_ajax',
             mobile: mobileWithCode,
                otpprocess: 'whatsapp',
              security_nonce: msg91_ajax_obj.nonce 
@@ -138,7 +138,7 @@ jQuery(document).ready(function ($) {
         let otpprocess = $container.find('#otpprocess').val(); 
     
         $.post(msg91_ajax_obj.ajax_url, {
-            action: 'happycoders_verify_msg91_otp_ajax',
+            action: 'hcotp_verify_otp_ajax',
             mobile: mobileWithCode,
             otpprocess : otpprocess,
             otp: otp,
@@ -207,7 +207,7 @@ jQuery(document).ready(function ($) {
     
        
         $.post(msg91_ajax_obj.ajax_url, {
-            action: 'happycoders_send_msg91_otp_ajax',
+            action: 'hcotp_send_otp_ajax',
             mobile: mobileWithCode,
               security_nonce: msg91_ajax_obj.nonce 
         }, function (res) {
