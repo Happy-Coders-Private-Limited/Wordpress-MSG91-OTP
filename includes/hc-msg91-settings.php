@@ -18,7 +18,7 @@ add_action(
 		);
 	}
 );
-function hc_enqueue_msg91_scripts() {
+function hcotp_admin_enqueue_scripts() {
 	wp_enqueue_script( 'msg91-otp-js', HCOTP_PLUGIN_URL . 'assets/js/hc-msg91-otp.js', array( 'jquery' ), time(), true );
 	wp_enqueue_style( 'msg91-otp-css', HCOTP_PLUGIN_URL . 'assets/css/hc-msg91-otp.css', array(), time() );
 
@@ -36,8 +36,8 @@ function hc_enqueue_msg91_scripts() {
 	);
 }
 
-add_action( 'wp_enqueue_scripts', 'hc_enqueue_msg91_scripts' );
-add_action( 'admin_enqueue_scripts', 'hc_enqueue_msg91_scripts' );
+add_action( 'wp_enqueue_scripts', 'hcotp_admin_enqueue_scripts' );
+add_action( 'admin_enqueue_scripts', 'hcotp_admin_enqueue_scripts' );
 
 add_action(
 	'admin_init',
