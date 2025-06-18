@@ -150,7 +150,7 @@ function hcotp_register_wc_sms_hooks() {
 	add_action( 'woocommerce_thankyou', 'hcotp_sms_on_thankyou_page', 10, 1 );
 
 	// 3. Order Shipped & 4. Order Delivered (via status change)
-	add_action( 'woocommerce_order_status_changed', 'happycoders_msg91_sms_on_order_status_change', 10, 3 );
+	add_action( 'woocommerce_order_status_changed', 'hcotp_sms_on_order_status_change', 10, 3 );
 
 	// 5. Order on Cart (Abandoned Cart) - Basic Implementation
 	add_action( 'woocommerce_cart_updated', 'happycoders_msg91_schedule_abandoned_cart_check' );
@@ -302,8 +302,8 @@ function hcotp_sms_on_thankyou_page( $order_id ) {
 	}
 }
 
-function happycoders_msg91_sms_on_order_status_change( $order_id, $old_status, $new_status ) {
-	error_log( 'happycoders_msg91_sms_on_order_status_change - Fired. Order ID: ' . $order_id );
+function hcotp_sms_on_order_status_change( $order_id, $old_status, $new_status ) {
+	error_log( 'hcotp_sms_on_order_status_change - Fired. Order ID: ' . $order_id );
 	$order = wc_get_order( $order_id );
 
 	$phone = hcotp_get_customer_phone( $order );
@@ -325,7 +325,7 @@ function happycoders_msg91_sms_on_order_status_change( $order_id, $old_status, $
 	$shipped_target_status = get_option( 'msg91_sms_osh_status_slug', 'shipped' ); // Default 'shipped'
 
 	if ( $shipped_enabled && ! empty( $shipped_template_id ) && $new_status === $shipped_target_status ) {
-		error_log( 'happycoders_msg91_sms_on_order_status_change - Order Shipped SMS enabled. Template ID: ' . $shipped_template_id );
+		error_log( 'hcotp_sms_on_order_status_change - Order Shipped SMS enabled. Template ID: ' . $shipped_template_id );
 
 		$tracking_id       = get_post_meta( $order_id, '_hc_msg91_tracking_id', true );
 		$tracking_url      = get_post_meta( $order_id, '_hc_msg91_tracking_url', true );
@@ -350,7 +350,7 @@ function happycoders_msg91_sms_on_order_status_change( $order_id, $old_status, $
 	$delivered_target_status = get_option( 'msg91_sms_odl_status_slug', 'delivered' ); // Default 'delivered'
 
 	if ( $delivered_enabled && ! empty( $delivered_template_id ) && $new_status === $delivered_target_status ) {
-		error_log( 'happycoders_msg91_sms_on_order_status_change - Order Delivered SMS enabled. Template ID: ' . $shipped_template_id );
+		error_log( 'hcotp_sms_on_order_status_change - Order Delivered SMS enabled. Template ID: ' . $shipped_template_id );
 		$vars = array(
 			'var1' => $customer_name,
 			'var2' => $order->get_order_number(),  // Order ID
