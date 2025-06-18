@@ -161,14 +161,14 @@ function hcotp_register_wc_sms_hooks() {
 // --- HOOKS ---
 
 // 1. New Customer Registration
-// add_action( 'user_register', 'happycoders_msg91_sms_on_new_customer_registration', 10, 1 );
-function happycoders_msg91_sms_on_new_customer_registration( $user_id ) {
-	error_log( 'happycoders_msg91_sms_on_new_customer_registration - Fired. User ID: ' . $user_id );
+// add_action( 'user_register', 'hcotp_sms_on_new_customer_registration', 10, 1 );
+function hcotp_sms_on_new_customer_registration( $user_id ) {
+	error_log( 'hcotp_sms_on_new_customer_registration - Fired. User ID: ' . $user_id );
 	if ( ! get_option( 'msg91_sms_ncr_enable', 0 ) ) {
 		return;
 	}
 	$template_id = get_option( 'msg91_sms_ncr_template_id' );
-	error_log( 'happycoders_msg91_sms_on_new_customer_registration - Template ID: ' . $template_id );
+	error_log( 'hcotp_sms_on_new_customer_registration - Template ID: ' . $template_id );
 	if ( empty( $template_id ) ) {
 		return;
 	}

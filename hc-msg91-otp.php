@@ -712,13 +712,13 @@ function hcotp_auto_login_user() {
 		);
 		$user = get_user_by( 'ID', $user_id );
 
-			happycoders_msg91_sms_on_new_customer_registration( $user->ID );
+			hcotp_sms_on_new_customer_registration( $user->ID );
 
 	} else {
 		$created             = strtotime( $user->user_registered );
 		$is_very_recent_user = ( time() - $created ) < 60;
 		if ( $is_very_recent_user ) {
-			happycoders_msg91_sms_on_new_customer_registration( $user->ID );
+			hcotp_sms_on_new_customer_registration( $user->ID );
 		}
 	}
 	wp_set_current_user( $user->ID );
@@ -776,7 +776,7 @@ function hcotp_verify_otp_ajax() {
 				$is_very_recent_user = ( time() - $created ) < 120;
 
 			if ( $is_very_recent_user ) {
-				happycoders_msg91_sms_on_new_customer_registration( $user->ID );
+				hcotp_sms_on_new_customer_registration( $user->ID );
 			}
 			if ( $user ) {
 				wp_set_current_user( $user->ID );
@@ -814,7 +814,7 @@ function hcotp_verify_otp_ajax() {
 		$is_very_recent_user = ( time() - $created ) < 120;
 
 		if ( $is_very_recent_user ) {
-			happycoders_msg91_sms_on_new_customer_registration( $user->ID );
+			hcotp_sms_on_new_customer_registration( $user->ID );
 		}
 		$saved_otp = get_user_meta( $user->ID, 'otp_code', true );
 
