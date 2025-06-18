@@ -19,7 +19,7 @@ define( 'HC_MSG91_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
 
 if ( ! defined( 'ABSPATH' ) ) {
-    exit;
+	exit;
 }
 
 require_once HC_MSG91_PLUGIN_DIR . 'includes/hc-msg91-settings.php';
@@ -27,13 +27,13 @@ require_once HC_MSG91_PLUGIN_DIR . 'includes/hc-countries.php';
 require_once HC_MSG91_PLUGIN_DIR . 'includes/hc-msg91-transactional-sms.php';
 
 function happycoders_msg91_init_woocommerce_hooks() {
-    include_once ABSPATH . 'wp-admin/includes/plugin.php';
+	include_once ABSPATH . 'wp-admin/includes/plugin.php';
 
-    if ( is_plugin_active( 'woocommerce/woocommerce.php' ) && class_exists( 'WooCommerce' ) ) {
-        if ( function_exists( 'hc_msg91_register_wc_sms_hooks' ) ) {
-            hc_msg91_register_wc_sms_hooks();
-        }
-    }
+	if ( is_plugin_active( 'woocommerce/woocommerce.php' ) && class_exists( 'WooCommerce' ) ) {
+		if ( function_exists( 'hc_msg91_register_wc_sms_hooks' ) ) {
+			hc_msg91_register_wc_sms_hooks();
+		}
+	}
 }
 
 add_action( 'plugins_loaded', 'happycoders_msg91_init_woocommerce_hooks', 20 );
@@ -166,34 +166,32 @@ function msg91_otp_plugin_row_meta( $plugin_meta, $plugin_file, $plugin_data, $s
  * @param string $text The text to be translated.
  * @return string The translated text or the original text if no translation is found.
  */
-
-
 function hc_msg91_enqueue_scripts() {
-    wp_enqueue_script(
-        'msg91-otp-js',
-        HC_MSG91_PLUGIN_URL . 'assets/js/hc-msg91-otp.js',
-        array( 'jquery' ),
-        defined('HC_MSG91_VERSION') ? HC_MSG91_VERSION : time(),
-        true
-    );
-    wp_enqueue_style(
-        'msg91-otp-css',
-        HC_MSG91_PLUGIN_URL . 'assets/css/hc-msg91-otp.css',
-        array(),
-        defined('HC_MSG91_VERSION') ? HC_MSG91_VERSION : time()
-    );
-    wp_localize_script(
-        'msg91-otp-js',
-        'msg91_ajax_obj',
-        array(
-            'ajax_url'                 => admin_url( 'admin-ajax.php' ),
-            'nonce'                    => wp_create_nonce( 'msg91_ajax_nonce_action' ),
-            'resend_timer'             => (int) get_option( 'msg91_resend_timer', 60 ),
-            'redirect_page'            => get_option( 'msg91_redirect_page' ),
-            'sendotp_validation_msg'   => get_option( 'msg91_sendotp_validation_msg', 'Please enter a valid mobile number (between 5 and 12 digits).' ),
-            'verifyotp_validation_msg' => get_option( 'msg91_verifyotp_validation_msg', 'Please enter the otp' ),
-        )
-    );
+	wp_enqueue_script(
+		'msg91-otp-js',
+		HC_MSG91_PLUGIN_URL . 'assets/js/hc-msg91-otp.js',
+		array( 'jquery' ),
+		defined( 'HC_MSG91_VERSION' ) ? HC_MSG91_VERSION : time(),
+		true
+	);
+	wp_enqueue_style(
+		'msg91-otp-css',
+		HC_MSG91_PLUGIN_URL . 'assets/css/hc-msg91-otp.css',
+		array(),
+		defined( 'HC_MSG91_VERSION' ) ? HC_MSG91_VERSION : time()
+	);
+	wp_localize_script(
+		'msg91-otp-js',
+		'msg91_ajax_obj',
+		array(
+			'ajax_url'                 => admin_url( 'admin-ajax.php' ),
+			'nonce'                    => wp_create_nonce( 'msg91_ajax_nonce_action' ),
+			'resend_timer'             => (int) get_option( 'msg91_resend_timer', 60 ),
+			'redirect_page'            => get_option( 'msg91_redirect_page' ),
+			'sendotp_validation_msg'   => get_option( 'msg91_sendotp_validation_msg', 'Please enter a valid mobile number (between 5 and 12 digits).' ),
+			'verifyotp_validation_msg' => get_option( 'msg91_verifyotp_validation_msg', 'Please enter the otp' ),
+		)
+	);
 }
 add_action( 'wp_enqueue_scripts', 'hc_msg91_enqueue_scripts' );
 
@@ -304,9 +302,9 @@ function msg91_get_options() {
 		'verify_otp_buttontext'   => happycoders_msg91_get_option_with_default( 'msg91_verifyotp_button_text', 'Verify OTP' ),
 		'verify_otp_button_color' => happycoders_msg91_get_option_with_default( 'msg91_verifyotp_button_color', '#0073aa' ),
 		'top_verify_image'        => happycoders_msg91_get_option_with_default( 'msg91_top_verify_image', HC_MSG91_PLUGIN_URL . 'assets/images/verify-otp.png' ),
-		'whatsapp_auth_enabled'   => happycoders_msg91_get_option_with_default( 'whatsapp_auth_enabled', 0),
-		'whatsapp_button_text'   => happycoders_msg91_get_option_with_default( 'whatsapp_button_text', 'Send OTP via Whatsapp'),
-		
+		'whatsapp_auth_enabled'   => happycoders_msg91_get_option_with_default( 'whatsapp_auth_enabled', 0 ),
+		'whatsapp_button_text'    => happycoders_msg91_get_option_with_default( 'whatsapp_button_text', 'Send OTP via Whatsapp' ),
+
 	);
 }
 function happycoders_msg91_get_option_with_default( $option_name, $default_value ) {
@@ -368,7 +366,7 @@ add_shortcode(
 	'msg91_otp_form',
 	function () {
 		$options = msg91_get_options();
-		
+
 		if ( empty( $options['top_image'] ) ) {
 			$options['top_image'] = HC_MSG91_PLUGIN_URL . 'assets/images/send-otp.png';
 		}
@@ -478,13 +476,13 @@ function happycoders_msg91_otp_form( $options, $is_popup = false ) {
 			
 			<button id="msg91_send_otp" class="common-width" style="background-color: <?php echo esc_attr( $options['send_otp_button_color'] ); ?>; color: #fff;"><?php echo esc_html( $options['send_otp_button_text'] ); ?></button>
 
-			    <?php if ( ! empty( $options['whatsapp_auth_enabled'] ) ) : ?>
+				<?php if ( ! empty( $options['whatsapp_auth_enabled'] ) ) : ?>
 					<button id="msg91_send_otp_whatsapp" class="common-width">
 						<?php echo esc_html( $options['whatsapp_button_text'] ); ?>
 					</button>
-			    <?php endif; ?>
+				<?php endif; ?>
 
-		     </div>
+			</div>
 				<div id="otp_input_wrap" style="display: none;">
 					<?php if ( ! empty( $options['top_verify_image'] ) ) : ?>
 						<div style="text-align:center;">
@@ -540,12 +538,12 @@ function happycoders_send_msg91_otp_ajax() {
 	global $wpdb;
 	check_ajax_referer( 'msg91_ajax_nonce_action', 'security_nonce' );
 
-	$mobile     = sanitize_text_field( wp_unslash( $_POST['mobile'] ?? '' ) );
-	$otpprocess = sanitize_text_field( wp_unslash( $_POST['otpprocess'] ?? '' ) );
-	$ip_address = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
-	$table_name = $wpdb->prefix . 'msg91_blocked_number';
+	$mobile        = sanitize_text_field( wp_unslash( $_POST['mobile'] ?? '' ) );
+	$otpprocess    = sanitize_text_field( wp_unslash( $_POST['otpprocess'] ?? '' ) );
+	$ip_address    = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+	$table_name    = $wpdb->prefix . 'msg91_blocked_number';
 	$per_day_limit = intval( get_option( 'msg91_perday_otplimit', 5 ) );
-	$today = gmdate( 'Y-m-d' );
+	$today         = gmdate( 'Y-m-d' );
 
 	$otp_count_today = $wpdb->get_var(
 		$wpdb->prepare(
@@ -559,17 +557,16 @@ function happycoders_send_msg91_otp_ajax() {
 		wp_send_json_error( array( 'message' => 'You have reached the OTP request limit for today.' ) );
 	}
 
-	$authkey        = get_option( 'msg91_auth_key' );
-	$sender         = get_option( 'msg91_sender_id' );
-	$template_id    = get_option( 'msg91_template_id' );
-	$wa_template    = get_option( 'whatsapp_template_name', 'login' );
+	$authkey     = get_option( 'msg91_auth_key' );
+	$sender      = get_option( 'msg91_sender_id' );
+	$template_id = get_option( 'msg91_template_id' );
+	$wa_template = get_option( 'whatsapp_template_name', 'login' );
 
-	$wa_namespace   = get_option( 'whatsapp_template_namespace' );
+	$wa_namespace = get_option( 'whatsapp_template_namespace' );
 
-	$wa_number      = get_option( 'whatsapp_integrated_number' );
+	$wa_number = get_option( 'whatsapp_integrated_number' );
 
-	$whatsapp_language_code     = get_option( 'whatsapp_language_code' );
-	
+	$whatsapp_language_code = get_option( 'whatsapp_language_code' );
 
 	if ( $otpprocess === 'sms' ) {
 
@@ -588,65 +585,68 @@ function happycoders_send_msg91_otp_ajax() {
 					current_time( 'mysql' )
 				)
 			);
-			wp_send_json_success([
-				'message'    => 'OTP sent successfully via SMS.',
-				'request_id' => $result['request_id'] ?? null,
-			]);
+			wp_send_json_success(
+				array(
+					'message'    => 'OTP sent successfully via SMS.',
+					'request_id' => $result['request_id'] ?? null,
+				)
+			);
 		} else {
-			wp_send_json_error([ 'message' => $result['message'] ?? 'Failed to send OTP via SMS.' ]);
+			wp_send_json_error( array( 'message' => $result['message'] ?? 'Failed to send OTP via SMS.' ) );
 		}
+	} else {
+		$otp_code = rand( 1000, 9999 );
 
-	} 
-	else {
-	$otp_code = rand(1000, 9999);
-
-		$wa_url = 'https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/';
-		$wa_payload = [
+		$wa_url     = 'https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/';
+		$wa_payload = array(
 			'integrated_number' => $wa_number,
 			'content_type'      => 'template',
-			'payload'           => [
+			'payload'           => array(
 				'messaging_product' => 'whatsapp',
 				'type'              => 'template',
-				'template'          => [
-					'name'      => $wa_template,
-					'language'  => [
+				'template'          => array(
+					'name'              => $wa_template,
+					'language'          => array(
 						'code'   => $whatsapp_language_code,
-						'policy' => 'deterministic'
-					],
-					'namespace' => $wa_namespace,
-					'to_and_components' => [
-						[
-							'to' => [ $mobile ],
-							'components' => [
-								'body_1' => [
+						'policy' => 'deterministic',
+					),
+					'namespace'         => $wa_namespace,
+					'to_and_components' => array(
+						array(
+							'to'         => array( $mobile ),
+							'components' => array(
+								'body_1'   => array(
 									'type'  => 'text',
-									'value' => $otp_code
-								],
-								'button_1' => [
+									'value' => $otp_code,
+								),
+								'button_1' => array(
 									'type'    => 'text',
 									'subtype' => 'url',
-									'value'   => $otp_code
-								]
-							]
-						]
-					]
-				]
-			]
-		];
+									'value'   => $otp_code,
+								),
+							),
+						),
+					),
+				),
+			),
+		);
 
-		$response = wp_remote_post( $wa_url, [
-			'headers' => [
-				'Content-Type' => 'application/json',
-				'Authkey'      => $authkey,
-			],
-			'body' => wp_json_encode( $wa_payload ),
-		] );
+		$response = wp_remote_post(
+			$wa_url,
+			array(
+				'headers' => array(
+					'Content-Type' => 'application/json',
+					'Authkey'      => $authkey,
+				),
+				'body'    => wp_json_encode( $wa_payload ),
+			)
+		);
 
-		$body = wp_remote_retrieve_body( $response );
+		$body   = wp_remote_retrieve_body( $response );
 		$result = json_decode( $body, true );
 
 		if ( isset( $result['status'] ) && $result['status'] === 'success' ) {
-	
+
 				$wpdb->query(
 					$wpdb->prepare(
 						'INSERT INTO ' . $table_name . ' (mobile_number, ip_address, created_at) VALUES (%s, %s, %s)',
@@ -655,41 +655,38 @@ function happycoders_send_msg91_otp_ajax() {
 						current_time( 'mysql' )
 					)
 				);
-	           $clean_mobile = preg_replace( '/\D/', '', $mobile );
-			   $user = $wpdb->get_row(
+				$clean_mobile = preg_replace( '/\D/', '', $mobile );
+				$user         = $wpdb->get_row(
 					$wpdb->prepare(
 						"SELECT * FROM {$wpdb->users} WHERE user_login = %s",
 						$clean_mobile
 					)
 				);
-				if ( $user ) {
-					
-					update_user_meta( $user->ID, 'otp_code', $otp_code );
-					update_user_meta( $user->ID, 'mobile_number', $clean_mobile );
+			if ( $user ) {
 
+				update_user_meta( $user->ID, 'otp_code', $otp_code );
+				update_user_meta( $user->ID, 'mobile_number', $clean_mobile );
 
-
-				} else {
+			} else {
 				$password = wp_generate_password( 8, false );
-				$user_id = wp_insert_user([
-					'user_login' => $clean_mobile,
-					'user_pass'  => $password,
-					'user_email' => $clean_mobile . '@example.com', 
-					'role'       => 'subscriber'
-				]);
+				$user_id  = wp_insert_user(
+					array(
+						'user_login' => $clean_mobile,
+						'user_pass'  => $password,
+						'user_email' => $clean_mobile . '@example.com',
+						'role'       => 'subscriber',
+					)
+				);
 
 				if ( ! is_wp_error( $user_id ) ) {
 						update_user_meta( $user_id, 'otp_code', $otp_code );
 						update_user_meta( $user_id, 'mobile_number', $clean_mobile );
 				}
-				
-	           }
+			}
 
-				wp_send_json_success([ 'message' => 'OTP sent successfully via WhatsApp.' ]);
-		}
-
-		 else {
-			wp_send_json_error([ 'message' => $result['message'] ?? 'Failed to send OTP via WhatsApp.' ]);
+				wp_send_json_success( array( 'message' => 'OTP sent successfully via WhatsApp.' ) );
+		} else {
+			wp_send_json_error( array( 'message' => $result['message'] ?? 'Failed to send OTP via WhatsApp.' ) );
 		}
 	}
 }
@@ -718,13 +715,11 @@ function msg91_auto_login_user() {
 	if ( empty( $mobile ) ) {
 		wp_send_json_error( array( 'message' => 'Mobile number missing' ) );
 	}
-	
 
 	$username = $mobile;
 	$email    = $username . '@oorna.com';
 
 	$user = get_user_by( 'login', $username );
-	
 
 	if ( ! $user ) {
 		$user_id = wp_create_user( $username, wp_generate_password(), $email );
@@ -735,11 +730,11 @@ function msg91_auto_login_user() {
 			)
 		);
 		$user = get_user_by( 'ID', $user_id );
-		
-		  happycoders_msg91_sms_on_new_customer_registration( $user->ID );
-		
+
+			happycoders_msg91_sms_on_new_customer_registration( $user->ID );
+
 	} else {
-	    $created = strtotime( $user->user_registered );
+		$created             = strtotime( $user->user_registered );
 		$is_very_recent_user = ( time() - $created ) < 60;
 		if ( $is_very_recent_user ) {
 			happycoders_msg91_sms_on_new_customer_registration( $user->ID );
@@ -775,18 +770,18 @@ add_action( 'wp_ajax_nopriv_happycoders_verify_msg91_otp_ajax', 'happycoders_ver
  */
 function happycoders_verify_msg91_otp_ajax() {
 	check_ajax_referer( 'msg91_ajax_nonce_action', 'security_nonce' );
-	$mobile = sanitize_text_field( wp_unslash( isset( $_POST['mobile'] ) ? $_POST['mobile'] : '' ) );
+	$mobile     = sanitize_text_field( wp_unslash( isset( $_POST['mobile'] ) ? $_POST['mobile'] : '' ) );
 	$otpprocess = sanitize_text_field( wp_unslash( $_POST['otpprocess'] ?? '' ) );
-	$otp    = sanitize_text_field( wp_unslash( isset( $_POST['otp'] ) ? $_POST['otp'] : '' ) );
+	$otp        = sanitize_text_field( wp_unslash( isset( $_POST['otp'] ) ? $_POST['otp'] : '' ) );
 
 	if ( empty( $mobile ) || empty( $otp ) ) {
 		wp_send_json_error( array( 'message' => 'Mobile number and OTP are required.' ) );
 		return;
 	}
 
-	$mobile = preg_replace( '/[^0-9]/', '', $mobile ); 
+	$mobile = preg_replace( '/[^0-9]/', '', $mobile );
 
-	if ($otpprocess == 'sms'){
+	if ( $otpprocess == 'sms' ) {
 		$url = 'https://api.msg91.com/api/verifyRequestOTP.php?authkey=' . get_option( 'msg91_auth_key' ) . "&mobile={$mobile}&otp={$otp}";
 
 		$response = wp_remote_get( $url );
@@ -795,15 +790,14 @@ function happycoders_verify_msg91_otp_ajax() {
 
 		if ( isset( $result['type'] ) && 'success' === $result['type'] ) {
 			$user = get_user_by( 'login', $mobile );
-			
 
 			$created = strtotime( $user->user_registered );
 
 				$is_very_recent_user = ( time() - $created ) < 120;
 
-				if ( $is_very_recent_user ) {
-					happycoders_msg91_sms_on_new_customer_registration( $user->ID );
-				}
+			if ( $is_very_recent_user ) {
+				happycoders_msg91_sms_on_new_customer_registration( $user->ID );
+			}
 			if ( $user ) {
 				wp_set_current_user( $user->ID );
 				wp_set_auth_cookie( $user->ID, true );
@@ -834,12 +828,10 @@ function happycoders_verify_msg91_otp_ajax() {
 		} else {
 			wp_send_json_error( array( 'message' => $result['message'] ?? 'OTP verification failed' ) );
 		}
-	}
+	} elseif ( $otpprocess === 'whatsapp' ) {
 
-		elseif ( $otpprocess === 'whatsapp' ) {
-			
-	   $user = get_user_by( 'login', $mobile );
-	   $created = strtotime( $user->user_registered );
+		$user    = get_user_by( 'login', $mobile );
+		$created = strtotime( $user->user_registered );
 
 		$is_very_recent_user = ( time() - $created ) < 120;
 
@@ -847,7 +839,6 @@ function happycoders_verify_msg91_otp_ajax() {
 			happycoders_msg91_sms_on_new_customer_registration( $user->ID );
 		}
 		$saved_otp = get_user_meta( $user->ID, 'otp_code', true );
-	
 
 		if ( $otp !== $saved_otp ) {
 			wp_send_json_error( array( 'message' => 'Invalid OTP for WhatsApp.' ) );
@@ -860,17 +851,15 @@ function happycoders_verify_msg91_otp_ajax() {
 		setcookie( 'msg91_verified_mobile', $mobile, time() + ( 30 * 24 * 60 * 60 ), COOKIEPATH, COOKIE_DOMAIN );
 		setcookie( 'msg91_verified_user_id', $user->ID, time() + ( 30 * 24 * 60 * 60 ), COOKIEPATH, COOKIE_DOMAIN );
 
-		wp_send_json_success( array(
-			'message' => 'OTP Verified Successfully (WhatsApp)',
-			'user_id' => $user->ID,
-		) );
-	}
-
-	else {
+		wp_send_json_success(
+			array(
+				'message' => 'OTP Verified Successfully (WhatsApp)',
+				'user_id' => $user->ID,
+			)
+		);
+	} else {
 		wp_send_json_error( array( 'message' => 'Invalid OTP process type.' ) );
 	}
-
-	
 }
 
 /**
@@ -949,35 +938,38 @@ function happycoders_msg91_add_custom_statuses_to_order_list( $order_statuses ) 
 	return $new_order_statuses;
 }
 
-remove_action('woocommerce_login_form', 'woocommerce_login_form_start', 10); 
-remove_action('woocommerce_login_form', 'woocommerce_login_form', 20); 
-remove_action('woocommerce_login_form', 'woocommerce_login_form_end', 30); 
+remove_action( 'woocommerce_login_form', 'woocommerce_login_form_start', 10 );
+remove_action( 'woocommerce_login_form', 'woocommerce_login_form', 20 );
+remove_action( 'woocommerce_login_form', 'woocommerce_login_form_end', 30 );
 
 // Remove WooCommerce register form
-remove_action('woocommerce_register_form', 'woocommerce_register_form_start', 10);
-remove_action('woocommerce_register_form', 'woocommerce_register_form', 20);
-remove_action('woocommerce_register_form', 'woocommerce_register_form_end', 30);
+remove_action( 'woocommerce_register_form', 'woocommerce_register_form_start', 10 );
+remove_action( 'woocommerce_register_form', 'woocommerce_register_form', 20 );
+remove_action( 'woocommerce_register_form', 'woocommerce_register_form_end', 30 );
 
 // Remove login form on checkout
-remove_action('woocommerce_before_checkout_form', 'woocommerce_checkout_login_form', 10);
+remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_login_form', 10 );
 
 // Add your custom shortcode
-add_action('woocommerce_before_customer_login_form', 'replace_wc_login_register_with_msg91_otp');
+add_action( 'woocommerce_before_customer_login_form', 'replace_wc_login_register_with_msg91_otp' );
 function replace_wc_login_register_with_msg91_otp() {
-    if (!is_user_logged_in()) {
-        echo do_shortcode('[msg91_otp_form]');
-    }
+	if ( ! is_user_logged_in() ) {
+		echo do_shortcode( '[msg91_otp_form]' );
+	}
 }
 
-add_action('woocommerce_before_checkout_form', 'custom_message_before_checkout', 5);
+add_action( 'woocommerce_before_checkout_form', 'custom_message_before_checkout', 5 );
 function custom_message_before_checkout() {
-    if ( !is_user_logged_in() ) {
-        echo '<div class="woocommerce-info custom-login-notice">';
-        echo 'Please <a href="/my-account">click here</a> to login.';
-        echo '</div>';
-        
-    }
+	if ( ! is_user_logged_in() ) {
+		echo '<div class="woocommerce-info custom-login-notice">';
+		echo 'Please <a href="/my-account">click here</a> to login.';
+		echo '</div>';
+
+	}
 }
-add_action('wp_loaded', function() {
-    remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_login_form', 10 );
-});
+add_action(
+	'wp_loaded',
+	function () {
+		remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_login_form', 10 );
+	}
+);

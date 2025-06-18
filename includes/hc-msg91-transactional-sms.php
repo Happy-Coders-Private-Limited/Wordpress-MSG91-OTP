@@ -334,7 +334,7 @@ function happycoders_msg91_sms_on_order_status_change( $order_id, $old_status, $
 
 		$vars = array(
 			'var1' => $tracking_id,             // Customer Name
-            'var2' => $tracking_url ?: $site_url,
+			'var2' => $tracking_url ?: $site_url,
 			// 'VAR3' => $tracking_id ?: 'N/A',
 			// 'VAR4' => $shipping_provider ?: 'your courier',
 			// 'VAR5' => $tracking_url ?: 'N/A', // This is the tracking URL or ID
@@ -352,8 +352,8 @@ function happycoders_msg91_sms_on_order_status_change( $order_id, $old_status, $
 	if ( $delivered_enabled && ! empty( $delivered_template_id ) && $new_status === $delivered_target_status ) {
 		error_log( 'happycoders_msg91_sms_on_order_status_change - Order Delivered SMS enabled. Template ID: ' . $shipped_template_id );
 		$vars = array(
-			  'var1' => $customer_name,
-            'var2' => $order->get_order_number(),  // Order ID
+			'var1' => $customer_name,
+			'var2' => $order->get_order_number(),  // Order ID
 			// 'VAR3' => get_bloginfo('name'),       // Site Name
 		);
 		// Documented: VAR1=CustomerName, VAR2=OrderID, VAR3=SiteName
@@ -738,13 +738,12 @@ function happycoders_msg91_shipment_details_meta_box_html( $object ) {
 add_action( 'woocommerce_process_shop_order_meta', 'happycoders_msg91_save_shipment_details_meta', 10, 1 );
 function happycoders_msg91_save_shipment_details_meta( $order_id ) {
 	if (
-    ! isset( $_POST['hc_msg91_shipment_nonce'] ) ||
-    ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['hc_msg91_shipment_nonce'] ) ), 'hc_msg91_save_shipment_details' )
-) {
-    error_log( 'HC MSG91: happycoders_msg91_save_shipment_details_meta nonce failed' );
-    return $order_id; 
-}
-
+	! isset( $_POST['hc_msg91_shipment_nonce'] ) ||
+	! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['hc_msg91_shipment_nonce'] ) ), 'hc_msg91_save_shipment_details' )
+	) {
+		error_log( 'HC MSG91: happycoders_msg91_save_shipment_details_meta nonce failed' );
+		return $order_id;
+	}
 
 	// Check if the current user has permission to save the data.
 	if ( ! current_user_can( 'edit_post', $order_id ) ) {

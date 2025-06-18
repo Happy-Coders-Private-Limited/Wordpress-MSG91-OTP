@@ -1,14 +1,14 @@
 <?php
 
 if ( ! defined( 'ABSPATH' ) ) {
-    exit;
+	exit;
 }
 
 add_action(
 	'admin_menu',
 	function () {
 		add_menu_page(
-		    __( 'MSG91 OTP Settings', 'hc-msg91-plugin' ),
+			__( 'MSG91 OTP Settings', 'hc-msg91-plugin' ),
 			__( 'MSG91 OTP & SMS', 'hc-msg91-plugin' ),
 			'manage_options',
 			'msg91-otp-settings',
@@ -19,7 +19,7 @@ add_action(
 	}
 );
 function hc_enqueue_msg91_scripts() {
-	wp_enqueue_script( 'msg91-otp-js', HC_MSG91_PLUGIN_URL. 'assets/js/hc-msg91-otp.js', array( 'jquery' ), time(), true );
+	wp_enqueue_script( 'msg91-otp-js', HC_MSG91_PLUGIN_URL . 'assets/js/hc-msg91-otp.js', array( 'jquery' ), time(), true );
 	wp_enqueue_style( 'msg91-otp-css', HC_MSG91_PLUGIN_URL . 'assets/css/hc-msg91-otp.css', array(), time() );
 
 	wp_localize_script(
@@ -42,13 +42,13 @@ add_action( 'admin_enqueue_scripts', 'hc_enqueue_msg91_scripts' );
 add_action(
 	'admin_init',
 	function () {
-		register_setting('msg91_otp_settings_group','whatsapp_auth_enabled', isset($_POST['whatsapp_auth_enabled']) ? 1 : 0);
-        register_setting('msg91_otp_settings_group','whatsapp_integrated_number', 'sanitize_text_field');
-        register_setting('msg91_otp_settings_group','whatsapp_template_name', 'sanitize_text_field');
-        register_setting('msg91_otp_settings_group','whatsapp_template_namespace', 'sanitize_text_field');
-        register_setting('msg91_otp_settings_group','whatsapp_language_code', 'sanitize_text_field'); 
-        register_setting('msg91_otp_settings_group','whatsapp_button_text', 'sanitize_text_field');
-	
+		register_setting( 'msg91_otp_settings_group', 'whatsapp_auth_enabled', isset( $_POST['whatsapp_auth_enabled'] ) ? 1 : 0 );
+		register_setting( 'msg91_otp_settings_group', 'whatsapp_integrated_number', 'sanitize_text_field' );
+		register_setting( 'msg91_otp_settings_group', 'whatsapp_template_name', 'sanitize_text_field' );
+		register_setting( 'msg91_otp_settings_group', 'whatsapp_template_namespace', 'sanitize_text_field' );
+		register_setting( 'msg91_otp_settings_group', 'whatsapp_language_code', 'sanitize_text_field' );
+		register_setting( 'msg91_otp_settings_group', 'whatsapp_button_text', 'sanitize_text_field' );
+
 		register_setting( 'msg91_otp_settings_group', 'msg91_active_tab', 'sanitize_text_field' );
 		register_setting( 'msg91_otp_settings_group', 'msg91_auth_key', 'sanitize_text_field' );
 		register_setting( 'msg91_otp_settings_group', 'msg91_sender_id', 'sanitize_text_field' );
@@ -87,8 +87,6 @@ add_action(
 		register_setting( 'msg91_otp_settings_group', 'msg91_verifyotp_validation_msg', 'sanitize_text_field' );
 		register_setting( 'msg91_otp_settings_group', 'msg91_verifyotp_button_text', 'sanitize_text_field' );
 		register_setting( 'msg91_otp_settings_group', 'msg91_verifyotp_button_color', 'sanitize_hex_color' );
-	
-
 
 		// Code for SMS added by Kombiah
 		$sms_event_types = array(
@@ -115,7 +113,7 @@ add_action(
 
 function happycoders_msg91_sanitize_positive_float( $input ) {
 	$value = floatval( str_replace( ',', '.', $input ) );
-	return ( $value > 0 ) ? $value : 0.01; 
+	return ( $value > 0 ) ? $value : 0.01;
 }
 
 function msg91_otp_settings_page() {
@@ -155,43 +153,43 @@ function msg91_otp_settings_page() {
 						</td>
 					</tr>
 <tr valign="top">
-    <th scope="row">
-        <?php echo msg91_translate('Send OTP to users through WhatsApp?'); ?>
-    </th>
-    <td>
-        <label>
-            <input type="checkbox" id="whatsapp_auth_checkbox" name="whatsapp_auth_enabled" value="1" <?php checked(get_option('whatsapp_auth_enabled'), 1); ?> />
-            <?php echo msg91_translate('Yes'); ?>
-        </label>
-        <div id="whatsapp_auth_inputs" style="margin-top: 10px; <?php echo get_option('whatsapp_auth_enabled') ? '' : 'display:none;'; ?>">
-            <p class="lable-input-between">
-                <label ><strong >Integrated Number:</strong><br>
-                    <input type="text" class="input-top" size="50" name="whatsapp_integrated_number" value="<?php echo esc_attr(get_option('whatsapp_integrated_number')); ?>" class="regular-text" />
-                </label>
-            </p>
-            <p class="lable-input-between"> 
-                <label style="margin-bottom: 12px;"><strong>Template Name:</strong><br>
-                    <input type="text" class="input-top"  size="50" name="whatsapp_template_name" value="<?php echo esc_attr(get_option('whatsapp_template_name')); ?>" class="regular-text" />
-                </label>
-            </p> 
-            <p class="lable-input-between">
-                <label style="margin-bottom: 12px;"><strong>Template Namespace:</strong><br>
-                    <input type="text" class="input-top"  size="50" name="whatsapp_template_namespace" value="<?php echo esc_attr(get_option('whatsapp_template_namespace')); ?>" class="regular-text" />
-                </label>
-            </p>
-            <p class="lable-input-between">
-                <label style="margin-bottom: 12px;"><strong>Language Code:</strong><br>
-                    <input type="text"class="input-top"  size="50" name="whatsapp_language_code" value="<?php echo esc_attr(get_option('whatsapp_language_code')); ?>" class="regular-text" />
-                </label>
-            </p>
+	<th scope="row">
+		<?php echo msg91_translate( 'Send OTP to users through WhatsApp?' ); ?>
+	</th>
+	<td>
+		<label>
+			<input type="checkbox" id="whatsapp_auth_checkbox" name="whatsapp_auth_enabled" value="1" <?php checked( get_option( 'whatsapp_auth_enabled' ), 1 ); ?> />
+			<?php echo msg91_translate( 'Yes' ); ?>
+		</label>
+		<div id="whatsapp_auth_inputs" style="margin-top: 10px; <?php echo get_option( 'whatsapp_auth_enabled' ) ? '' : 'display:none;'; ?>">
+			<p class="lable-input-between">
+				<label ><strong >Integrated Number:</strong><br>
+					<input type="text" class="input-top" size="50" name="whatsapp_integrated_number" value="<?php echo esc_attr( get_option( 'whatsapp_integrated_number' ) ); ?>" class="regular-text" />
+				</label>
+			</p>
+			<p class="lable-input-between"> 
+				<label style="margin-bottom: 12px;"><strong>Template Name:</strong><br>
+					<input type="text" class="input-top"  size="50" name="whatsapp_template_name" value="<?php echo esc_attr( get_option( 'whatsapp_template_name' ) ); ?>" class="regular-text" />
+				</label>
+			</p> 
+			<p class="lable-input-between">
+				<label style="margin-bottom: 12px;"><strong>Template Namespace:</strong><br>
+					<input type="text" class="input-top"  size="50" name="whatsapp_template_namespace" value="<?php echo esc_attr( get_option( 'whatsapp_template_namespace' ) ); ?>" class="regular-text" />
+				</label>
+			</p>
+			<p class="lable-input-between">
+				<label style="margin-bottom: 12px;"><strong>Language Code:</strong><br>
+					<input type="text"class="input-top"  size="50" name="whatsapp_language_code" value="<?php echo esc_attr( get_option( 'whatsapp_language_code' ) ); ?>" class="regular-text" />
+				</label>
+			</p>
 
 			<p class="lable-input-between">
-                <label style="margin-bottom: 12px;"><strong>Button Text (Example : Send OTP via Whatsapp)</strong><br>
-                    <input type="text"class="input-top"  size="50" name="whatsapp_button_text" value="<?php echo esc_attr(get_option('whatsapp_button_text')); ?>" class="regular-text" />
-                </label>
-            </p>
-        </div>
-    </td>
+				<label style="margin-bottom: 12px;"><strong>Button Text (Example : Send OTP via Whatsapp)</strong><br>
+					<input type="text"class="input-top"  size="50" name="whatsapp_button_text" value="<?php echo esc_attr( get_option( 'whatsapp_button_text' ) ); ?>" class="regular-text" />
+				</label>
+			</p>
+		</div>
+	</td>
 </tr>
 
 					
@@ -207,7 +205,7 @@ function msg91_otp_settings_page() {
 					<tr valign="top">
 						<th scope="row"><?php echo msg91_translate( 'Template ID' ); ?></th>
 						<td><input type="text" name="msg91_template_id" value="<?php echo esc_attr( get_option( 'msg91_template_id' ) ); ?>" size="30" />
-						<p class="description"><?php echo esc_html(  msg91_translate( 'MSG91 DLT Template ID for sending OTPs.' )); ?></p></td>
+						<p class="description"><?php echo esc_html( msg91_translate( 'MSG91 DLT Template ID for sending OTPs.' ) ); ?></p></td>
 						
 					</tr>
 					<tr valign="top">
@@ -249,12 +247,12 @@ function msg91_otp_settings_page() {
 						<th scope="row"><?php echo msg91_translate( 'Image URL for Send OTP Form' ); ?></th>
 						<td>
 							<input type="text" name="msg91_top_image" value="<?php echo esc_attr( get_option( 'msg91_top_image', HC_MSG91_PLUGIN_URL . 'assets/images/send-otp.png' ) ); ?>" size="60" />
-							<p class="description"><?php echo esc_html(  msg91_translate( 'Paste the full image URL to display above the OTP form (e.g. banner, logo).' )); ?></p>
+							<p class="description"><?php echo esc_html( msg91_translate( 'Paste the full image URL to display above the OTP form (e.g. banner, logo).' ) ); ?></p>
 						</td>
 					</tr>
 
 					<tr valign="top">
-						<th scope="row"><?php echo esc_html(  msg91_translate( 'Send OTP Form Lable' )); ?></th>
+						<th scope="row"><?php echo esc_html( msg91_translate( 'Send OTP Form Lable' ) ); ?></th>
 						<td><input type="text" name="msg91_sendotp_lable" value="<?php echo esc_attr( get_option( 'msg91_sendotp_lable' ) ); ?>" size="50" /></td>
 					</tr>
 
@@ -292,7 +290,7 @@ function msg91_otp_settings_page() {
 						<th scope="row"><?php echo msg91_translate( 'Image URL for Verify OTP Form' ); ?></th>
 						<td>
 							<input type="text" name="msg91_top_verify_image" value="<?php echo esc_attr( get_option( 'msg91_top_verify_image', HC_MSG91_PLUGIN_URL . 'assets/images/verify-otp.png' ) ); ?>" size="60" />
-							<p class="description"><?php echo esc_html(  msg91_translate( 'Paste the full image URL to display above the OTP form (e.g. banner, logo).' )); ?></p>
+							<p class="description"><?php echo esc_html( msg91_translate( 'Paste the full image URL to display above the OTP form (e.g. banner, logo).' ) ); ?></p>
 						</td>
 					</tr>
 
@@ -315,29 +313,33 @@ function msg91_otp_settings_page() {
 					</tr>
 
 					<tr valign="top">
-						<th scope="row"><?php echo esc_html( msg91_translate( 'Verify OTP Form Button Text' )); ?></th>
+						<th scope="row"><?php echo esc_html( msg91_translate( 'Verify OTP Form Button Text' ) ); ?></th>
 						<td><input type="text" name="msg91_verifyotp_button_text" value="<?php echo esc_attr( get_option( 'msg91_verifyotp_button_text' ) ); ?>" size="50" /></td>
 					</tr>
 
 				
 					<tr valign="top">
-						<th scope="row"><?php echo esc_html( msg91_translate( 'Verify OTP Button Color' )); ?></th>
+						<th scope="row"><?php echo esc_html( msg91_translate( 'Verify OTP Button Color' ) ); ?></th>
 						<td><input type="color" name="msg91_verifyotp_button_color" value="<?php echo esc_attr( get_option( 'msg91_verifyotp_button_color' ) ); ?>" size="30" /></td>
 					</tr>
 
 					<tr valign="top">
-						<th scope="row"><?php echo esc_html( msg91_translate( 'Verify OTP Form validation msg' )); ?></th>
+						<th scope="row"><?php echo esc_html( msg91_translate( 'Verify OTP Form validation msg' ) ); ?></th>
 						<td><input type="text" name="msg91_verifyotp_validation_msg" value="<?php echo esc_attr( get_option( 'msg91_verifyotp_validation_msg' ) ); ?>" size="50" /></td>
 					</tr>
 
 
 					<tr valign="top">
-						<th scope="row"><?php echo esc_html(msg91_translate( 'Redirect Page URL') ); ?></th>
+						<th scope="row"><?php echo esc_html( msg91_translate( 'Redirect Page URL' ) ); ?></th>
 						<td>
 							<input type="text" name="msg91_redirect_page" 
 								value="<?php echo esc_attr( get_option( 'msg91_redirect_page', home_url() ) ); ?>" 
 								size="60" />
-							<p class="description"><?php echo esc_html(  msg91_translate( 'Enter the URL where users should be redirected after login. Example:' ));; ?> <code><?php echo home_url( '/dashboard' ); ?></code></p>
+							<p class="description">
+							<?php
+							echo esc_html( msg91_translate( 'Enter the URL where users should be redirected after login. Example:' ) );
+							?>
+<code><?php echo home_url( '/dashboard' ); ?></code></p>
 						</td>
 					</tr>
 					<tr valign="top">
@@ -363,7 +365,7 @@ function msg91_otp_settings_page() {
 												esc_html( $name ),
 												esc_html( $dial_code )
 											);
-										}
+								}
 
 								?>
 							</select>
@@ -432,12 +434,12 @@ function msg91_otp_settings_page() {
 						<td>
 							<label>
 								<input type="checkbox" name="<?php echo esc_attr( $enable_option ); ?>" value="1" <?php checked( 1, get_option( $enable_option, 0 ) ); ?> />
-							     <?php 
+								<?php
 												printf(
 													esc_html( msg91_translate( 'Send SMS when %s' ) ),
 													esc_html( strtolower( str_replace( '(WooCommerce)', '', $label ) ) )
 												);
-									?>
+								?>
 
 							</label>
 						</td>
@@ -446,7 +448,7 @@ function msg91_otp_settings_page() {
 						<th scope="row"><?php echo msg91_translate( 'MSG91 Flow/Template ID' ); ?></th>
 						<td>
 							<input type="text" name="<?php echo esc_attr( $template_id_option ); ?>" value="<?php echo esc_attr( get_option( $template_id_option ) ); ?>" size="40" />
-							<p class="description"><?php echo esc_html(  msg91_translate( 'Enter the Flow ID from your MSG91 panel for this event.' )); ?></p>
+							<p class="description"><?php echo esc_html( msg91_translate( 'Enter the Flow ID from your MSG91 panel for this event.' ) ); ?></p>
 						</td>
 					</tr>
 					<?php
@@ -459,7 +461,7 @@ function msg91_otp_settings_page() {
 						<td>
 							<input type="text" name="<?php echo esc_attr( $status_slug_option ); ?>" value="<?php echo esc_attr( get_option( $status_slug_option, $default_slug ) ); ?>" size="30" />
 							<p class="description">
-								<?php echo esc_html(  msg91_translate( 'Enter the WooCommerce order status slug that triggers this SMS (e.g., "shipped", "wc-completed", "delivered"). Do not include "wc-" prefix if it\'s a custom status without it.') ); ?>
+								<?php echo esc_html( msg91_translate( 'Enter the WooCommerce order status slug that triggers this SMS (e.g., "shipped", "wc-completed", "delivered"). Do not include "wc-" prefix if it\'s a custom status without it.' ) ); ?>
 							</p>
 						</td>
 					</tr>
@@ -472,7 +474,7 @@ function msg91_otp_settings_page() {
 						<th scope="row"><?php echo msg91_translate( 'Abandonment Delay (Hours)' ); ?></th>
 						<td>
 							<input type="number" name="<?php echo esc_attr( $delay_option ); ?>" value="<?php echo esc_attr( get_option( $delay_option, 1 ) ); ?>"  min="0.01" step="0.01" size="5" lang="en" />
-							<p class="description"><?php echo esc_html(  msg91_translate( 'Enter delay in hours (e.g., 1 for 1 hour, 0.5 for 30 minutes, 0.05 for 3 minutes). Minimum 0.01 (approx 30 seconds). Affects logged-in users.' )); ?></p>
+							<p class="description"><?php echo esc_html( msg91_translate( 'Enter delay in hours (e.g., 1 for 1 hour, 0.5 for 30 minutes, 0.05 for 3 minutes). Minimum 0.01 (approx 30 seconds). Affects logged-in users.' ) ); ?></p>
 						</td>
 					</tr>
 					<?php endif; ?>
