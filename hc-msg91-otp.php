@@ -239,8 +239,8 @@ function hcotp_delete_blocked_numbers_table() {
 	$sql        = "DROP TABLE IF EXISTS $table_name;";
 	$wpdb->query( $sql );
 }
-add_action( 'wp_ajax_happycoders_send_msg91_otp_ajax', 'happycoders_send_msg91_otp_ajax' );
-add_action( 'wp_ajax_nopriv_happycoders_send_msg91_otp_ajax', 'happycoders_send_msg91_otp_ajax' );
+add_action( 'wp_ajax_hcotp_send_otp_ajax', 'hcotp_send_otp_ajax' );
+add_action( 'wp_ajax_nopriv_hcotp_send_otp_ajax', 'hcotp_send_otp_ajax' );
 
 
 /**
@@ -515,7 +515,7 @@ function happycoders_msg91_otp_form( $options, $is_popup = false ) {
  *
  * @since 1.0.0
  */
-function happycoders_send_msg91_otp_ajax() {
+function hcotp_send_otp_ajax() {
 	global $wpdb;
 	check_ajax_referer( 'msg91_ajax_nonce_action', 'security_nonce' );
 
@@ -672,8 +672,8 @@ function happycoders_send_msg91_otp_ajax() {
 	}
 }
 
-add_action( 'wp_ajax_happycoders_send_msg91_otp_ajax', 'happycoders_send_msg91_otp_ajax' );
-add_action( 'wp_ajax_nopriv_happycoders_send_msg91_otp_ajax', 'happycoders_send_msg91_otp_ajax' );
+add_action( 'wp_ajax_hcotp_send_otp_ajax', 'hcotp_send_otp_ajax' );
+add_action( 'wp_ajax_nopriv_hcotp_send_otp_ajax', 'hcotp_send_otp_ajax' );
 add_action( 'wp_ajax_msg91_auto_login_user', 'msg91_auto_login_user' );
 add_action( 'wp_ajax_nopriv_msg91_auto_login_user', 'msg91_auto_login_user' );
 
