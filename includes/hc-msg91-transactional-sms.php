@@ -735,13 +735,13 @@ function hcotp_shipment_details_meta_box_html( $object ) {
 }
 
 // Save the custom meta fields
-add_action( 'woocommerce_process_shop_order_meta', 'happycoders_msg91_save_shipment_details_meta', 10, 1 );
-function happycoders_msg91_save_shipment_details_meta( $order_id ) {
+add_action( 'woocommerce_process_shop_order_meta', 'hcotp_save_shipment_details_meta', 10, 1 );
+function hcotp_save_shipment_details_meta( $order_id ) {
 	if (
 	! isset( $_POST['hc_msg91_shipment_nonce'] ) ||
 	! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['hc_msg91_shipment_nonce'] ) ), 'hc_msg91_save_shipment_details' )
 	) {
-		error_log( 'HC MSG91: happycoders_msg91_save_shipment_details_meta nonce failed' );
+		error_log( 'HC MSG91: hcotp_save_shipment_details_meta nonce failed' );
 		return $order_id;
 	}
 
