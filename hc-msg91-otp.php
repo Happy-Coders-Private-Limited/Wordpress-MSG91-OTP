@@ -40,10 +40,10 @@ add_action( 'plugins_loaded', 'hcotp_init_woocommerce_hooks', 20 );
 
 add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'hcotp_plugin_action_links' );
 
-register_activation_hook( __FILE__, 'happycoders_msg91_activate_plugin' );
+register_activation_hook( __FILE__, 'hcotp_activate_plugin' );
 register_deactivation_hook( __FILE__, 'happycoders_msg91_deactivate_plugin' );
 
-function happycoders_msg91_activate_plugin() {
+function hcotp_activate_plugin() {
 	msg91_create_blocked_numbers_table();
 
 	// Default OTP form texts (if not already set)
