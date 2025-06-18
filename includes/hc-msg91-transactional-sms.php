@@ -15,7 +15,7 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableControlle
  * @param bool   $force_send If true, bypasses time window check (e.g., for OTPs if you reuse this function). Defaults to false.
  * @return bool|WP_Error True on success, WP_Error on failure.
  */
-function happycoders_msg91_send_transactional_sms( $mobile, $flow_id, $vars = array(), $force_send = false ) {
+function hcotp_send_transactional_sms( $mobile, $flow_id, $vars = array(), $force_send = false ) {
 	$authkey   = get_option( 'msg91_auth_key' );
 	$sender_id = get_option( 'msg91_sender_id' );
 
@@ -125,7 +125,7 @@ function happycoders_msg91_get_customer_phone( $order_or_user_id ) {
 	if ( $phone ) {
 		$phone = preg_replace( '/[^\d+]/', '', $phone );
 		// Ensure it starts with country code, not +. MSG91 flow API wants 91XXXXXXXXXX.
-		// The happycoders_msg91_send_transactional_sms function handles removing '+'.
+		// The hcotp_send_transactional_sms function handles removing '+'.
 		// Here, we just ensure it's a plausible phone number.
 		// If it doesn't have a +, assume it needs the default country code.
 		if ( strpos( $phone, '+' ) !== 0 && strlen( $phone ) <= 10 ) { // Simple check for local number
@@ -190,7 +190,7 @@ function happycoders_msg91_sms_on_new_customer_registration( $user_id ) {
 	);
 	// Documented: VAR1=CustomerName, VAR2=SiteName, VAR3=ShopURL
 
-	happycoders_msg91_send_transactional_sms( $phone, $template_id, $vars );
+	hcotp_send_transactional_sms( $phone, $template_id, $vars );
 }
 
 // Callback for New Order Placed
@@ -242,7 +242,7 @@ function happycoders_msg91_sms_on_new_order_placed( $order_id, $posted_data, $or
 	);
 	error_log( 'happycoders_msg91_sms_on_new_order_placed - Variables for SMS: ' . print_r( $vars, true ) );
 
-	$result = happycoders_msg91_send_transactional_sms( $phone, $template_id, $vars );
+	$result = hcotp_send_transactional_sms( $phone, $template_id, $vars );
 	if ( is_wp_error( $result ) ) {
 		error_log( 'happycoders_msg91_sms_on_new_order_placed - SMS sending failed: ' . $result->get_error_message() );
 	} else {
@@ -294,7 +294,7 @@ function happycoders_msg91_sms_on_thankyou_page( $order_id ) {
 	);
 	error_log( 'happycoders_msg91_sms_on_thankyou_page - Variables for SMS: ' . print_r( $vars, true ) );
 
-	$result = happycoders_msg91_send_transactional_sms( $phone, $template_id, $vars );
+	$result = hcotp_send_transactional_sms( $phone, $template_id, $vars );
 	if ( is_wp_error( $result ) ) {
 		error_log( 'happycoders_msg91_sms_on_thankyou_page - SMS sending failed: ' . $result->get_error_message() );
 	} else {
@@ -341,7 +341,7 @@ function happycoders_msg91_sms_on_order_status_change( $order_id, $old_status, $
 			// 'VAR6' => get_bloginfo('name'),
 		);
 		// Documented: VAR1=CustomerName, VAR2=OrderID, VAR3=TrackingNumber, VAR4=SiteName, VAR5=ShopURL
-		happycoders_msg91_send_transactional_sms( $phone, $shipped_template_id, $vars );
+		hcotp_send_transactional_sms( $phone, $shipped_template_id, $vars );
 	}
 
 	// Order Delivered
@@ -357,7 +357,7 @@ function happycoders_msg91_sms_on_order_status_change( $order_id, $old_status, $
 			// 'VAR3' => get_bloginfo('name'),       // Site Name
 		);
 		// Documented: VAR1=CustomerName, VAR2=OrderID, VAR3=SiteName
-		happycoders_msg91_send_transactional_sms( $phone, $delivered_template_id, $vars );
+		hcotp_send_transactional_sms( $phone, $delivered_template_id, $vars );
 	}
 }
 
@@ -641,7 +641,7 @@ function happycoders_msg91_send_abandoned_cart_sms( $user_id, $scheduled_cart_ha
 	);
 	// Documented: VAR1=CustomerName, VAR2=CartItemsCount, VAR3=CartTotal, VAR4=SiteName, VAR5=CartURL
 
-	happycoders_msg91_send_transactional_sms( $phone, $template_id, $vars );
+	hcotp_send_transactional_sms( $phone, $template_id, $vars );
 }
 
 function happycoders_msg91_clear_abandoned_cart_check_on_order( $order_id ) {
