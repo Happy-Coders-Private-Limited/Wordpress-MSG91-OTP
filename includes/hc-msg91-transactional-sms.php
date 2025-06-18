@@ -147,7 +147,7 @@ function hcotp_register_wc_sms_hooks() {
 	// add_action('woocommerce_checkout_order_processed', 'happycoders_msg91_sms_on_new_order_placed', 10, 3);
 
 	// Or use 'woocommerce_thankyou' which is also common
-	add_action( 'woocommerce_thankyou', 'happycoders_msg91_sms_on_thankyou_page', 10, 1 );
+	add_action( 'woocommerce_thankyou', 'hcotp_sms_on_thankyou_page', 10, 1 );
 
 	// 3. Order Shipped & 4. Order Delivered (via status change)
 	add_action( 'woocommerce_order_status_changed', 'happycoders_msg91_sms_on_order_status_change', 10, 3 );
@@ -250,29 +250,29 @@ function happycoders_msg91_sms_on_new_order_placed( $order_id, $posted_data, $or
 	}
 }
 
-function happycoders_msg91_sms_on_thankyou_page( $order_id ) {
+function hcotp_sms_on_thankyou_page( $order_id ) {
 	// Expects 1 arg
-	error_log( 'happycoders_msg91_sms_on_thankyou_page - Fired. Order ID: ' . $order_id );
+	error_log( 'hcotp_sms_on_thankyou_page - Fired. Order ID: ' . $order_id );
 	if ( ! get_option( 'msg91_sms_npo_enable', 0 ) ) {
-		error_log( 'happycoders_msg91_sms_on_thankyou_page - NPO SMS not enabled.' );
+		error_log( 'hcotp_sms_on_thankyou_page - NPO SMS not enabled.' );
 		return;
 	}
 	$template_id = get_option( 'msg91_sms_npo_template_id' );
-	error_log( 'happycoders_msg91_sms_on_thankyou_page - Template ID: ' . $template_id );
+	error_log( 'hcotp_sms_on_thankyou_page - Template ID: ' . $template_id );
 	if ( empty( $template_id ) ) {
-		error_log( 'happycoders_msg91_sms_on_thankyou_page - Template ID is empty.' );
+		error_log( 'hcotp_sms_on_thankyou_page - Template ID is empty.' );
 		return;
 	}
 	$order = wc_get_order( $order_id );
 	if ( ! $order ) {
-		error_log( 'happycoders_msg91_sms_on_thankyou_page - Could not get order object.' );
+		error_log( 'hcotp_sms_on_thankyou_page - Could not get order object.' );
 		return;
 	}
 
 	$phone = hcotp_get_customer_phone( $order );
-	error_log( 'happycoders_msg91_sms_on_thankyou_page - Phone: ' . $phone );
+	error_log( 'hcotp_sms_on_thankyou_page - Phone: ' . $phone );
 	if ( ! $phone ) {
-		error_log( 'happycoders_msg91_sms_on_thankyou_page - Phone number not found.' );
+		error_log( 'hcotp_sms_on_thankyou_page - Phone number not found.' );
 		return;
 	}
 
@@ -283,7 +283,7 @@ function happycoders_msg91_sms_on_thankyou_page( $order_id ) {
 	} elseif ( ! $customer_name ) {
 		$customer_name = 'Valued Customer';
 	}
-	error_log( 'happycoders_msg91_sms_on_thankyou_page - Customer Name: ' . $customer_name );
+	error_log( 'hcotp_sms_on_thankyou_page - Customer Name: ' . $customer_name );
 
 	$vars = array(
 		'var1' => $customer_name,
@@ -292,13 +292,13 @@ function happycoders_msg91_sms_on_thankyou_page( $order_id ) {
 		// 'VAR4' => get_bloginfo('name'),
 		// 'VAR5' => home_url(),
 	);
-	error_log( 'happycoders_msg91_sms_on_thankyou_page - Variables for SMS: ' . print_r( $vars, true ) );
+	error_log( 'hcotp_sms_on_thankyou_page - Variables for SMS: ' . print_r( $vars, true ) );
 
 	$result = hcotp_send_transactional_sms( $phone, $template_id, $vars );
 	if ( is_wp_error( $result ) ) {
-		error_log( 'happycoders_msg91_sms_on_thankyou_page - SMS sending failed: ' . $result->get_error_message() );
+		error_log( 'hcotp_sms_on_thankyou_page - SMS sending failed: ' . $result->get_error_message() );
 	} else {
-		error_log( 'happycoders_msg91_sms_on_thankyou_page - SMS send attempt successful.' );
+		error_log( 'hcotp_sms_on_thankyou_page - SMS send attempt successful.' );
 	}
 }
 
