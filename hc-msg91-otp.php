@@ -112,7 +112,7 @@ function hcotp_plugin_action_links( $links ) {
 	array_unshift( $links, $settings_link );
 	return $links;
 }
-add_filter( 'plugin_row_meta', 'msg91_otp_plugin_row_meta', 10, 4 );
+add_filter( 'plugin_row_meta', 'hcotp_plugin_row_meta', 10, 4 );
 
 /**
  * Adds custom meta links to the plugin row in the plugins list table.
@@ -123,7 +123,7 @@ add_filter( 'plugin_row_meta', 'msg91_otp_plugin_row_meta', 10, 4 );
  * @param string $status       The plugin's status.
  * @return array The modified array of plugin meta data with additional links.
  */
-function msg91_otp_plugin_row_meta( $plugin_meta, $plugin_file, $plugin_data, $status ) {
+function hcotp_plugin_row_meta( $plugin_meta, $plugin_file, $plugin_data, $status ) {
 	if ( plugin_basename( __FILE__ ) === $plugin_file ) {
 		if ( stripos( $plugin_data['Author'], 'HAPPY CODERS' ) !== false ) {
 			$plugin_meta[] = '<a href="https://www.happycoders.in/msg91-plugin-documentation/" target="_blank">Documentation</a>';
