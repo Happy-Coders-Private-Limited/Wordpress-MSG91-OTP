@@ -96,7 +96,7 @@ function hcotp_activate_plugin() {
 }
 
 function hcotp_deactivate_plugin() {
-	msg91_delete_blocked_numbers_table();
+	hcotp_delete_blocked_numbers_table();
 	wp_clear_scheduled_hook( 'hc_msg91_trigger_abandoned_cart_sms' );
 }
 
@@ -179,7 +179,7 @@ add_action( 'wp_enqueue_scripts', 'hc_msg91_enqueue_scripts' );
 
 register_activation_hook( __FILE__, 'hcotp_create_blocked_numbers_table' );
 register_activation_hook( __FILE__, 'msg91_add_otp_column_to_users_table' );
-register_deactivation_hook( __FILE__, 'msg91_delete_blocked_numbers_table' );
+register_deactivation_hook( __FILE__, 'hcotp_delete_blocked_numbers_table' );
 
 /**
  * Creates the database table for storing blocked mobile numbers.
@@ -233,7 +233,7 @@ function msg91_add_otp_column_to_users_table() {
  * This function is triggered during plugin deactivation and drops the
  * database table created by hcotp_create_blocked_numbers_table.
  */
-function msg91_delete_blocked_numbers_table() {
+function hcotp_delete_blocked_numbers_table() {
 	global $wpdb;
 	$table_name = $wpdb->prefix . 'msg91_blocked_number';
 	$sql        = "DROP TABLE IF EXISTS $table_name;";
