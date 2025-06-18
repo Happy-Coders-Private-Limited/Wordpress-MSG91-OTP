@@ -872,8 +872,8 @@ function hcotp_register_custom_order_statuses() {
 }
 
 // Add custom statuses to WooCommerce order statuses list
-add_filter( 'wc_order_statuses', 'happycoders_msg91_add_custom_statuses_to_order_list' );
-function happycoders_msg91_add_custom_statuses_to_order_list( $order_statuses ) {
+add_filter( 'wc_order_statuses', 'hcotp_add_custom_statuses_to_order_list' );
+function hcotp_add_custom_statuses_to_order_list( $order_statuses ) {
 	$new_order_statuses = array();
 
 	// Add new statuses after 'Processing' or 'Completed'
