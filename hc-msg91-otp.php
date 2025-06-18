@@ -26,7 +26,7 @@ require_once HCOTP_PLUGIN_DIR . 'includes/hc-msg91-settings.php';
 require_once HCOTP_PLUGIN_DIR . 'includes/hc-countries.php';
 require_once HCOTP_PLUGIN_DIR . 'includes/hc-msg91-transactional-sms.php';
 
-function happycoders_msg91_init_woocommerce_hooks() {
+function hcotp_init_woocommerce_hooks() {
 	include_once ABSPATH . 'wp-admin/includes/plugin.php';
 
 	if ( is_plugin_active( 'woocommerce/woocommerce.php' ) && class_exists( 'WooCommerce' ) ) {
@@ -36,7 +36,7 @@ function happycoders_msg91_init_woocommerce_hooks() {
 	}
 }
 
-add_action( 'plugins_loaded', 'happycoders_msg91_init_woocommerce_hooks', 20 );
+add_action( 'plugins_loaded', 'hcotp_init_woocommerce_hooks', 20 );
 
 add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'msg91_otp_plugin_action_links' );
 
