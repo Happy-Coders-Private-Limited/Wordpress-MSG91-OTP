@@ -908,8 +908,8 @@ remove_action( 'woocommerce_register_form', 'woocommerce_register_form_end', 30 
 remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_login_form', 10 );
 
 // Add your custom shortcode
-add_action( 'woocommerce_before_customer_login_form', 'replace_wc_login_register_with_msg91_otp' );
-function replace_wc_login_register_with_msg91_otp() {
+add_action( 'woocommerce_before_customer_login_form', 'hcotp_replace_wc_login_with_otp' );
+function hcotp_replace_wc_login_with_otp() {
 	if ( ! is_user_logged_in() ) {
 		echo do_shortcode( '[msg91_otp_form]' );
 	}
