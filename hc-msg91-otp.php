@@ -48,16 +48,16 @@ function hcotp_activate_plugin() {
 
 	// Default OTP form texts (if not already set)
 	$options_to_set = array(
-		'msg91_sendotp_lable'            => 'Mobile Number',
-		'msg91_sendotp_dec'              => 'we will send you an OTP',
-		'msg91_sendotp_button_text'      => 'Send OTP',
-		'msg91_sendotp_validation_msg'   => 'Please enter the valid mobile number',
-		'msg91_verifyotp_lable'          => 'Enter OTP',
-		'msg91_verifyotp_dec'            => 'Enter your 4-digit OTP',
-		'msg91_verifyotp_button_text'    => 'Verify OTP',
-		'msg91_verifyotp_validation_msg' => 'Please enter the OTP',
-		'msg91_perday_otplimit'          => 5,
-		'msg91_resend_timer'             => 60, // Default resend timer
+		'hcotp_msg91_sendotp_lable'            => 'Mobile Number',
+		'hcotp_msg91_sendotp_dec'              => 'we will send you an OTP',
+		'hcotp_msg91_sendotp_button_text'      => 'Send OTP',
+		'hcotp_msg91_sendotp_validation_msg'   => 'Please enter the valid mobile number',
+		'hcotp_msg91_verifyotp_lable'          => 'Enter OTP',
+		'hcotp_msg91_verifyotp_dec'            => 'Enter your 4-digit OTP',
+		'hcotp_msg91_verifyotp_button_text'    => 'Verify OTP',
+		'hcotp_msg91_verifyotp_validation_msg' => 'Please enter the OTP',
+		'hcotp_msg91_perday_otplimit'          => 5,
+		'hcotp_msg91_resend_timer'             => 60, // Default resend timer
 	);
 
 	foreach ( $options_to_set as $option_name => $default_value ) {
@@ -68,24 +68,24 @@ function hcotp_activate_plugin() {
 
 	// Default values for new SMS settings (set only if they don't exist)
 	$sms_defaults = array(
-		'msg91_sms_ncr_enable'      => 0,
-		'msg91_sms_ncr_template_id' => '',
-		'msg91_sms_ncr_notes'       => 'New Customer: VAR1=CustomerName, VAR2=SiteName, VAR3=ShopURL',
-		'msg91_sms_npo_enable'      => 0,
-		'msg91_sms_npo_template_id' => '',
-		'msg91_sms_npo_notes'       => 'New Order: VAR1=CustomerName, VAR2=OrderID, VAR3=OrderTotal, VAR4=SiteName, VAR5=ShopURL',
-		'msg91_sms_osh_enable'      => 0,
-		'msg91_sms_osh_template_id' => '',
-		'msg91_sms_osh_status_slug' => 'shipped',
-		'msg91_sms_osh_notes'       => 'Order Shipped: VAR1=CustomerName, VAR2=OrderID, VAR3=TrackingID, VAR4=ShippingProvider, VAR5=TrackingLink, VAR6=SiteName',
-		'msg91_sms_odl_enable'      => 0,
-		'msg91_sms_odl_template_id' => '',
-		'msg91_sms_odl_status_slug' => 'delivered',
-		'msg91_sms_odl_notes'       => 'Order Delivered: VAR1=CustomerName, VAR2=OrderID, VAR3=SiteName',
-		'msg91_sms_oac_enable'      => 0,
-		'msg91_sms_oac_template_id' => '',
-		'msg91_sms_oac_delay_hours' => 1,
-		'msg91_sms_oac_notes'       => 'Abandoned Cart: VAR1=CustomerName, VAR2=CartItemsCount, VAR3=CartTotal, VAR4=SiteName, VAR5=CartURL',
+		'hcotp_msg91_sms_ncr_enable'      => 0,
+		'hcotp_msg91_sms_ncr_template_id' => '',
+		'hcotp_msg91_sms_ncr_notes'       => 'New Customer: VAR1=CustomerName, VAR2=SiteName, VAR3=ShopURL',
+		'hcotp_msg91_sms_npo_enable'      => 0,
+		'hcotp_msg91_sms_npo_template_id' => '',
+		'hcotp_msg91_sms_npo_notes'       => 'New Order: VAR1=CustomerName, VAR2=OrderID, VAR3=OrderTotal, VAR4=SiteName, VAR5=ShopURL',
+		'hcotp_msg91_sms_osh_enable'      => 0,
+		'hcotp_msg91_sms_osh_template_id' => '',
+		'hcotp_msg91_sms_osh_status_slug' => 'shipped',
+		'hcotp_msg91_sms_osh_notes'       => 'Order Shipped: VAR1=CustomerName, VAR2=OrderID, VAR3=TrackingID, VAR4=ShippingProvider, VAR5=TrackingLink, VAR6=SiteName',
+		'hcotp_msg91_sms_odl_enable'      => 0,
+		'hcotp_msg91_sms_odl_template_id' => '',
+		'hcotp_msg91_sms_odl_status_slug' => 'delivered',
+		'hcotp_msg91_sms_odl_notes'       => 'Order Delivered: VAR1=CustomerName, VAR2=OrderID, VAR3=SiteName',
+		'hcotp_msg91_sms_oac_enable'      => 0,
+		'hcotp_msg91_sms_oac_template_id' => '',
+		'hcotp_msg91_sms_oac_delay_hours' => 1,
+		'hcotp_msg91_sms_oac_notes'       => 'Abandoned Cart: VAR1=CustomerName, VAR2=CartItemsCount, VAR3=CartTotal, VAR4=SiteName, VAR5=CartURL',
 	);
 
 	foreach ( $sms_defaults as $key => $value ) {
@@ -167,10 +167,10 @@ function hcotp_enqueue_scripts() {
 		array(
 			'ajax_url'                 => admin_url( 'admin-ajax.php' ),
 			'nonce'                    => wp_create_nonce( 'msg91_ajax_nonce_action' ),
-			'resend_timer'             => (int) get_option( 'msg91_resend_timer', 60 ),
-			'redirect_page'            => get_option( 'msg91_redirect_page' ),
-			'sendotp_validation_msg'   => get_option( 'msg91_sendotp_validation_msg', 'Please enter a valid mobile number (between 5 and 12 digits).' ),
-			'verifyotp_validation_msg' => get_option( 'msg91_verifyotp_validation_msg', 'Please enter the otp' ),
+			'resend_timer'             => (int) get_option( 'hcotp_msg91_resend_timer', 60 ),
+			'redirect_page'            => get_option( 'hcotp_msg91_redirect_page' ),
+			'sendotp_validation_msg'   => get_option( 'hcotp_msg91_sendotp_validation_msg', 'Please enter a valid mobile number (between 5 and 12 digits).' ),
+			'verifyotp_validation_msg' => get_option( 'hcotp_msg91_verifyotp_validation_msg', 'Please enter the otp' ),
 		)
 	);
 }
@@ -269,22 +269,22 @@ add_action( 'wp_ajax_nopriv_hcotp_send_otp_ajax', 'hcotp_send_otp_ajax' );
  */
 function hcotp_get_options() {
 	return array(
-		'send_otp_label'          => hcotp_get_option_with_default( 'msg91_sendotp_lable', 'Mobile Number' ),
-		'send_otp_label_color'    => hcotp_get_option_with_default( 'msg91_sendotp_lable_color', '#000000' ),
-		'send_otp_desc'           => hcotp_get_option_with_default( 'msg91_sendotp_dec', 'We will send you an OTP' ),
-		'send_otp_desc_color'     => hcotp_get_option_with_default( 'msg91_sendotp_dec_color', '#000000' ),
-		'send_otp_button_text'    => hcotp_get_option_with_default( 'msg91_sendotp_button_text', 'Send OTP' ),
-		'send_otp_button_color'   => hcotp_get_option_with_default( 'msg91_sendotp_button_color', '#0073aa' ),
-		'top_image'               => hcotp_get_option_with_default( 'msg91_top_image', HCOTP_PLUGIN_URL . 'assets/images/send-otp.png' ),
-		'verify_otp_lable'        => hcotp_get_option_with_default( 'msg91_verifyotp_lable', 'Enter Mobile' ),
-		'verify_otp_lable_color'  => hcotp_get_option_with_default( 'msg91_verifyotp_lable_color', '#000000' ),
-		'verify_otp_dec'          => hcotp_get_option_with_default( 'msg91_verifyotp_dec', 'Enter your 4-digit OTP' ),
-		'verify_otp_dec_color'    => hcotp_get_option_with_default( 'msg91_verifyotp_desc_color', '#000000' ),
-		'verify_otp_buttontext'   => hcotp_get_option_with_default( 'msg91_verifyotp_button_text', 'Verify OTP' ),
-		'verify_otp_button_color' => hcotp_get_option_with_default( 'msg91_verifyotp_button_color', '#0073aa' ),
-		'top_verify_image'        => hcotp_get_option_with_default( 'msg91_top_verify_image', HCOTP_PLUGIN_URL . 'assets/images/verify-otp.png' ),
-		'whatsapp_auth_enabled'   => hcotp_get_option_with_default( 'whatsapp_auth_enabled', 0 ),
-		'whatsapp_button_text'    => hcotp_get_option_with_default( 'whatsapp_button_text', 'Send OTP via Whatsapp' ),
+		'send_otp_label'          => hcotp_get_option_with_default( 'hcotp_msg91_sendotp_lable', 'Mobile Number' ),
+		'send_otp_label_color'    => hcotp_get_option_with_default( 'hcotp_msg91_sendotp_lable_color', '#000000' ),
+		'send_otp_desc'           => hcotp_get_option_with_default( 'hcotp_msg91_sendotp_dec', 'We will send you an OTP' ),
+		'send_otp_desc_color'     => hcotp_get_option_with_default( 'hcotp_msg91_sendotp_dec_color', '#000000' ),
+		'send_otp_button_text'    => hcotp_get_option_with_default( 'hcotp_msg91_sendotp_button_text', 'Send OTP' ),
+		'send_otp_button_color'   => hcotp_get_option_with_default( 'hcotp_msg91_sendotp_button_color', '#0073aa' ),
+		'top_image'               => hcotp_get_option_with_default( 'hcotp_msg91_top_image', HCOTP_PLUGIN_URL . 'assets/images/send-otp.png' ),
+		'verify_otp_lable'        => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_lable', 'Enter Mobile' ),
+		'verify_otp_lable_color'  => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_lable_color', '#000000' ),
+		'verify_otp_dec'          => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_dec', 'Enter your 4-digit OTP' ),
+		'verify_otp_dec_color'    => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_desc_color', '#000000' ),
+		'verify_otp_buttontext'   => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_button_text', 'Verify OTP' ),
+		'verify_otp_button_color' => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_button_color', '#0073aa' ),
+		'top_verify_image'        => hcotp_get_option_with_default( 'hcotp_msg91_top_verify_image', HCOTP_PLUGIN_URL . 'assets/images/verify-otp.png' ),
+		'hcotp_whatsapp_auth_enabled'   => hcotp_get_option_with_default( 'hcotp_whatsapp_auth_enabled', 0 ),
+		'hcotp_whatsapp_button_text'    => hcotp_get_option_with_default( 'hcotp_whatsapp_button_text', 'Send OTP via Whatsapp' ),
 
 	);
 }
@@ -308,14 +308,14 @@ function hcotp_get_option_with_default( $option_name, $default_value ) {
  */
 function hcotp_country_select( $options ) {
 	$html          = '';
-	$all_countries = happycoders_msg91_get_countries_with_iso();
+	$all_countries = hcotp_get_countries_with_iso();
 
-	$selected_countries = get_option( 'msg91_selected_countries', array( '+91' ) );
+	$selected_countries = get_option( 'hcotp_msg91_selected_countries', array( '+91' ) );
 
 	if ( ! is_array( $selected_countries ) ) {
 		$selected_countries = array( '+91' );
 	}
-	$show_flag = get_option( 'msg91_flag_show', 0 );
+	$show_flag = get_option( 'hcotp_msg91_flag_show', 0 );
 
 	$filtered_countries = array_filter(
 		$all_countries,
@@ -326,7 +326,7 @@ function hcotp_country_select( $options ) {
 
 	foreach ( $filtered_countries as $country ) {
 		$selected  = 'selected';
-		$flag      = happycoders_msg91_iso_to_flag( $country['iso'] );
+		$flag      = hcotp_iso_to_flag( $country['iso'] );
 		$flag_html = $show_flag ? $flag : '';
 		$html     .= sprintf(
 			/* translators: 1: Country code, 2: Flag icon, 3: Selected attribute, 4: Country name, 5: Country code */
@@ -457,9 +457,9 @@ function hcotp_otp_form( $options, $is_popup = false ) {
 			
 			<button id="msg91_send_otp" class="common-width" style="background-color: <?php echo esc_attr( $options['send_otp_button_color'] ); ?>; color: #fff;"><?php echo esc_html( $options['send_otp_button_text'] ); ?></button>
 
-				<?php if ( ! empty( $options['whatsapp_auth_enabled'] ) ) : ?>
+				<?php if ( ! empty( $options['hcotp_whatsapp_auth_enabled'] ) ) : ?>
 					<button id="msg91_send_otp_whatsapp" class="common-width">
-						<?php echo esc_html( $options['whatsapp_button_text'] ); ?>
+						<?php echo esc_html( $options['hcotp_whatsapp_button_text'] ); ?>
 					</button>
 				<?php endif; ?>
 
@@ -523,7 +523,7 @@ function hcotp_send_otp_ajax() {
 	$otpprocess    = sanitize_text_field( wp_unslash( $_POST['otpprocess'] ?? '' ) );
 	$ip_address    = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
 	$table_name    = $wpdb->prefix . 'msg91_blocked_number';
-	$per_day_limit = intval( get_option( 'msg91_perday_otplimit', 5 ) );
+	$per_day_limit = intval( get_option( 'hcotp_msg91_perday_otplimit', 5 ) );
 	$today         = gmdate( 'Y-m-d' );
 
 	$otp_count_today = $wpdb->get_var(
@@ -538,16 +538,16 @@ function hcotp_send_otp_ajax() {
 		wp_send_json_error( array( 'message' => 'You have reached the OTP request limit for today.' ) );
 	}
 
-	$authkey     = get_option( 'msg91_auth_key' );
-	$sender      = get_option( 'msg91_sender_id' );
-	$template_id = get_option( 'msg91_template_id' );
-	$wa_template = get_option( 'whatsapp_template_name', 'login' );
+	$authkey     = get_option( 'hcotp_msg91_auth_key' );
+	$sender      = get_option( 'hcotp_msg91_sender_id' );
+	$template_id = get_option( 'hcotp_msg91_template_id' );
+	$wa_template = get_option( 'hcotp_whatsapp_template_name', 'login' );
 
-	$wa_namespace = get_option( 'whatsapp_template_namespace' );
+	$wa_namespace = get_option( 'hcotp_whatsapp_template_namespace' );
 
-	$wa_number = get_option( 'whatsapp_integrated_number' );
+	$wa_number = get_option( 'hcotp_whatsapp_integrated_number' );
 
-	$whatsapp_language_code = get_option( 'whatsapp_language_code' );
+	$hcotp_whatsapp_language_code = get_option( 'hcotp_whatsapp_language_code' );
 
 	if ( $otpprocess === 'sms' ) {
 
@@ -588,7 +588,7 @@ function hcotp_send_otp_ajax() {
 				'template'          => array(
 					'name'              => $wa_template,
 					'language'          => array(
-						'code'   => $whatsapp_language_code,
+						'code'   => $hcotp_whatsapp_language_code,
 						'policy' => 'deterministic',
 					),
 					'namespace'         => $wa_namespace,
@@ -712,13 +712,13 @@ function hcotp_auto_login_user() {
 		);
 		$user = get_user_by( 'ID', $user_id );
 
-			happycoders_msg91_sms_on_new_customer_registration( $user->ID );
+			hcotp_sms_on_new_customer_registration( $user->ID );
 
 	} else {
 		$created             = strtotime( $user->user_registered );
 		$is_very_recent_user = ( time() - $created ) < 60;
 		if ( $is_very_recent_user ) {
-			happycoders_msg91_sms_on_new_customer_registration( $user->ID );
+			hcotp_sms_on_new_customer_registration( $user->ID );
 		}
 	}
 	wp_set_current_user( $user->ID );
@@ -762,7 +762,7 @@ function hcotp_verify_otp_ajax() {
 	$mobile = preg_replace( '/[^0-9]/', '', $mobile );
 
 	if ( $otpprocess == 'sms' ) {
-		$url = 'https://api.msg91.com/api/verifyRequestOTP.php?authkey=' . get_option( 'msg91_auth_key' ) . "&mobile={$mobile}&otp={$otp}";
+		$url = 'https://api.msg91.com/api/verifyRequestOTP.php?authkey=' . get_option( 'hcotp_msg91_auth_key' ) . "&mobile={$mobile}&otp={$otp}";
 
 		$response = wp_remote_get( $url );
 		$body     = wp_remote_retrieve_body( $response );
@@ -776,7 +776,7 @@ function hcotp_verify_otp_ajax() {
 				$is_very_recent_user = ( time() - $created ) < 120;
 
 			if ( $is_very_recent_user ) {
-				happycoders_msg91_sms_on_new_customer_registration( $user->ID );
+				hcotp_sms_on_new_customer_registration( $user->ID );
 			}
 			if ( $user ) {
 				wp_set_current_user( $user->ID );
@@ -814,7 +814,7 @@ function hcotp_verify_otp_ajax() {
 		$is_very_recent_user = ( time() - $created ) < 120;
 
 		if ( $is_very_recent_user ) {
-			happycoders_msg91_sms_on_new_customer_registration( $user->ID );
+			hcotp_sms_on_new_customer_registration( $user->ID );
 		}
 		$saved_otp = get_user_meta( $user->ID, 'otp_code', true );
 
@@ -842,8 +842,8 @@ function hcotp_verify_otp_ajax() {
 
 
 // Register custom order statuses
-add_action( 'init', 'happycoders_msg91_register_custom_order_statuses' );
-function happycoders_msg91_register_custom_order_statuses() {
+add_action( 'init', 'hcotp_register_custom_order_statuses' );
+function hcotp_register_custom_order_statuses() {
 	// Status: Shipped
 	register_post_status(
 		'wc-shipped',
@@ -872,8 +872,8 @@ function happycoders_msg91_register_custom_order_statuses() {
 }
 
 // Add custom statuses to WooCommerce order statuses list
-add_filter( 'wc_order_statuses', 'happycoders_msg91_add_custom_statuses_to_order_list' );
-function happycoders_msg91_add_custom_statuses_to_order_list( $order_statuses ) {
+add_filter( 'wc_order_statuses', 'hcotp_add_custom_statuses_to_order_list' );
+function hcotp_add_custom_statuses_to_order_list( $order_statuses ) {
 	$new_order_statuses = array();
 
 	// Add new statuses after 'Processing' or 'Completed'
@@ -908,15 +908,15 @@ remove_action( 'woocommerce_register_form', 'woocommerce_register_form_end', 30 
 remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_login_form', 10 );
 
 // Add your custom shortcode
-add_action( 'woocommerce_before_customer_login_form', 'replace_wc_login_register_with_msg91_otp' );
-function replace_wc_login_register_with_msg91_otp() {
+add_action( 'woocommerce_before_customer_login_form', 'hcotp_replace_wc_login_with_otp' );
+function hcotp_replace_wc_login_with_otp() {
 	if ( ! is_user_logged_in() ) {
 		echo do_shortcode( '[msg91_otp_form]' );
 	}
 }
 
-add_action( 'woocommerce_before_checkout_form', 'custom_message_before_checkout', 5 );
-function custom_message_before_checkout() {
+add_action( 'woocommerce_before_checkout_form', 'hcotp_message_before_checkout', 5 );
+function hcotp_message_before_checkout() {
 	if ( ! is_user_logged_in() ) {
 		echo '<div class="woocommerce-info custom-login-notice">';
 		echo 'Please <a href="/my-account">click here</a> to login.';

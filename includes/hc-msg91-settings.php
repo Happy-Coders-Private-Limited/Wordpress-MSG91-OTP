@@ -12,13 +12,13 @@ add_action(
 			__( 'MSG91 OTP & SMS', 'hc-msg91-plugin' ),
 			'manage_options',
 			'msg91-otp-settings',
-			'msg91_otp_settings_page',
+			'hcotp_settings_page',
 			'dashicons-smartphone',
 			56
 		);
 	}
 );
-function hc_enqueue_msg91_scripts() {
+function hcotp_admin_enqueue_scripts() {
 	wp_enqueue_script( 'msg91-otp-js', HCOTP_PLUGIN_URL . 'assets/js/hc-msg91-otp.js', array( 'jquery' ), time(), true );
 	wp_enqueue_style( 'msg91-otp-css', HCOTP_PLUGIN_URL . 'assets/css/hc-msg91-otp.css', array(), time() );
 
@@ -28,65 +28,65 @@ function hc_enqueue_msg91_scripts() {
 		array(
 			'ajax_url'                 => admin_url( 'admin-ajax.php' ),
 			'nonce'                    => wp_create_nonce( 'msg91_ajax_nonce_action' ),
-			'resend_timer'             => (int) get_option( 'msg91_resend_timer', 60 ),
-			'redirect_page'            => get_option( 'msg91_redirect_page' ),
-			'sendotp_validation_msg'   => get_option( 'msg91_sendotp_validation_msg', 'Please enter a valid mobile number (between 5 and 12 digits).' ),
-			'verifyotp_validation_msg' => get_option( 'msg91_verifyotp_validation_msg', 'Please enter the otp' ),
+			'resend_timer'             => (int) get_option( 'hcotp_msg91_resend_timer', 60 ),
+			'redirect_page'            => get_option( 'hcotp_msg91_redirect_page' ),
+			'sendotp_validation_msg'   => get_option( 'hcotp_msg91_sendotp_validation_msg', 'Please enter a valid mobile number (between 5 and 12 digits).' ),
+			'verifyotp_validation_msg' => get_option( 'hcotp_msg91_verifyotp_validation_msg', 'Please enter the otp' ),
 		)
 	);
 }
 
-add_action( 'wp_enqueue_scripts', 'hc_enqueue_msg91_scripts' );
-add_action( 'admin_enqueue_scripts', 'hc_enqueue_msg91_scripts' );
+add_action( 'wp_enqueue_scripts', 'hcotp_admin_enqueue_scripts' );
+add_action( 'admin_enqueue_scripts', 'hcotp_admin_enqueue_scripts' );
 
 add_action(
 	'admin_init',
 	function () {
-		register_setting( 'msg91_otp_settings_group', 'whatsapp_auth_enabled', isset( $_POST['whatsapp_auth_enabled'] ) ? 1 : 0 );
-		register_setting( 'msg91_otp_settings_group', 'whatsapp_integrated_number', 'sanitize_text_field' );
-		register_setting( 'msg91_otp_settings_group', 'whatsapp_template_name', 'sanitize_text_field' );
-		register_setting( 'msg91_otp_settings_group', 'whatsapp_template_namespace', 'sanitize_text_field' );
-		register_setting( 'msg91_otp_settings_group', 'whatsapp_language_code', 'sanitize_text_field' );
-		register_setting( 'msg91_otp_settings_group', 'whatsapp_button_text', 'sanitize_text_field' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_whatsapp_auth_enabled', isset( $_POST['hcotp_whatsapp_auth_enabled'] ) ? 1 : 0 );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_whatsapp_integrated_number', 'sanitize_text_field' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_whatsapp_template_name', 'sanitize_text_field' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_whatsapp_template_namespace', 'sanitize_text_field' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_whatsapp_language_code', 'sanitize_text_field' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_whatsapp_button_text', 'sanitize_text_field' );
 
-		register_setting( 'msg91_otp_settings_group', 'msg91_active_tab', 'sanitize_text_field' );
-		register_setting( 'msg91_otp_settings_group', 'msg91_auth_key', 'sanitize_text_field' );
-		register_setting( 'msg91_otp_settings_group', 'msg91_sender_id', 'sanitize_text_field' );
-		register_setting( 'msg91_otp_settings_group', 'msg91_template_id', 'sanitize_text_field' );
-		register_setting( 'msg91_otp_settings_group', 'msg91_resend_timer', 'intval' );
-		register_setting( 'msg91_otp_settings_group', 'msg91_default_country', 'sanitize_text_field' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_active_tab', 'sanitize_text_field' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_auth_key', 'sanitize_text_field' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_sender_id', 'sanitize_text_field' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_template_id', 'sanitize_text_field' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_resend_timer', 'intval' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_default_country', 'sanitize_text_field' );
 		register_setting(
-			'msg91_otp_settings_group',
-			'msg91_selected_countries',
+			'hcotp_otp_settings_group',
+			'hcotp_msg91_selected_countries',
 			function ( $input ) {
 				return array_map( 'sanitize_text_field', (array) $input );
 			}
 		);
-		register_setting( 'msg91_otp_settings_group', 'msg91_top_image', 'esc_url_raw' );
-		register_setting( 'msg91_otp_settings_group', 'msg91_top_verify_image', 'esc_url_raw' );
-		register_setting( 'msg91_otp_settings_group', 'msg91_perday_otplimit', 'intval' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_top_image', 'esc_url_raw' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_top_verify_image', 'esc_url_raw' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_perday_otplimit', 'intval' );
 		register_setting(
-			'msg91_otp_settings_group',
-			'msg91_flag_show',
+			'hcotp_otp_settings_group',
+			'hcotp_flag_show',
 			function ( $value ) {
 				return $value === '1' ? 1 : 0;
 			}
 		);
-		register_setting( 'msg91_otp_settings_group', 'msg91_redirect_page', 'esc_url_raw' );
-		register_setting( 'msg91_otp_settings_group', 'msg91_sendotp_lable', 'sanitize_text_field' );
-		register_setting( 'msg91_otp_settings_group', 'msg91_sendotp_lable_color', 'sanitize_hex_color' );
-		register_setting( 'msg91_otp_settings_group', 'msg91_sendotp_dec', 'sanitize_text_field' );
-		register_setting( 'msg91_otp_settings_group', 'msg91_sendotp_dec_color', 'sanitize_hex_color' );
-		register_setting( 'msg91_otp_settings_group', 'msg91_sendotp_validation_msg', 'sanitize_text_field' );
-		register_setting( 'msg91_otp_settings_group', 'msg91_sendotp_button_text', 'sanitize_text_field' );
-		register_setting( 'msg91_otp_settings_group', 'msg91_sendotp_button_color', 'sanitize_hex_color' );
-		register_setting( 'msg91_otp_settings_group', 'msg91_verifyotp_lable', 'sanitize_text_field' );
-		register_setting( 'msg91_otp_settings_group', 'msg91_verifyotp_lable_color', 'sanitize_hex_color' );
-		register_setting( 'msg91_otp_settings_group', 'msg91_verifyotp_dec', 'sanitize_text_field' );
-		register_setting( 'msg91_otp_settings_group', 'msg91_verifyotp_desc_color', 'sanitize_hex_color' );
-		register_setting( 'msg91_otp_settings_group', 'msg91_verifyotp_validation_msg', 'sanitize_text_field' );
-		register_setting( 'msg91_otp_settings_group', 'msg91_verifyotp_button_text', 'sanitize_text_field' );
-		register_setting( 'msg91_otp_settings_group', 'msg91_verifyotp_button_color', 'sanitize_hex_color' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_redirect_page', 'esc_url_raw' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_sendotp_lable', 'sanitize_text_field' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_sendotp_lable_color', 'sanitize_hex_color' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_sendotp_dec', 'sanitize_text_field' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_sendotp_dec_color', 'sanitize_hex_color' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_sendotp_validation_msg', 'sanitize_text_field' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_sendotp_button_text', 'sanitize_text_field' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_sendotp_button_color', 'sanitize_hex_color' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_verifyotp_lable', 'sanitize_text_field' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_verifyotp_lable_color', 'sanitize_hex_color' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_verifyotp_dec', 'sanitize_text_field' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_verifyotp_desc_color', 'sanitize_hex_color' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_verifyotp_validation_msg', 'sanitize_text_field' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_verifyotp_button_text', 'sanitize_text_field' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_verifyotp_button_color', 'sanitize_hex_color' );
 
 		// Code for SMS added by Kombiah
 		$sms_event_types = array(
@@ -98,26 +98,26 @@ add_action(
 		);
 
 		foreach ( $sms_event_types as $key => $label ) {
-			register_setting( 'msg91_otp_settings_group', "msg91_sms_{$key}_enable", 'absint' );
-			register_setting( 'msg91_otp_settings_group', "msg91_sms_{$key}_template_id", 'sanitize_text_field' );
-			register_setting( 'msg91_otp_settings_group', "msg91_sms_{$key}_notes", 'wp_kses_post' ); // Allows some HTML for notes
+			register_setting( 'hcotp_otp_settings_group', "hcotp_msg91_sms_{$key}_enable", 'absint' );
+			register_setting( 'hcotp_otp_settings_group', "hcotp_msg91_sms_{$key}_template_id", 'sanitize_text_field' );
+			register_setting( 'hcotp_otp_settings_group', "hcotp_msg91_sms_{$key}_notes", 'wp_kses_post' ); // Allows some HTML for notes
 			if ( $key === 'osh' || $key === 'odl' ) {
-				register_setting( 'msg91_otp_settings_group', "msg91_sms_{$key}_status_slug", 'sanitize_text_field' );
+				register_setting( 'hcotp_otp_settings_group', "hcotp_msg91_sms_{$key}_status_slug", 'sanitize_text_field' );
 			}
 			if ( $key === 'oac' ) {
-				register_setting( 'msg91_otp_settings_group', "msg91_sms_{$key}_delay_hours", 'happycoders_msg91_sanitize_positive_float' );
+				register_setting( 'hcotp_otp_settings_group', "hcotp_msg91_sms_{$key}_delay_hours", 'hcotp_sanitize_positive_float' );
 			}
 		}
 	}
 );
 
-function happycoders_msg91_sanitize_positive_float( $input ) {
+function hcotp_sanitize_positive_float( $input ) {
 	$value = floatval( str_replace( ',', '.', $input ) );
 	return ( $value > 0 ) ? $value : 0.01;
 }
 
-function msg91_otp_settings_page() {
-	$active_tab = get_option( 'msg91_active_tab', 'otp_settings' );
+function hcotp_settings_page() {
+	$active_tab = get_option( 'hcotp_msg91_active_tab', 'otp_settings' );
 	?>
 	<div class="wrap">
 		<h1><?php echo msg91_translate( 'Happy Coders MSG91 Settings' ); ?></h1>
@@ -130,10 +130,10 @@ function msg91_otp_settings_page() {
 		</h2>
 
 		<form method="post" action="options.php">
-			<?php settings_fields( 'msg91_otp_settings_group' ); ?>
-			<?php do_settings_sections( 'msg91_otp_settings_group' ); ?>
+			<?php settings_fields( 'hcotp_otp_settings_group' ); ?>
+			<?php do_settings_sections( 'hcotp_otp_settings_group' ); ?>
 
-			<input type="hidden" name="msg91_active_tab" id="msg91_active_tab_input" value="<?php echo esc_attr( $active_tab ); ?>">
+			<input type="hidden" name="hcotp_msg91_active_tab" id="hcotp_msg91_active_tab_input" value="<?php echo esc_attr( $active_tab ); ?>">
 
 			<div id="general_settings" class="tab-content <?php echo $active_tab == 'general_settings' ? 'active-tab' : ''; ?>">
 				<h2><?php echo msg91_translate( 'MSG91 API Credentials ' ); ?></h2>
@@ -141,14 +141,14 @@ function msg91_otp_settings_page() {
 					<tr valign="top">
 						<th scope="row"><?php echo msg91_translate( 'MSG91 Auth Key' ); ?></th>
 						<td>
-							<input type="text" name="msg91_auth_key" value="<?php echo esc_attr( get_option( 'msg91_auth_key' ) ); ?>" size="50" />
+							<input type="text" name="hcotp_msg91_auth_key" value="<?php echo esc_attr( get_option( 'hcotp_msg91_auth_key' ) ); ?>" size="50" />
 							<p class="description"><?php echo esc_html( msg91_translate( 'Your MSG91 Authentication Key. Used for OTP and Transactional SMS.' ) ); ?></p>
 						</td>
 					</tr>
 					<tr valign="top">
 						<th scope="row"><?php echo msg91_translate( 'Sender ID' ); ?></th>
 						<td>
-							<input type="text" name="msg91_sender_id" value="<?php echo esc_attr( get_option( 'msg91_sender_id' ) ); ?>" size="30" />
+							<input type="text" name="hcotp_msg91_sender_id" value="<?php echo esc_attr( get_option( 'hcotp_msg91_sender_id' ) ); ?>" size="30" />
 							<p class="description"><?php echo esc_html( msg91_translate( 'Your DLT Approved Sender ID. Used for OTP and Transactional SMS.' ) ); ?></p>
 						</td>
 					</tr>
@@ -158,34 +158,34 @@ function msg91_otp_settings_page() {
 	</th>
 	<td>
 		<label>
-			<input type="checkbox" id="whatsapp_auth_checkbox" name="whatsapp_auth_enabled" value="1" <?php checked( get_option( 'whatsapp_auth_enabled' ), 1 ); ?> />
+			<input type="checkbox" id="whatsapp_auth_checkbox" name="hcotp_whatsapp_auth_enabled" value="1" <?php checked( get_option( 'hcotp_whatsapp_auth_enabled' ), 1 ); ?> />
 			<?php echo msg91_translate( 'Yes' ); ?>
 		</label>
-		<div id="whatsapp_auth_inputs" style="margin-top: 10px; <?php echo get_option( 'whatsapp_auth_enabled' ) ? '' : 'display:none;'; ?>">
+		<div id="whatsapp_auth_inputs" style="margin-top: 10px; <?php echo get_option( 'hcotp_whatsapp_auth_enabled' ) ? '' : 'display:none;'; ?>">
 			<p class="lable-input-between">
 				<label ><strong >Integrated Number:</strong><br>
-					<input type="text" class="input-top" size="50" name="whatsapp_integrated_number" value="<?php echo esc_attr( get_option( 'whatsapp_integrated_number' ) ); ?>" class="regular-text" />
+					<input type="text" class="input-top" size="50" name="hcotp_whatsapp_integrated_number" value="<?php echo esc_attr( get_option( 'hcotp_whatsapp_integrated_number' ) ); ?>" class="regular-text" />
 				</label>
 			</p>
 			<p class="lable-input-between"> 
 				<label style="margin-bottom: 12px;"><strong>Template Name:</strong><br>
-					<input type="text" class="input-top"  size="50" name="whatsapp_template_name" value="<?php echo esc_attr( get_option( 'whatsapp_template_name' ) ); ?>" class="regular-text" />
+					<input type="text" class="input-top"  size="50" name="hcotp_whatsapp_template_name" value="<?php echo esc_attr( get_option( 'hcotp_whatsapp_template_name' ) ); ?>" class="regular-text" />
 				</label>
 			</p> 
 			<p class="lable-input-between">
 				<label style="margin-bottom: 12px;"><strong>Template Namespace:</strong><br>
-					<input type="text" class="input-top"  size="50" name="whatsapp_template_namespace" value="<?php echo esc_attr( get_option( 'whatsapp_template_namespace' ) ); ?>" class="regular-text" />
+					<input type="text" class="input-top"  size="50" name="hcotp_whatsapp_template_namespace" value="<?php echo esc_attr( get_option( 'hcotp_whatsapp_template_namespace' ) ); ?>" class="regular-text" />
 				</label>
 			</p>
 			<p class="lable-input-between">
 				<label style="margin-bottom: 12px;"><strong>Language Code:</strong><br>
-					<input type="text"class="input-top"  size="50" name="whatsapp_language_code" value="<?php echo esc_attr( get_option( 'whatsapp_language_code' ) ); ?>" class="regular-text" />
+					<input type="text"class="input-top"  size="50" name="hcotp_whatsapp_language_code" value="<?php echo esc_attr( get_option( 'hcotp_whatsapp_language_code' ) ); ?>" class="regular-text" />
 				</label>
 			</p>
 
 			<p class="lable-input-between">
 				<label style="margin-bottom: 12px;"><strong>Button Text (Example : Send OTP via Whatsapp)</strong><br>
-					<input type="text"class="input-top"  size="50" name="whatsapp_button_text" value="<?php echo esc_attr( get_option( 'whatsapp_button_text' ) ); ?>" class="regular-text" />
+					<input type="text"class="input-top"  size="50" name="hcotp_whatsapp_button_text" value="<?php echo esc_attr( get_option( 'hcotp_whatsapp_button_text' ) ); ?>" class="regular-text" />
 				</label>
 			</p>
 		</div>
@@ -204,19 +204,19 @@ function msg91_otp_settings_page() {
 				<table class="form-table">
 					<tr valign="top">
 						<th scope="row"><?php echo msg91_translate( 'Template ID' ); ?></th>
-						<td><input type="text" name="msg91_template_id" value="<?php echo esc_attr( get_option( 'msg91_template_id' ) ); ?>" size="30" />
+						<td><input type="text" name="hcotp_msg91_template_id" value="<?php echo esc_attr( get_option( 'hcotp_msg91_template_id' ) ); ?>" size="30" />
 						<p class="description"><?php echo esc_html( msg91_translate( 'MSG91 DLT Template ID for sending OTPs.' ) ); ?></p></td>
 						
 					</tr>
 					<tr valign="top">
 						<th scope="row"><?php echo msg91_translate( 'User OTP Limit per day' ); ?></th>
-						<td><input type="number" name="msg91_perday_otplimit" value="<?php echo esc_attr( get_option( 'msg91_perday_otplimit' ) ); ?>" size="30" /></td>
+						<td><input type="number" name="hcotp_msg91_perday_otplimit" value="<?php echo esc_attr( get_option( 'hcotp_msg91_perday_otplimit' ) ); ?>" size="30" /></td>
 					</tr>
 					<tr valign="top">
 						<th scope="row"><?php echo msg91_translate( 'Resend OTP Timer (sec)' ); ?></th>
 						<td>
-							<input type="number" name="msg91_resend_timer" 
-								value="<?php echo esc_attr( get_option( 'msg91_resend_timer', 60 ) ); ?>" size="30" />
+							<input type="number" name="hcotp_msg91_resend_timer" 
+								value="<?php echo esc_attr( get_option( 'hcotp_msg91_resend_timer', 60 ) ); ?>" size="30" />
 						</td>
 					</tr>
 					<tr valign="top">
@@ -246,94 +246,94 @@ function msg91_otp_settings_page() {
 					<tr valign="top">
 						<th scope="row"><?php echo msg91_translate( 'Image URL for Send OTP Form' ); ?></th>
 						<td>
-							<input type="text" name="msg91_top_image" value="<?php echo esc_attr( get_option( 'msg91_top_image', HCOTP_PLUGIN_URL . 'assets/images/send-otp.png' ) ); ?>" size="60" />
+							<input type="text" name="hcotp_msg91_top_image" value="<?php echo esc_attr( get_option( 'hcotp_msg91_top_image', HCOTP_PLUGIN_URL . 'assets/images/send-otp.png' ) ); ?>" size="60" />
 							<p class="description"><?php echo esc_html( msg91_translate( 'Paste the full image URL to display above the OTP form (e.g. banner, logo).' ) ); ?></p>
 						</td>
 					</tr>
 
 					<tr valign="top">
 						<th scope="row"><?php echo esc_html( msg91_translate( 'Send OTP Form Lable' ) ); ?></th>
-						<td><input type="text" name="msg91_sendotp_lable" value="<?php echo esc_attr( get_option( 'msg91_sendotp_lable' ) ); ?>" size="50" /></td>
+						<td><input type="text" name="hcotp_msg91_sendotp_lable" value="<?php echo esc_attr( get_option( 'hcotp_msg91_sendotp_lable' ) ); ?>" size="50" /></td>
 					</tr>
 
 					<tr valign="top">
 						<th scope="row"><?php echo msg91_translate( 'Send OTP Lable Color' ); ?></th>
-						<td><input type="color" name="msg91_sendotp_lable_color" value="<?php echo esc_attr( get_option( 'msg91_sendotp_lable_color' ) ); ?>" size="30" /></td>
+						<td><input type="color" name="hcotp_msg91_sendotp_lable_color" value="<?php echo esc_attr( get_option( 'hcotp_msg91_sendotp_lable_color' ) ); ?>" size="30" /></td>
 					</tr>
 					<tr valign="top">
 						<th scope="row"><?php echo msg91_translate( 'Send OTP Form Decription' ); ?></th>
-						<td><input type="text" name="msg91_sendotp_dec" value="<?php echo esc_attr( get_option( 'msg91_sendotp_dec' ) ); ?>" size="50" /></td>
+						<td><input type="text" name="hcotp_msg91_sendotp_dec" value="<?php echo esc_attr( get_option( 'hcotp_msg91_sendotp_dec' ) ); ?>" size="50" /></td>
 					</tr>
 
 					<tr valign="top">
 						<th scope="row"><?php echo msg91_translate( 'Send OTP Decription Color' ); ?></th>
-						<td><input type="color" name="msg91_sendotp_dec_color" value="<?php echo esc_attr( get_option( 'msg91_sendotp_dec_color' ) ); ?>" size="30" /></td>
+						<td><input type="color" name="hcotp_msg91_sendotp_dec_color" value="<?php echo esc_attr( get_option( 'hcotp_msg91_sendotp_dec_color' ) ); ?>" size="30" /></td>
 					</tr>
 
 					<tr valign="top">
 						<th scope="row"><?php echo msg91_translate( 'Send OTP Form Button Text' ); ?></th>
-						<td><input type="text" name="msg91_sendotp_button_text" value="<?php echo esc_attr( get_option( 'msg91_sendotp_button_text' ) ); ?>" size="50" /></td>
+						<td><input type="text" name="hcotp_msg91_sendotp_button_text" value="<?php echo esc_attr( get_option( 'hcotp_msg91_sendotp_button_text' ) ); ?>" size="50" /></td>
 					</tr>
 
 
 					<tr valign="top">
 						<th scope="row"><?php echo msg91_translate( 'Send OTP Button Color' ); ?></th>
-						<td><input type="color" name="msg91_sendotp_button_color" value="<?php echo esc_attr( get_option( 'msg91_sendotp_button_color' ) ); ?>" size="30" /></td>
+						<td><input type="color" name="hcotp_msg91_sendotp_button_color" value="<?php echo esc_attr( get_option( 'hcotp_msg91_sendotp_button_color' ) ); ?>" size="30" /></td>
 					</tr>
 
 					<tr valign="top">
 						<th scope="row"><?php echo msg91_translate( 'Send OTP Form validation msg' ); ?></th>
-						<td><input type="text" name="msg91_sendotp_validation_msg" value="<?php echo esc_attr( get_option( 'msg91_sendotp_validation_msg' ) ); ?>" size="50" /></td>
+						<td><input type="text" name="hcotp_msg91_sendotp_validation_msg" value="<?php echo esc_attr( get_option( 'hcotp_msg91_sendotp_validation_msg' ) ); ?>" size="50" /></td>
 					</tr>
 
 					<tr valign="top">
 						<th scope="row"><?php echo msg91_translate( 'Image URL for Verify OTP Form' ); ?></th>
 						<td>
-							<input type="text" name="msg91_top_verify_image" value="<?php echo esc_attr( get_option( 'msg91_top_verify_image', HCOTP_PLUGIN_URL . 'assets/images/verify-otp.png' ) ); ?>" size="60" />
+							<input type="text" name="hcotp_msg91_top_verify_image" value="<?php echo esc_attr( get_option( 'hcotp_msg91_top_verify_image', HCOTP_PLUGIN_URL . 'assets/images/verify-otp.png' ) ); ?>" size="60" />
 							<p class="description"><?php echo esc_html( msg91_translate( 'Paste the full image URL to display above the OTP form (e.g. banner, logo).' ) ); ?></p>
 						</td>
 					</tr>
 
 					<tr valign="top">
 						<th scope="row"><?php echo msg91_translate( 'Verify OTP Form Lable' ); ?></th>
-						<td><input type="text" name="msg91_verifyotp_lable" value="<?php echo esc_attr( get_option( 'msg91_verifyotp_lable' ) ); ?>" size="50" /></td>
+						<td><input type="text" name="hcotp_msg91_verifyotp_lable" value="<?php echo esc_attr( get_option( 'hcotp_msg91_verifyotp_lable' ) ); ?>" size="50" /></td>
 					</tr>
 					<tr valign="top">
 						<th scope="row"><?php echo msg91_translate( 'Verify OTP Lable Color' ); ?></th>
-						<td><input type="color" name="msg91_verifyotp_lable_color" value="<?php echo esc_attr( get_option( 'msg91_verifyotp_lable_color' ) ); ?>" size="30" /></td>
+						<td><input type="color" name="hcotp_msg91_verifyotp_lable_color" value="<?php echo esc_attr( get_option( 'hcotp_msg91_verifyotp_lable_color' ) ); ?>" size="30" /></td>
 					</tr>
 					<tr valign="top">
 						<th scope="row"><?php echo msg91_translate( 'Verify OTP Form Decription' ); ?></th>
-						<td><input type="text" name="msg91_verifyotp_dec" value="<?php echo esc_attr( get_option( 'msg91_verifyotp_dec' ) ); ?>" size="50" /></td>
+						<td><input type="text" name="hcotp_msg91_verifyotp_dec" value="<?php echo esc_attr( get_option( 'hcotp_msg91_verifyotp_dec' ) ); ?>" size="50" /></td>
 					</tr>
 
 					<tr valign="top">
 						<th scope="row"><?php echo esc_html( msg91_translate( 'Verify OTP Decription Color' ) ); ?></th>
-						<td><input type="color" name="msg91_verifyotp_dec_color" value="<?php echo esc_attr( get_option( 'msg91_verifyotp_dec_color' ) ); ?>" size="30" /></td>
+						<td><input type="color" name="hcotp_msg91_verifyotp_dec_color" value="<?php echo esc_attr( get_option( 'hcotp_msg91_verifyotp_dec_color' ) ); ?>" size="30" /></td>
 					</tr>
 
 					<tr valign="top">
 						<th scope="row"><?php echo esc_html( msg91_translate( 'Verify OTP Form Button Text' ) ); ?></th>
-						<td><input type="text" name="msg91_verifyotp_button_text" value="<?php echo esc_attr( get_option( 'msg91_verifyotp_button_text' ) ); ?>" size="50" /></td>
+						<td><input type="text" name="hcotp_msg91_verifyotp_button_text" value="<?php echo esc_attr( get_option( 'hcotp_msg91_verifyotp_button_text' ) ); ?>" size="50" /></td>
 					</tr>
 
 				
 					<tr valign="top">
 						<th scope="row"><?php echo esc_html( msg91_translate( 'Verify OTP Button Color' ) ); ?></th>
-						<td><input type="color" name="msg91_verifyotp_button_color" value="<?php echo esc_attr( get_option( 'msg91_verifyotp_button_color' ) ); ?>" size="30" /></td>
+						<td><input type="color" name="hcotp_msg91_verifyotp_button_color" value="<?php echo esc_attr( get_option( 'hcotp_msg91_verifyotp_button_color' ) ); ?>" size="30" /></td>
 					</tr>
 
 					<tr valign="top">
 						<th scope="row"><?php echo esc_html( msg91_translate( 'Verify OTP Form validation msg' ) ); ?></th>
-						<td><input type="text" name="msg91_verifyotp_validation_msg" value="<?php echo esc_attr( get_option( 'msg91_verifyotp_validation_msg' ) ); ?>" size="50" /></td>
+						<td><input type="text" name="hcotp_msg91_verifyotp_validation_msg" value="<?php echo esc_attr( get_option( 'hcotp_msg91_verifyotp_validation_msg' ) ); ?>" size="50" /></td>
 					</tr>
 
 
 					<tr valign="top">
 						<th scope="row"><?php echo esc_html( msg91_translate( 'Redirect Page URL' ) ); ?></th>
 						<td>
-							<input type="text" name="msg91_redirect_page" 
-								value="<?php echo esc_attr( get_option( 'msg91_redirect_page', home_url() ) ); ?>" 
+							<input type="text" name="hcotp_msg91_redirect_page" 
+								value="<?php echo esc_attr( get_option( 'hcotp_msg91_redirect_page', home_url() ) ); ?>" 
 								size="60" />
 							<p class="description">
 							<?php
@@ -345,17 +345,17 @@ function msg91_otp_settings_page() {
 					<tr valign="top">
 						<th scope="row"><?php echo msg91_translate( 'Default Country' ); ?></th>
 						<td>
-							<select name="msg91_default_country" id="msg91_default_country">
+							<select name="hcotp_msg91_default_country" id="hcotp_msg91_default_country">
 								<?php
-									$default_country = get_option( 'msg91_default_country', '+91' );
-									$countries       = happycoders_msg91_get_countries_with_iso();
+									$default_country = get_option( 'hcotp_msg91_default_country', '+91' );
+									$countries       = hcotp_get_countries_with_iso();
 
 								foreach ( $countries as $country ) {
 											$dial_code = $country['code'];
 											$name      = $country['name'];
 											$iso       = $country['iso'];
 
-											$flag = function_exists( 'happycoders_msg91_iso_to_flag' ) ? happycoders_msg91_iso_to_flag( $iso ) : '';
+											$flag = function_exists( 'hcotp_iso_to_flag' ) ? hcotp_iso_to_flag( $iso ) : '';
 
 											printf(
 												'<option value="%s" %s>%s %s (%s)</option>',
@@ -374,7 +374,7 @@ function msg91_otp_settings_page() {
 					<tr valign="top">
 						<th scope="row"></th>
 						<td>
-							<input type="checkbox" name="msg91_flag_show" value="1" <?php checked( 1, get_option( 'msg91_flag_show' ), true ); ?> />
+							<input type="checkbox" name="hcotp_msg91_flag_show" value="1" <?php checked( 1, get_option( 'hcotp_msg91_flag_show' ), true ); ?> />
 							<span class="description"><?php echo esc_html( msg91_translate( 'Do you want to show country flag?' ) ); ?></span>
 
 						</td>
@@ -382,17 +382,17 @@ function msg91_otp_settings_page() {
 					<tr valign="top">
 						<th scope="row"><?php echo msg91_translate( 'Selected Countries' ); ?></th>
 						<td>
-							<select name="msg91_selected_countries[]" id="msg91_selected_countries" multiple="multiple" style="width: 100%; height: 150px;">
+							<select name="hcotp_msg91_selected_countries[]" id="hcotp_msg91_selected_countries" multiple="multiple" style="width: 100%; height: 150px;">
 								<?php
-									$default_countries = get_option( 'msg91_selected_countries', array( '+91' ) );
-									$countries         = happycoders_msg91_get_countries_with_iso();
+									$default_countries = get_option( 'hcotp_msg91_selected_countries', array( '+91' ) );
+									$countries         = hcotp_get_countries_with_iso();
 								foreach ( $countries as $country ) {
 									$dial_code = $country['code'];
 									$name      = $country['name'];
 									$iso       = $country['iso'];
 
 									$selected = in_array( $dial_code, $default_countries ) ? 'selected' : '';
-									$flag     = function_exists( 'happycoders_msg91_iso_to_flag' ) ? happycoders_msg91_iso_to_flag( $iso ) : '';
+									$flag     = function_exists( 'hcotp_iso_to_flag' ) ? hcotp_iso_to_flag( $iso ) : '';
 
 									$background_color = ( $selected ) ? 'background-color: #009ee8; color: white;' : '';
 
@@ -509,7 +509,7 @@ function msg91_otp_settings_page() {
 	<?php
 }
 // Helper function to get default notes for SMS templates
-function happycoders_msg91_get_default_sms_note( $key ) {
+function hcotp_get_default_sms_note( $key ) {
 	$notes = array(
 		'ncr' => 'New Customer: VAR1=CustomerName, VAR2=SiteName, VAR3=ShopURL',
 		'npo' => 'New Order: VAR1=CustomerName, VAR2=OrderID, VAR3=OrderTotal, VAR4=SiteName, VAR5=ShopURL',

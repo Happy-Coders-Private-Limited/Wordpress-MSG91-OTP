@@ -322,7 +322,7 @@ jQuery(document).ready(function($) {
 				$(this).addClass('nav-tab-active');
 				$('.tab-content').removeClass('active-tab').hide();
 				$('#' + tab_id).addClass('active-tab').show();
-				$('#msg91_active_tab_input').val(tab_id);
+				$('#hcotp_msg91_active_tab_input').val(tab_id);
 	});
 });
 jQuery(document).ready(function($) {

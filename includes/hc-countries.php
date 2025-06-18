@@ -1,5 +1,5 @@
 <?php
-function happycoders_msg91_iso_to_flag( $iso ) {
+function hcotp_iso_to_flag( $iso ) {
 	$iso  = strtoupper( $iso );
 	$flag = '';
 	for ( $i = 0; $i < strlen( $iso ); $i++ ) {
@@ -7,7 +7,7 @@ function happycoders_msg91_iso_to_flag( $iso ) {
 	}
 	return $flag;
 }
-function happycoders_msg91_get_countries_with_iso() {
+function hcotp_get_countries_with_iso() {
 	return array(
 		array(
 			'name' => 'Afghanistan',
