@@ -915,8 +915,8 @@ function hcotp_replace_wc_login_with_otp() {
 	}
 }
 
-add_action( 'woocommerce_before_checkout_form', 'custom_message_before_checkout', 5 );
-function custom_message_before_checkout() {
+add_action( 'woocommerce_before_checkout_form', 'hcotp_message_before_checkout', 5 );
+function hcotp_message_before_checkout() {
 	if ( ! is_user_logged_in() ) {
 		echo '<div class="woocommerce-info custom-login-notice">';
 		echo 'Please <a href="/my-account">click here</a> to login.';
