@@ -154,7 +154,7 @@ function hcotp_register_wc_sms_hooks() {
 
 	// 5. Order on Cart (Abandoned Cart) - Basic Implementation
 	add_action( 'woocommerce_cart_updated', 'hcotp_schedule_abandoned_cart_check' );
-	add_action( 'hc_msg91_trigger_abandoned_cart_sms', 'hcotp_send_abandoned_cart_sms', 10, 2 );
+	add_action( 'hcotp_trigger_abandoned_cart_sms', 'hcotp_send_abandoned_cart_sms', 10, 2 );
 	add_action( 'woocommerce_checkout_order_processed', 'hcotp_clear_abandoned_cart_check_on_order', 10, 1 );
 }
 
@@ -376,10 +376,10 @@ function hcotp_schedule_abandoned_cart_check() {
 			$cron_array = _get_cron_array();
 			if ( ! empty( $cron_array ) ) {
 				foreach ( $cron_array as $timestamp => $cron ) {
-					if ( isset( $cron['hc_msg91_trigger_abandoned_cart_sms'] ) ) {
-						foreach ( $cron['hc_msg91_trigger_abandoned_cart_sms'] as $hook_instance_hash => $details ) {
+					if ( isset( $cron['hcotp_trigger_abandoned_cart_sms'] ) ) {
+						foreach ( $cron['hcotp_trigger_abandoned_cart_sms'] as $hook_instance_hash => $details ) {
 							if ( isset( $details['args'] ) && ! empty( $details['args'] ) && $details['args'][0] == $user_id ) {
-								wp_unschedule_event( $timestamp, 'hc_msg91_trigger_abandoned_cart_sms', $details['args'] );
+								wp_unschedule_event( $timestamp, 'hcotp_trigger_abandoned_cart_sms', $details['args'] );
 								error_log( "HC MSG91 Schedule: Cleared task for user $user_id at timestamp $timestamp with args: " . print_r( $details['args'], true ) );
 							}
 						}
@@ -412,23 +412,23 @@ function hcotp_schedule_abandoned_cart_check() {
 	$cart_hash     = md5( json_encode( $cart_contents ) );
 
 	// Clear previous schedule for this user to avoid multiple SMS for same abandonment period
-	wp_clear_scheduled_hook( 'hc_msg91_trigger_abandoned_cart_sms', array( $user_id, $cart_hash ) ); // Old hash might be different
+	wp_clear_scheduled_hook( 'hcotp_trigger_abandoned_cart_sms', array( $user_id, $cart_hash ) ); // Old hash might be different
 	$existing_tasks = _get_cron_array();
 	if ( ! empty( $existing_tasks ) ) {
 		foreach ( $existing_tasks as $time => $cron ) {
-			if ( isset( $cron['hc_msg91_trigger_abandoned_cart_sms'] ) ) {
-				foreach ( $cron['hc_msg91_trigger_abandoned_cart_sms'] as $hash => $details ) {
+			if ( isset( $cron['hcotp_trigger_abandoned_cart_sms'] ) ) {
+				foreach ( $cron['hcotp_trigger_abandoned_cart_sms'] as $hash => $details ) {
 					if ( isset( $details['args'][0] ) && $details['args'][0] == $user_id ) {
 						error_log( 'hcotp_schedule_abandoned_cart_check - Clearing previous schedule for User ID: ' . $user_id );
-						wp_unschedule_event( $time, 'hc_msg91_trigger_abandoned_cart_sms', $details['args'] );
+						wp_unschedule_event( $time, 'hcotp_trigger_abandoned_cart_sms', $details['args'] );
 					}
 				}
 			}
 		}
 	}
 
-	if ( ! wp_next_scheduled( 'hc_msg91_trigger_abandoned_cart_sms', array( $user_id, $cart_hash ) ) ) {
-		wp_schedule_single_event( time() + ( $delay_hours * HOUR_IN_SECONDS ), 'hc_msg91_trigger_abandoned_cart_sms', array( $user_id, $cart_hash ) );
+	if ( ! wp_next_scheduled( 'hcotp_trigger_abandoned_cart_sms', array( $user_id, $cart_hash ) ) ) {
+		wp_schedule_single_event( time() + ( $delay_hours * HOUR_IN_SECONDS ), 'hcotp_trigger_abandoned_cart_sms', array( $user_id, $cart_hash ) );
 	}
 }
 
@@ -650,16 +650,16 @@ function hcotp_clear_abandoned_cart_check_on_order( $order_id ) {
 	if ( $order && $order->get_customer_id() ) {
 			$user_id = $order->get_customer_id();
 		// We don't have the cart hash here, so we clear any task for this user.
-		$timestamp = wp_next_scheduled( 'hc_msg91_trigger_abandoned_cart_sms', array( $user_id, null ) ); // This won't work directly
+		$timestamp = wp_next_scheduled( 'hcotp_trigger_abandoned_cart_sms', array( $user_id, null ) ); // This won't work directly
 		// Need to iterate cron array or store the specific args used for scheduling.
 		// Simplified: Clear all for this user.
 		$existing_tasks = _get_cron_array();
 		if ( ! empty( $existing_tasks ) ) {
 			foreach ( $existing_tasks as $time => $cron ) {
-				if ( isset( $cron['hc_msg91_trigger_abandoned_cart_sms'] ) ) {
-					foreach ( $cron['hc_msg91_trigger_abandoned_cart_sms'] as $hash => $details ) {
+				if ( isset( $cron['hcotp_trigger_abandoned_cart_sms'] ) ) {
+					foreach ( $cron['hcotp_trigger_abandoned_cart_sms'] as $hash => $details ) {
 						if ( isset( $details['args'][0] ) && $details['args'][0] == $user_id ) {
-							wp_unschedule_event( $time, 'hc_msg91_trigger_abandoned_cart_sms', $details['args'] );
+							wp_unschedule_event( $time, 'hcotp_trigger_abandoned_cart_sms', $details['args'] );
 						}
 					}
 				}

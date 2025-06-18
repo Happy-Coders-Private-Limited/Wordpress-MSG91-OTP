@@ -97,7 +97,7 @@ function hcotp_activate_plugin() {
 
 function hcotp_deactivate_plugin() {
 	hcotp_delete_blocked_numbers_table();
-	wp_clear_scheduled_hook( 'hc_msg91_trigger_abandoned_cart_sms' );
+	wp_clear_scheduled_hook( 'hcotp_trigger_abandoned_cart_sms' );
 }
 
 
