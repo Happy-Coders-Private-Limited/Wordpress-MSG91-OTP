@@ -144,7 +144,7 @@ function hcotp_get_customer_phone( $order_or_user_id ) {
 function hcotp_register_wc_sms_hooks() {
 	// 2. New Order Placed
 	// This hook provides 3 arguments: $order_id, $posted_data, $order
-	// add_action('woocommerce_checkout_order_processed', 'happycoders_msg91_sms_on_new_order_placed', 10, 3);
+	// add_action('woocommerce_checkout_order_processed', 'hcotp_sms_on_new_order_placed', 10, 3);
 
 	// Or use 'woocommerce_thankyou' which is also common
 	add_action( 'woocommerce_thankyou', 'hcotp_sms_on_thankyou_page', 10, 1 );
@@ -154,7 +154,7 @@ function hcotp_register_wc_sms_hooks() {
 
 	// 5. Order on Cart (Abandoned Cart) - Basic Implementation
 	add_action( 'woocommerce_cart_updated', 'hcotp_schedule_abandoned_cart_check' );
-	add_action( 'hc_msg91_trigger_abandoned_cart_sms', 'hcotp_send_abandoned_cart_sms', 10, 2 );
+	add_action( 'hcotp_trigger_abandoned_cart_sms', 'hcotp_send_abandoned_cart_sms', 10, 2 );
 	add_action( 'woocommerce_checkout_order_processed', 'hcotp_clear_abandoned_cart_check_on_order', 10, 1 );
 }
 
@@ -194,33 +194,33 @@ function hcotp_sms_on_new_customer_registration( $user_id ) {
 }
 
 // Callback for New Order Placed
-function happycoders_msg91_sms_on_new_order_placed( $order_id, $posted_data, $order ) {
+function hcotp_sms_on_new_order_placed( $order_id, $posted_data, $order ) {
 	// Expects 3 args
-	error_log( 'happycoders_msg91_sms_on_new_order_placed - Fired. Order ID: ' . $order_id ); // First log
+	error_log( 'hcotp_sms_on_new_order_placed - Fired. Order ID: ' . $order_id ); // First log
 	if ( ! get_option( 'hcotp_msg91_sms_npo_enable', 0 ) ) {
-		error_log( 'happycoders_msg91_sms_on_new_order_placed - NPO SMS not enabled.' );
+		error_log( 'hcotp_sms_on_new_order_placed - NPO SMS not enabled.' );
 		return;
 	}
 	$template_id = get_option( 'hcotp_msg91_sms_npo_template_id' );
-	error_log( 'happycoders_msg91_sms_on_new_order_placed - Template ID: ' . $template_id );
+	error_log( 'hcotp_sms_on_new_order_placed - Template ID: ' . $template_id );
 	if ( empty( $template_id ) ) {
-		error_log( 'happycoders_msg91_sms_on_new_order_placed - Template ID is empty.' );
+		error_log( 'hcotp_sms_on_new_order_placed - Template ID is empty.' );
 		return;
 	}
 	if ( ! $order ) {
-		error_log( 'happycoders_msg91_sms_on_new_order_placed - Order object is invalid/null.' );
+		error_log( 'hcotp_sms_on_new_order_placed - Order object is invalid/null.' );
 		// Attempt to get order object if not passed correctly, though it should be.
 		$order = wc_get_order( $order_id );
 		if ( ! $order ) {
-			error_log( 'happycoders_msg91_sms_on_new_order_placed - Could not retrieve order object with wc_get_order.' );
+			error_log( 'hcotp_sms_on_new_order_placed - Could not retrieve order object with wc_get_order.' );
 			return;
 		}
 	}
 
 	$phone = hcotp_get_customer_phone( $order );
-	error_log( 'happycoders_msg91_sms_on_new_order_placed - Phone: ' . $phone );
+	error_log( 'hcotp_sms_on_new_order_placed - Phone: ' . $phone );
 	if ( ! $phone ) {
-		error_log( 'happycoders_msg91_sms_on_new_order_placed - Phone number not found.' );
+		error_log( 'hcotp_sms_on_new_order_placed - Phone number not found.' );
 		return;
 	}
 
@@ -231,7 +231,7 @@ function happycoders_msg91_sms_on_new_order_placed( $order_id, $posted_data, $or
 	} elseif ( ! $customer_name ) {
 		$customer_name = 'Valued Customer';
 	}
-	error_log( 'happycoders_msg91_sms_on_new_order_placed - Customer Name: ' . $customer_name );
+	error_log( 'hcotp_sms_on_new_order_placed - Customer Name: ' . $customer_name );
 
 	$vars = array(
 		'var1' => $customer_name,
@@ -240,13 +240,13 @@ function happycoders_msg91_sms_on_new_order_placed( $order_id, $posted_data, $or
 		// 'VAR4' => get_bloginfo('name'),
 		// 'VAR5' => home_url(),
 	);
-	error_log( 'happycoders_msg91_sms_on_new_order_placed - Variables for SMS: ' . print_r( $vars, true ) );
+	error_log( 'hcotp_sms_on_new_order_placed - Variables for SMS: ' . print_r( $vars, true ) );
 
 	$result = hcotp_send_transactional_sms( $phone, $template_id, $vars );
 	if ( is_wp_error( $result ) ) {
-		error_log( 'happycoders_msg91_sms_on_new_order_placed - SMS sending failed: ' . $result->get_error_message() );
+		error_log( 'hcotp_sms_on_new_order_placed - SMS sending failed: ' . $result->get_error_message() );
 	} else {
-		error_log( 'happycoders_msg91_sms_on_new_order_placed - SMS send attempt successful.' );
+		error_log( 'hcotp_sms_on_new_order_placed - SMS send attempt successful.' );
 	}
 }
 
@@ -327,9 +327,9 @@ function hcotp_sms_on_order_status_change( $order_id, $old_status, $new_status )
 	if ( $shipped_enabled && ! empty( $shipped_template_id ) && $new_status === $shipped_target_status ) {
 		error_log( 'hcotp_sms_on_order_status_change - Order Shipped SMS enabled. Template ID: ' . $shipped_template_id );
 
-		$tracking_id       = get_post_meta( $order_id, '_hc_msg91_tracking_id', true );
-		$tracking_url      = get_post_meta( $order_id, '_hc_msg91_tracking_url', true );
-		$shipping_provider = get_post_meta( $order_id, '_hc_msg91_shipping_provider', true );
+		$tracking_id       = get_post_meta( $order_id, '_hcotp_tracking_id', true );
+		$tracking_url      = get_post_meta( $order_id, '_hcotp_tracking_url', true );
+		$shipping_provider = get_post_meta( $order_id, '_hcotp_shipping_provider', true );
 		// If using another plugin, the meta key for tracking number might be different.
 
 		$vars = array(
@@ -376,10 +376,10 @@ function hcotp_schedule_abandoned_cart_check() {
 			$cron_array = _get_cron_array();
 			if ( ! empty( $cron_array ) ) {
 				foreach ( $cron_array as $timestamp => $cron ) {
-					if ( isset( $cron['hc_msg91_trigger_abandoned_cart_sms'] ) ) {
-						foreach ( $cron['hc_msg91_trigger_abandoned_cart_sms'] as $hook_instance_hash => $details ) {
+					if ( isset( $cron['hcotp_trigger_abandoned_cart_sms'] ) ) {
+						foreach ( $cron['hcotp_trigger_abandoned_cart_sms'] as $hook_instance_hash => $details ) {
 							if ( isset( $details['args'] ) && ! empty( $details['args'] ) && $details['args'][0] == $user_id ) {
-								wp_unschedule_event( $timestamp, 'hc_msg91_trigger_abandoned_cart_sms', $details['args'] );
+								wp_unschedule_event( $timestamp, 'hcotp_trigger_abandoned_cart_sms', $details['args'] );
 								error_log( "HC MSG91 Schedule: Cleared task for user $user_id at timestamp $timestamp with args: " . print_r( $details['args'], true ) );
 							}
 						}
@@ -412,23 +412,23 @@ function hcotp_schedule_abandoned_cart_check() {
 	$cart_hash     = md5( json_encode( $cart_contents ) );
 
 	// Clear previous schedule for this user to avoid multiple SMS for same abandonment period
-	wp_clear_scheduled_hook( 'hc_msg91_trigger_abandoned_cart_sms', array( $user_id, $cart_hash ) ); // Old hash might be different
+	wp_clear_scheduled_hook( 'hcotp_trigger_abandoned_cart_sms', array( $user_id, $cart_hash ) ); // Old hash might be different
 	$existing_tasks = _get_cron_array();
 	if ( ! empty( $existing_tasks ) ) {
 		foreach ( $existing_tasks as $time => $cron ) {
-			if ( isset( $cron['hc_msg91_trigger_abandoned_cart_sms'] ) ) {
-				foreach ( $cron['hc_msg91_trigger_abandoned_cart_sms'] as $hash => $details ) {
+			if ( isset( $cron['hcotp_trigger_abandoned_cart_sms'] ) ) {
+				foreach ( $cron['hcotp_trigger_abandoned_cart_sms'] as $hash => $details ) {
 					if ( isset( $details['args'][0] ) && $details['args'][0] == $user_id ) {
 						error_log( 'hcotp_schedule_abandoned_cart_check - Clearing previous schedule for User ID: ' . $user_id );
-						wp_unschedule_event( $time, 'hc_msg91_trigger_abandoned_cart_sms', $details['args'] );
+						wp_unschedule_event( $time, 'hcotp_trigger_abandoned_cart_sms', $details['args'] );
 					}
 				}
 			}
 		}
 	}
 
-	if ( ! wp_next_scheduled( 'hc_msg91_trigger_abandoned_cart_sms', array( $user_id, $cart_hash ) ) ) {
-		wp_schedule_single_event( time() + ( $delay_hours * HOUR_IN_SECONDS ), 'hc_msg91_trigger_abandoned_cart_sms', array( $user_id, $cart_hash ) );
+	if ( ! wp_next_scheduled( 'hcotp_trigger_abandoned_cart_sms', array( $user_id, $cart_hash ) ) ) {
+		wp_schedule_single_event( time() + ( $delay_hours * HOUR_IN_SECONDS ), 'hcotp_trigger_abandoned_cart_sms', array( $user_id, $cart_hash ) );
 	}
 }
 
@@ -650,16 +650,16 @@ function hcotp_clear_abandoned_cart_check_on_order( $order_id ) {
 	if ( $order && $order->get_customer_id() ) {
 			$user_id = $order->get_customer_id();
 		// We don't have the cart hash here, so we clear any task for this user.
-		$timestamp = wp_next_scheduled( 'hc_msg91_trigger_abandoned_cart_sms', array( $user_id, null ) ); // This won't work directly
+		$timestamp = wp_next_scheduled( 'hcotp_trigger_abandoned_cart_sms', array( $user_id, null ) ); // This won't work directly
 		// Need to iterate cron array or store the specific args used for scheduling.
 		// Simplified: Clear all for this user.
 		$existing_tasks = _get_cron_array();
 		if ( ! empty( $existing_tasks ) ) {
 			foreach ( $existing_tasks as $time => $cron ) {
-				if ( isset( $cron['hc_msg91_trigger_abandoned_cart_sms'] ) ) {
-					foreach ( $cron['hc_msg91_trigger_abandoned_cart_sms'] as $hash => $details ) {
+				if ( isset( $cron['hcotp_trigger_abandoned_cart_sms'] ) ) {
+					foreach ( $cron['hcotp_trigger_abandoned_cart_sms'] as $hash => $details ) {
 						if ( isset( $details['args'][0] ) && $details['args'][0] == $user_id ) {
-							wp_unschedule_event( $time, 'hc_msg91_trigger_abandoned_cart_sms', $details['args'] );
+							wp_unschedule_event( $time, 'hcotp_trigger_abandoned_cart_sms', $details['args'] );
 						}
 					}
 				}
@@ -712,9 +712,9 @@ function hcotp_shipment_details_meta_box_html( $object ) {
 
 	wp_nonce_field( 'hc_msg91_save_shipment_details', 'hc_msg91_shipment_nonce' );
 
-	$tracking_id       = get_post_meta( $order_id, '_hc_msg91_tracking_id', true );
-	$tracking_url      = get_post_meta( $order_id, '_hc_msg91_tracking_url', true );
-	$shipping_provider = get_post_meta( $order_id, '_hc_msg91_shipping_provider', true );
+	$tracking_id       = get_post_meta( $order_id, '_hcotp_tracking_id', true );
+	$tracking_url      = get_post_meta( $order_id, '_hcotp_tracking_url', true );
+	$shipping_provider = get_post_meta( $order_id, '_hcotp_shipping_provider', true );
 	?>
 	<p>
 		<label for="hc_msg91_tracking_id"><?php esc_html_e( 'Tracking ID:', 'happy-coders-otp-login' ); ?></label><br>
@@ -756,13 +756,13 @@ function hcotp_save_shipment_details_meta( $order_id ) {
 	}
 
 	if ( isset( $_POST['hc_msg91_tracking_id'] ) ) {
-		update_post_meta( $order_id, '_hc_msg91_tracking_id', sanitize_text_field( $_POST['hc_msg91_tracking_id'] ) );
+		update_post_meta( $order_id, '_hcotp_tracking_id', sanitize_text_field( $_POST['hc_msg91_tracking_id'] ) );
 	}
 	if ( isset( $_POST['hc_msg91_tracking_url'] ) ) {
-		update_post_meta( $order_id, '_hc_msg91_tracking_url', esc_url_raw( $_POST['hc_msg91_tracking_url'] ) );
+		update_post_meta( $order_id, '_hcotp_tracking_url', esc_url_raw( $_POST['hc_msg91_tracking_url'] ) );
 	}
 	if ( isset( $_POST['hc_msg91_shipping_provider'] ) ) {
-		update_post_meta( $order_id, '_hc_msg91_shipping_provider', sanitize_text_field( $_POST['hc_msg91_shipping_provider'] ) );
+		update_post_meta( $order_id, '_hcotp_shipping_provider', sanitize_text_field( $_POST['hc_msg91_shipping_provider'] ) );
 	}
 }
 

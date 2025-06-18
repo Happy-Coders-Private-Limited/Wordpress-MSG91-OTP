@@ -97,7 +97,7 @@ function hcotp_activate_plugin() {
 
 function hcotp_deactivate_plugin() {
 	hcotp_delete_blocked_numbers_table();
-	wp_clear_scheduled_hook( 'hc_msg91_trigger_abandoned_cart_sms' );
+	wp_clear_scheduled_hook( 'hcotp_trigger_abandoned_cart_sms' );
 }
 
 
@@ -149,7 +149,7 @@ function hcotp_plugin_row_meta( $plugin_meta, $plugin_file, $plugin_data, $statu
  */
 function hcotp_enqueue_scripts() {
 	wp_enqueue_script(
-		'msg91-otp-js',
+		'hcotp-main-js',
 		HCOTP_PLUGIN_URL . 'assets/js/hc-msg91-otp.js',
 		array( 'jquery' ),
 		defined( 'HC_MSG91_VERSION' ) ? HC_MSG91_VERSION : time(),
@@ -162,8 +162,8 @@ function hcotp_enqueue_scripts() {
 		defined( 'HC_MSG91_VERSION' ) ? HC_MSG91_VERSION : time()
 	);
 	wp_localize_script(
-		'msg91-otp-js',
-		'msg91_ajax_obj',
+		'hcotp-main-js',
+		'hcotp_params',
 		array(
 			'ajax_url'                 => admin_url( 'admin-ajax.php' ),
 			'nonce'                    => wp_create_nonce( 'msg91_ajax_nonce_action' ),

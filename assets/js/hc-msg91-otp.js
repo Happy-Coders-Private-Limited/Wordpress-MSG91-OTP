@@ -7,7 +7,7 @@ jQuery(document).ready(function ($) {
     
         let mobile = $container.find('#msg91_mobile').val().trim();
         let countryCode = $container.find('#msg91_country_code').val();
-        let msg = msg91_ajax_obj.sendotp_validation_msg || 'Please enter a valid mobile number (between 5 and 12 digits).';
+        let msg = hcotp_params.sendotp_validation_msg || 'Please enter a valid mobile number (between 5 and 12 digits).';
     
         if (!mobile || mobile.length < 5 || mobile.length > 12) {
             $container.find('#otp-send-status').html('<span style="color:red;">' + msg + '</span>');
@@ -19,11 +19,11 @@ jQuery(document).ready(function ($) {
     
         $button.prop('disabled', true).text('Sending...');
 
-        $.post(msg91_ajax_obj.ajax_url, {
+        $.post(hcotp_params.ajax_url, {
             action: 'hcotp_send_otp_ajax',
             mobile: mobileWithCode,
              otpprocess: 'sms',
-             security_nonce: msg91_ajax_obj.nonce 
+             security_nonce: hcotp_params.nonce 
             
         }, function (res) {
              $container.find('.sms-button').prop('disabled', false).text('SMS');
@@ -55,7 +55,7 @@ jQuery(document).ready(function ($) {
     
         let mobile = $container.find('#msg91_mobile').val().trim();
         let countryCode = $container.find('#msg91_country_code').val();
-        let msg = msg91_ajax_obj.sendotp_validation_msg || 'Please enter a valid mobile number (between 5 and 12 digits).';
+        let msg = hcotp_params.sendotp_validation_msg || 'Please enter a valid mobile number (between 5 and 12 digits).';
     
         if (!mobile || mobile.length < 5 || mobile.length > 12) {
             $container.find('#otp-send-status').html('<span style="color:red;">' + msg + '</span>');
@@ -67,11 +67,11 @@ jQuery(document).ready(function ($) {
         $button.prop('disabled', true).text('Sending...');
 
     
-        $.post(msg91_ajax_obj.ajax_url, {
+        $.post(hcotp_params.ajax_url, {
             action: 'hcotp_send_otp_ajax',
             mobile: mobileWithCode,
                otpprocess: 'whatsapp',
-             security_nonce: msg91_ajax_obj.nonce 
+             security_nonce: hcotp_params.nonce 
             
         }, function (res) {
               $container.find('.sms-button').prop('disabled', false).text('SMS');
@@ -122,7 +122,7 @@ jQuery(document).ready(function ($) {
                   $container.find('#otp3').val().trim() +
                   $container.find('#otp4').val().trim();
     
-        let msg = msg91_ajax_obj.verifyotp_validation_msg || 'Please enter the OTP.';
+        let msg = hcotp_params.verifyotp_validation_msg || 'Please enter the OTP.';
     
         if (otp.length !== 4) {
             $container.find('#otp-verify-status').html('<span style="color:red;font-size: 14px;">' + msg + '</span>');
@@ -137,12 +137,12 @@ jQuery(document).ready(function ($) {
         $button.prop('disabled', true).text('Verifying...');
         let otpprocess = $container.find('#otpprocess').val(); 
     
-        $.post(msg91_ajax_obj.ajax_url, {
+        $.post(hcotp_params.ajax_url, {
             action: 'hcotp_verify_otp_ajax',
             mobile: mobileWithCode,
             otpprocess : otpprocess,
             otp: otp,
-              security_nonce: msg91_ajax_obj.nonce 
+              security_nonce: hcotp_params.nonce 
         }, function (res) {
               
             if (res && res.success) {
@@ -150,7 +150,7 @@ jQuery(document).ready(function ($) {
                     // Hide the SMS & WhatsApp buttons
             otpButtons.hide();
 
-                let redirectUrl = msg91_ajax_obj.redirect_page;
+                let redirectUrl = hcotp_params.redirect_page;
     
                 if (redirectUrl) {
                   
@@ -197,7 +197,7 @@ jQuery(document).ready(function ($) {
         let mobile = $container.find('#msg91_mobile').val().trim();
          let countryCode = $container.find('#msg91_country_code').val();
     
-        let msg = msg91_ajax_obj.sendotp_validation_msg || 'Please enter a valid mobile number (between 5 and 12 digits).';
+        let msg = hcotp_params.sendotp_validation_msg || 'Please enter a valid mobile number (between 5 and 12 digits).';
         if (!mobile || mobile.length < 5 || mobile.length > 12) {
             $container.find('#otp-send-status').html('<span style="color:red;">' + msg + '</span>');
             return;
@@ -206,10 +206,10 @@ jQuery(document).ready(function ($) {
         let mobileWithCode = countryCode + mobile;
     
        
-        $.post(msg91_ajax_obj.ajax_url, {
+        $.post(hcotp_params.ajax_url, {
             action: 'hcotp_send_otp_ajax',
             mobile: mobileWithCode,
-              security_nonce: msg91_ajax_obj.nonce 
+              security_nonce: hcotp_params.nonce 
         }, function (res) {
             
             if (res && res.success) {
@@ -223,7 +223,7 @@ jQuery(document).ready(function ($) {
     
 
     function startOTPTimer($container) {
-        let timer = msg91_ajax_obj.resend_timer || 30;
+        let timer = hcotp_params.resend_timer || 30;
         const resendBtn = $container.find('#resend_otp');
 
          const otpButtons = $container.find('#otp_method_buttons');
