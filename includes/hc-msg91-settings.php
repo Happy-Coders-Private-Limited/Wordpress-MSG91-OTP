@@ -105,13 +105,13 @@ add_action(
 				register_setting( 'msg91_otp_settings_group', "msg91_sms_{$key}_status_slug", 'sanitize_text_field' );
 			}
 			if ( $key === 'oac' ) {
-				register_setting( 'msg91_otp_settings_group', "msg91_sms_{$key}_delay_hours", 'happycoders_msg91_sanitize_positive_float' );
+				register_setting( 'msg91_otp_settings_group', "msg91_sms_{$key}_delay_hours", 'hcotp_sanitize_positive_float' );
 			}
 		}
 	}
 );
 
-function happycoders_msg91_sanitize_positive_float( $input ) {
+function hcotp_sanitize_positive_float( $input ) {
 	$value = floatval( str_replace( ',', '.', $input ) );
 	return ( $value > 0 ) ? $value : 0.01;
 }
