@@ -682,7 +682,7 @@ function hcotp_add_shipment_details_meta_box() {
 		add_meta_box(
 			'hc_msg91_shipment_details',
 			__( 'Shipment Tracking Details (MSG91)', 'happy-coders-otp-login' ),
-			'happycoders_msg91_shipment_details_meta_box_html',
+			'hcotp_shipment_details_meta_box_html',
 			$screen, // Post type for WooCommerce orders
 			'side',       // Context (normal, side, advanced)
 			'default'     // Priority
@@ -691,7 +691,7 @@ function hcotp_add_shipment_details_meta_box() {
 }
 
 // HTML for the meta box
-function happycoders_msg91_shipment_details_meta_box_html( $object ) {
+function hcotp_shipment_details_meta_box_html( $object ) {
 	$order    = is_a( $object, 'WP_Post' ) ? wc_get_order( $object->ID ) : $object;
 	$order_id = 0;
 	if ( $order instanceof WP_Post ) {
