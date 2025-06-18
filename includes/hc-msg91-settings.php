@@ -12,7 +12,7 @@ add_action(
 			__( 'MSG91 OTP & SMS', 'hc-msg91-plugin' ),
 			'manage_options',
 			'msg91-otp-settings',
-			'msg91_otp_settings_page',
+			'hcotp_settings_page',
 			'dashicons-smartphone',
 			56
 		);
@@ -116,7 +116,7 @@ function happycoders_msg91_sanitize_positive_float( $input ) {
 	return ( $value > 0 ) ? $value : 0.01;
 }
 
-function msg91_otp_settings_page() {
+function hcotp_settings_page() {
 	$active_tab = get_option( 'msg91_active_tab', 'otp_settings' );
 	?>
 	<div class="wrap">
