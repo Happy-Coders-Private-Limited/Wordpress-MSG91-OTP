@@ -19,8 +19,8 @@ add_action(
 	}
 );
 function hc_enqueue_msg91_scripts() {
-	wp_enqueue_script( 'msg91-otp-js', HC_MSG91_PLUGIN_URL . 'assets/js/hc-msg91-otp.js', array( 'jquery' ), time(), true );
-	wp_enqueue_style( 'msg91-otp-css', HC_MSG91_PLUGIN_URL . 'assets/css/hc-msg91-otp.css', array(), time() );
+	wp_enqueue_script( 'msg91-otp-js', HCOTP_PLUGIN_URL . 'assets/js/hc-msg91-otp.js', array( 'jquery' ), time(), true );
+	wp_enqueue_style( 'msg91-otp-css', HCOTP_PLUGIN_URL . 'assets/css/hc-msg91-otp.css', array(), time() );
 
 	wp_localize_script(
 		'msg91-otp-js',
@@ -246,7 +246,7 @@ function msg91_otp_settings_page() {
 					<tr valign="top">
 						<th scope="row"><?php echo msg91_translate( 'Image URL for Send OTP Form' ); ?></th>
 						<td>
-							<input type="text" name="msg91_top_image" value="<?php echo esc_attr( get_option( 'msg91_top_image', HC_MSG91_PLUGIN_URL . 'assets/images/send-otp.png' ) ); ?>" size="60" />
+							<input type="text" name="msg91_top_image" value="<?php echo esc_attr( get_option( 'msg91_top_image', HCOTP_PLUGIN_URL . 'assets/images/send-otp.png' ) ); ?>" size="60" />
 							<p class="description"><?php echo esc_html( msg91_translate( 'Paste the full image URL to display above the OTP form (e.g. banner, logo).' ) ); ?></p>
 						</td>
 					</tr>
@@ -289,7 +289,7 @@ function msg91_otp_settings_page() {
 					<tr valign="top">
 						<th scope="row"><?php echo msg91_translate( 'Image URL for Verify OTP Form' ); ?></th>
 						<td>
-							<input type="text" name="msg91_top_verify_image" value="<?php echo esc_attr( get_option( 'msg91_top_verify_image', HC_MSG91_PLUGIN_URL . 'assets/images/verify-otp.png' ) ); ?>" size="60" />
+							<input type="text" name="msg91_top_verify_image" value="<?php echo esc_attr( get_option( 'msg91_top_verify_image', HCOTP_PLUGIN_URL . 'assets/images/verify-otp.png' ) ); ?>" size="60" />
 							<p class="description"><?php echo esc_html( msg91_translate( 'Paste the full image URL to display above the OTP form (e.g. banner, logo).' ) ); ?></p>
 						</td>
 					</tr>

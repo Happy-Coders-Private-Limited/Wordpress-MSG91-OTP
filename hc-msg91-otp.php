@@ -15,7 +15,7 @@
 
 define( 'HCOTP_PLUGIN_FILE', __FILE__ );
 define( 'HCOTP_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
-define( 'HC_MSG91_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+define( 'HCOTP_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -169,14 +169,14 @@ function msg91_otp_plugin_row_meta( $plugin_meta, $plugin_file, $plugin_data, $s
 function hc_msg91_enqueue_scripts() {
 	wp_enqueue_script(
 		'msg91-otp-js',
-		HC_MSG91_PLUGIN_URL . 'assets/js/hc-msg91-otp.js',
+		HCOTP_PLUGIN_URL . 'assets/js/hc-msg91-otp.js',
 		array( 'jquery' ),
 		defined( 'HC_MSG91_VERSION' ) ? HC_MSG91_VERSION : time(),
 		true
 	);
 	wp_enqueue_style(
 		'msg91-otp-css',
-		HC_MSG91_PLUGIN_URL . 'assets/css/hc-msg91-otp.css',
+		HCOTP_PLUGIN_URL . 'assets/css/hc-msg91-otp.css',
 		array(),
 		defined( 'HC_MSG91_VERSION' ) ? HC_MSG91_VERSION : time()
 	);
@@ -294,14 +294,14 @@ function msg91_get_options() {
 		'send_otp_desc_color'     => happycoders_msg91_get_option_with_default( 'msg91_sendotp_dec_color', '#000000' ),
 		'send_otp_button_text'    => happycoders_msg91_get_option_with_default( 'msg91_sendotp_button_text', 'Send OTP' ),
 		'send_otp_button_color'   => happycoders_msg91_get_option_with_default( 'msg91_sendotp_button_color', '#0073aa' ),
-		'top_image'               => happycoders_msg91_get_option_with_default( 'msg91_top_image', HC_MSG91_PLUGIN_URL . 'assets/images/send-otp.png' ),
+		'top_image'               => happycoders_msg91_get_option_with_default( 'msg91_top_image', HCOTP_PLUGIN_URL . 'assets/images/send-otp.png' ),
 		'verify_otp_lable'        => happycoders_msg91_get_option_with_default( 'msg91_verifyotp_lable', 'Enter Mobile' ),
 		'verify_otp_lable_color'  => happycoders_msg91_get_option_with_default( 'msg91_verifyotp_lable_color', '#000000' ),
 		'verify_otp_dec'          => happycoders_msg91_get_option_with_default( 'msg91_verifyotp_dec', 'Enter your 4-digit OTP' ),
 		'verify_otp_dec_color'    => happycoders_msg91_get_option_with_default( 'msg91_verifyotp_desc_color', '#000000' ),
 		'verify_otp_buttontext'   => happycoders_msg91_get_option_with_default( 'msg91_verifyotp_button_text', 'Verify OTP' ),
 		'verify_otp_button_color' => happycoders_msg91_get_option_with_default( 'msg91_verifyotp_button_color', '#0073aa' ),
-		'top_verify_image'        => happycoders_msg91_get_option_with_default( 'msg91_top_verify_image', HC_MSG91_PLUGIN_URL . 'assets/images/verify-otp.png' ),
+		'top_verify_image'        => happycoders_msg91_get_option_with_default( 'msg91_top_verify_image', HCOTP_PLUGIN_URL . 'assets/images/verify-otp.png' ),
 		'whatsapp_auth_enabled'   => happycoders_msg91_get_option_with_default( 'whatsapp_auth_enabled', 0 ),
 		'whatsapp_button_text'    => happycoders_msg91_get_option_with_default( 'whatsapp_button_text', 'Send OTP via Whatsapp' ),
 
@@ -368,10 +368,10 @@ add_shortcode(
 		$options = msg91_get_options();
 
 		if ( empty( $options['top_image'] ) ) {
-			$options['top_image'] = HC_MSG91_PLUGIN_URL . 'assets/images/send-otp.png';
+			$options['top_image'] = HCOTP_PLUGIN_URL . 'assets/images/send-otp.png';
 		}
 		if ( empty( $options['top_verify_image'] ) ) {
-			$options['top_verify_image'] = HC_MSG91_PLUGIN_URL . 'assets/images/verify-otp.png';
+			$options['top_verify_image'] = HCOTP_PLUGIN_URL . 'assets/images/verify-otp.png';
 		}
 
 		if ( is_user_logged_in() ) {
@@ -392,10 +392,10 @@ add_action(
 	function () {
 		$options = msg91_get_options();
 		if ( empty( $options['top_image'] ) ) {
-			$options['top_image'] = HC_MSG91_PLUGIN_URL . 'assets/images/send-otp.png';
+			$options['top_image'] = HCOTP_PLUGIN_URL . 'assets/images/send-otp.png';
 		}
 		if ( empty( $options['top_verify_image'] ) ) {
-			$options['top_verify_image'] = HC_MSG91_PLUGIN_URL . 'assets/images/verify-otp.png';
+			$options['top_verify_image'] = HCOTP_PLUGIN_URL . 'assets/images/verify-otp.png';
 		}
 		if ( is_user_logged_in() ) {
 			$user = wp_get_current_user();
