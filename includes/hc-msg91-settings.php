@@ -509,7 +509,7 @@ function hcotp_settings_page() {
 	<?php
 }
 // Helper function to get default notes for SMS templates
-function happycoders_msg91_get_default_sms_note( $key ) {
+function hcotp_get_default_sms_note( $key ) {
 	$notes = array(
 		'ncr' => 'New Customer: VAR1=CustomerName, VAR2=SiteName, VAR3=ShopURL',
 		'npo' => 'New Order: VAR1=CustomerName, VAR2=OrderID, VAR3=OrderTotal, VAR4=SiteName, VAR5=ShopURL',
