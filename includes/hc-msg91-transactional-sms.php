@@ -155,7 +155,7 @@ function hcotp_register_wc_sms_hooks() {
 	// 5. Order on Cart (Abandoned Cart) - Basic Implementation
 	add_action( 'woocommerce_cart_updated', 'hcotp_schedule_abandoned_cart_check' );
 	add_action( 'hc_msg91_trigger_abandoned_cart_sms', 'hcotp_send_abandoned_cart_sms', 10, 2 );
-	add_action( 'woocommerce_checkout_order_processed', 'happycoders_msg91_clear_abandoned_cart_check_on_order', 10, 1 );
+	add_action( 'woocommerce_checkout_order_processed', 'hcotp_clear_abandoned_cart_check_on_order', 10, 1 );
 }
 
 // --- HOOKS ---
@@ -644,8 +644,8 @@ function hcotp_send_abandoned_cart_sms( $user_id, $scheduled_cart_hash ) {
 	hcotp_send_transactional_sms( $phone, $template_id, $vars );
 }
 
-function happycoders_msg91_clear_abandoned_cart_check_on_order( $order_id ) {
-	error_log( 'happycoders_msg91_clear_abandoned_cart_check_on_order - Fired. Order ID: ' . $order_id );
+function hcotp_clear_abandoned_cart_check_on_order( $order_id ) {
+	error_log( 'hcotp_clear_abandoned_cart_check_on_order - Fired. Order ID: ' . $order_id );
 	$order = wc_get_order( $order_id );
 	if ( $order && $order->get_customer_id() ) {
 			$user_id = $order->get_customer_id();
