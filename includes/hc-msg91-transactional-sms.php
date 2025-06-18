@@ -141,7 +141,7 @@ function hcotp_get_customer_phone( $order_or_user_id ) {
  * Registers WooCommerce specific hooks for SMS notifications.
  * This function is called from the main plugin file after 'plugins_loaded'.
  */
-function happycoders_msg91_register_wc_sms_hooks() {
+function hcotp_register_wc_sms_hooks() {
 	// 2. New Order Placed
 	// This hook provides 3 arguments: $order_id, $posted_data, $order
 	// add_action('woocommerce_checkout_order_processed', 'happycoders_msg91_sms_on_new_order_placed', 10, 3);
