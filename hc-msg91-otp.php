@@ -147,7 +147,7 @@ function hcotp_plugin_row_meta( $plugin_meta, $plugin_file, $plugin_data, $statu
  * @param string $text The text to be translated.
  * @return string The translated text or the original text if no translation is found.
  */
-function hc_msg91_enqueue_scripts() {
+function hcotp_enqueue_scripts() {
 	wp_enqueue_script(
 		'msg91-otp-js',
 		HCOTP_PLUGIN_URL . 'assets/js/hc-msg91-otp.js',
@@ -174,7 +174,7 @@ function hc_msg91_enqueue_scripts() {
 		)
 	);
 }
-add_action( 'wp_enqueue_scripts', 'hc_msg91_enqueue_scripts' );
+add_action( 'wp_enqueue_scripts', 'hcotp_enqueue_scripts' );
 
 
 register_activation_hook( __FILE__, 'hcotp_create_blocked_numbers_table' );
