@@ -110,7 +110,7 @@
     cursor: not-allowed;
     margin-top: 10px;
 }
-#msg91_selected_countries option:checked {
+#hcotp_msg91_selected_countries option:checked {
     background-color: #007bff; 
     color: white;
 }

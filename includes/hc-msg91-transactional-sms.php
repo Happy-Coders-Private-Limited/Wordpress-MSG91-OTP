@@ -16,8 +16,8 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableControlle
  * @return bool|WP_Error True on success, WP_Error on failure.
  */
 function hcotp_send_transactional_sms( $mobile, $flow_id, $vars = array(), $force_send = false ) {
-	$authkey   = get_option( 'msg91_auth_key' );
-	$sender_id = get_option( 'msg91_sender_id' );
+	$authkey   = get_option( 'hcotp_msg91_auth_key' );
+	$sender_id = get_option( 'hcotp_msg91_sender_id' );
 
 	if ( empty( $authkey ) || empty( $sender_id ) || empty( $flow_id ) || empty( $mobile ) ) {
 		// error_log('MSG91 SMS: Missing authkey, sender ID, flow ID, or mobile.');
@@ -111,7 +111,7 @@ function hcotp_get_customer_phone( $order_or_user_id ) {
 					// For now, assume user_login IS the phone number if it matches pattern and billing_phone is empty
 					if ( strpos( $user_data->user_login, '+' ) !== 0 && strlen( $user_data->user_login ) <= 10 ) {
 						// If no country code, try to prepend default from plugin settings
-						$default_country_code = get_option( 'msg91_default_country', '+91' );
+						$default_country_code = get_option( 'hcotp_msg91_default_country', '+91' );
 						$phone                = str_replace( '+', '', $default_country_code ) . $user_data->user_login;
 					} else {
 						$phone = $user_data->user_login;
@@ -129,7 +129,7 @@ function hcotp_get_customer_phone( $order_or_user_id ) {
 		// Here, we just ensure it's a plausible phone number.
 		// If it doesn't have a +, assume it needs the default country code.
 		if ( strpos( $phone, '+' ) !== 0 && strlen( $phone ) <= 10 ) { // Simple check for local number
-			$default_country_code = get_option( 'msg91_default_country', '+91' ); // e.g. +91
+			$default_country_code = get_option( 'hcotp_msg91_default_country', '+91' ); // e.g. +91
 			$phone                = $default_country_code . $phone;
 		}
 	}
@@ -164,10 +164,10 @@ function hcotp_register_wc_sms_hooks() {
 // add_action( 'user_register', 'hcotp_sms_on_new_customer_registration', 10, 1 );
 function hcotp_sms_on_new_customer_registration( $user_id ) {
 	error_log( 'hcotp_sms_on_new_customer_registration - Fired. User ID: ' . $user_id );
-	if ( ! get_option( 'msg91_sms_ncr_enable', 0 ) ) {
+	if ( ! get_option( 'hcotp_msg91_sms_ncr_enable', 0 ) ) {
 		return;
 	}
-	$template_id = get_option( 'msg91_sms_ncr_template_id' );
+	$template_id = get_option( 'hcotp_msg91_sms_ncr_template_id' );
 	error_log( 'hcotp_sms_on_new_customer_registration - Template ID: ' . $template_id );
 	if ( empty( $template_id ) ) {
 		return;
@@ -197,11 +197,11 @@ function hcotp_sms_on_new_customer_registration( $user_id ) {
 function happycoders_msg91_sms_on_new_order_placed( $order_id, $posted_data, $order ) {
 	// Expects 3 args
 	error_log( 'happycoders_msg91_sms_on_new_order_placed - Fired. Order ID: ' . $order_id ); // First log
-	if ( ! get_option( 'msg91_sms_npo_enable', 0 ) ) {
+	if ( ! get_option( 'hcotp_msg91_sms_npo_enable', 0 ) ) {
 		error_log( 'happycoders_msg91_sms_on_new_order_placed - NPO SMS not enabled.' );
 		return;
 	}
-	$template_id = get_option( 'msg91_sms_npo_template_id' );
+	$template_id = get_option( 'hcotp_msg91_sms_npo_template_id' );
 	error_log( 'happycoders_msg91_sms_on_new_order_placed - Template ID: ' . $template_id );
 	if ( empty( $template_id ) ) {
 		error_log( 'happycoders_msg91_sms_on_new_order_placed - Template ID is empty.' );
@@ -253,11 +253,11 @@ function happycoders_msg91_sms_on_new_order_placed( $order_id, $posted_data, $or
 function hcotp_sms_on_thankyou_page( $order_id ) {
 	// Expects 1 arg
 	error_log( 'hcotp_sms_on_thankyou_page - Fired. Order ID: ' . $order_id );
-	if ( ! get_option( 'msg91_sms_npo_enable', 0 ) ) {
+	if ( ! get_option( 'hcotp_msg91_sms_npo_enable', 0 ) ) {
 		error_log( 'hcotp_sms_on_thankyou_page - NPO SMS not enabled.' );
 		return;
 	}
-	$template_id = get_option( 'msg91_sms_npo_template_id' );
+	$template_id = get_option( 'hcotp_msg91_sms_npo_template_id' );
 	error_log( 'hcotp_sms_on_thankyou_page - Template ID: ' . $template_id );
 	if ( empty( $template_id ) ) {
 		error_log( 'hcotp_sms_on_thankyou_page - Template ID is empty.' );
@@ -320,9 +320,9 @@ function hcotp_sms_on_order_status_change( $order_id, $old_status, $new_status )
 	}
 	$site_url = get_site_url();
 	// Order Shipped
-	$shipped_enabled       = get_option( 'msg91_sms_osh_enable', 0 );
-	$shipped_template_id   = get_option( 'msg91_sms_osh_template_id' );
-	$shipped_target_status = get_option( 'msg91_sms_osh_status_slug', 'shipped' ); // Default 'shipped'
+	$shipped_enabled       = get_option( 'hcotp_msg91_sms_osh_enable', 0 );
+	$shipped_template_id   = get_option( 'hcotp_msg91_sms_osh_template_id' );
+	$shipped_target_status = get_option( 'hcotp_msg91_sms_osh_status_slug', 'shipped' ); // Default 'shipped'
 
 	if ( $shipped_enabled && ! empty( $shipped_template_id ) && $new_status === $shipped_target_status ) {
 		error_log( 'hcotp_sms_on_order_status_change - Order Shipped SMS enabled. Template ID: ' . $shipped_template_id );
@@ -345,9 +345,9 @@ function hcotp_sms_on_order_status_change( $order_id, $old_status, $new_status )
 	}
 
 	// Order Delivered
-	$delivered_enabled       = get_option( 'msg91_sms_odl_enable', 0 );
-	$delivered_template_id   = get_option( 'msg91_sms_odl_template_id' );
-	$delivered_target_status = get_option( 'msg91_sms_odl_status_slug', 'delivered' ); // Default 'delivered'
+	$delivered_enabled       = get_option( 'hcotp_msg91_sms_odl_enable', 0 );
+	$delivered_template_id   = get_option( 'hcotp_msg91_sms_odl_template_id' );
+	$delivered_target_status = get_option( 'hcotp_msg91_sms_odl_status_slug', 'delivered' ); // Default 'delivered'
 
 	if ( $delivered_enabled && ! empty( $delivered_template_id ) && $new_status === $delivered_target_status ) {
 		error_log( 'hcotp_sms_on_order_status_change - Order Delivered SMS enabled. Template ID: ' . $shipped_template_id );
@@ -364,7 +364,7 @@ function hcotp_sms_on_order_status_change( $order_id, $old_status, $new_status )
 
 function hcotp_schedule_abandoned_cart_check() {
 	error_log( 'hcotp_schedule_abandoned_cart_check - Fired.' );
-	if ( is_admin() || ! get_option( 'msg91_sms_oac_enable', 0 ) ) {
+	if ( is_admin() || ! get_option( 'hcotp_msg91_sms_oac_enable', 0 ) ) {
 		return;
 	}
 
@@ -400,7 +400,7 @@ function hcotp_schedule_abandoned_cart_check() {
 		return;
 	}
 
-	$delay_hours = (float) get_option( 'msg91_sms_oac_delay_hours', 1 );
+	$delay_hours = (float) get_option( 'hcotp_msg91_sms_oac_delay_hours', 1 );
 	error_log( 'hcotp_schedule_abandoned_cart_check - Delay hours: ' . $delay_hours );
 	if ( $delay_hours <= 0 ) {
 		$delay_hours = 1;
@@ -453,11 +453,11 @@ function hcotp_send_abandoned_cart_sms( $user_id, $scheduled_cart_hash ) {
 	}
 	// --- End Ensure WooCommerce is loaded ---
 
-	if ( ! get_option( 'msg91_sms_oac_enable', 0 ) ) {
+	if ( ! get_option( 'hcotp_msg91_sms_oac_enable', 0 ) ) {
 		error_log( 'HC MSG91 Abandoned Cart SMS: SMS not enabled.' );
 		return;
 	}
-	$template_id = get_option( 'msg91_sms_oac_template_id' );
+	$template_id = get_option( 'hcotp_msg91_sms_oac_template_id' );
 	if ( empty( $template_id ) ) {
 		error_log( 'HC MSG91 Abandoned Cart SMS: Template ID is empty.' );
 		return;
@@ -612,7 +612,7 @@ function hcotp_send_abandoned_cart_sms( $user_id, $scheduled_cart_hash ) {
 	// if ($current_cart_hash !== $scheduled_cart_hash) return; // Cart changed significantly
 
 	// Check if user has placed an order since scheduling
-	$delay_hours = (float) get_option( 'msg91_sms_oac_delay_hours', 1 );
+	$delay_hours = (float) get_option( 'hcotp_msg91_sms_oac_delay_hours', 1 );
 	$args        = array(
 		'customer_id'  => $user_id,
 		'date_created' => '>' . ( time() - ( $delay_hours * HOUR_IN_SECONDS ) - ( 5 * MINUTE_IN_SECONDS ) ), // check orders in last X hours + 5 mins buffer
@@ -677,7 +677,7 @@ function hcotp_add_shipment_details_meta_box() {
 		? wc_get_page_screen_id( 'shop-order' )
 		: 'shop_order';
 
-	$shipped_enabled = get_option( 'msg91_sms_osh_enable', 0 );
+	$shipped_enabled = get_option( 'hcotp_msg91_sms_osh_enable', 0 );
 	if ( $shipped_enabled ) {
 		add_meta_box(
 			'hc_msg91_shipment_details',
