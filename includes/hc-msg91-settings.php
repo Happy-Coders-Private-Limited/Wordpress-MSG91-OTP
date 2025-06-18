@@ -42,9 +42,14 @@ add_action( 'admin_enqueue_scripts', 'hc_enqueue_msg91_scripts' );
 add_action(
 	'admin_init',
 	function () {
-		// Option to store the active tab
+		register_setting('msg91_otp_settings_group','whatsapp_auth_enabled', isset($_POST['whatsapp_auth_enabled']) ? 1 : 0);
+        register_setting('msg91_otp_settings_group','whatsapp_integrated_number', 'sanitize_text_field');
+        register_setting('msg91_otp_settings_group','whatsapp_template_name', 'sanitize_text_field');
+        register_setting('msg91_otp_settings_group','whatsapp_template_namespace', 'sanitize_text_field');
+        register_setting('msg91_otp_settings_group','whatsapp_language_code', 'sanitize_text_field'); 
+        register_setting('msg91_otp_settings_group','whatsapp_button_text', 'sanitize_text_field');
+	
 		register_setting( 'msg91_otp_settings_group', 'msg91_active_tab', 'sanitize_text_field' );
-
 		register_setting( 'msg91_otp_settings_group', 'msg91_auth_key', 'sanitize_text_field' );
 		register_setting( 'msg91_otp_settings_group', 'msg91_sender_id', 'sanitize_text_field' );
 		register_setting( 'msg91_otp_settings_group', 'msg91_template_id', 'sanitize_text_field' );
@@ -82,6 +87,8 @@ add_action(
 		register_setting( 'msg91_otp_settings_group', 'msg91_verifyotp_validation_msg', 'sanitize_text_field' );
 		register_setting( 'msg91_otp_settings_group', 'msg91_verifyotp_button_text', 'sanitize_text_field' );
 		register_setting( 'msg91_otp_settings_group', 'msg91_verifyotp_button_color', 'sanitize_hex_color' );
+	
+
 
 		// Code for SMS added by Kombiah
 		$sms_event_types = array(
@@ -107,8 +114,8 @@ add_action(
 );
 
 function happycoders_msg91_sanitize_positive_float( $input ) {
-	$value = floatval( str_replace( ',', '.', $input ) ); // Replace comma with dot for European locales
-	return ( $value > 0 ) ? $value : 0.01; // Ensure it's positive, default to a small minimum if not
+	$value = floatval( str_replace( ',', '.', $input ) );
+	return ( $value > 0 ) ? $value : 0.01; 
 }
 
 function msg91_otp_settings_page() {
@@ -121,6 +128,7 @@ function msg91_otp_settings_page() {
 			<a href="#general_settings" class="nav-tab <?php echo $active_tab == 'general_settings' ? 'nav-tab-active' : ''; ?>" data-tab="general_settings"><?php echo msg91_translate( 'General Settings' ); ?></a>        
 			<a href="#otp_settings" class="nav-tab <?php echo $active_tab == 'otp_settings' ? 'nav-tab-active' : ''; ?>" data-tab="otp_settings"><?php echo msg91_translate( 'OTP Login Settings' ); ?></a>
 			<a href="#sms_settings" class="nav-tab <?php echo $active_tab == 'sms_settings' ? 'nav-tab-active' : ''; ?>" data-tab="sms_settings"><?php echo msg91_translate( 'Transactional SMS Settings' ); ?></a>
+			
 		</h2>
 
 		<form method="post" action="options.php">
@@ -134,17 +142,64 @@ function msg91_otp_settings_page() {
 				<table class="form-table">
 					<tr valign="top">
 						<th scope="row"><?php echo msg91_translate( 'MSG91 Auth Key' ); ?></th>
-						<td><input type="text" name="msg91_auth_key" value="<?php echo esc_attr( get_option( 'msg91_auth_key' ) ); ?>" size="50" />
-						<p class="description"><?php echo esc_html( msg91_translate( 'Your MSG91 Authentication Key. Used for OTP and Transactional SMS.' ) ); ?></p></td>
-						
+						<td>
+							<input type="text" name="msg91_auth_key" value="<?php echo esc_attr( get_option( 'msg91_auth_key' ) ); ?>" size="50" />
+							<p class="description"><?php echo esc_html( msg91_translate( 'Your MSG91 Authentication Key. Used for OTP and Transactional SMS.' ) ); ?></p>
+						</td>
 					</tr>
 					<tr valign="top">
 						<th scope="row"><?php echo msg91_translate( 'Sender ID' ); ?></th>
-						<td><input type="text" name="msg91_sender_id" value="<?php echo esc_attr( get_option( 'msg91_sender_id' ) ); ?>" size="30" />
-						<p class="description"><?php echo esc_html(  msg91_translate( 'Your DLT Approved Sender ID. Used for OTP and Transactional SMS.' )); ?></p></td>
+						<td>
+							<input type="text" name="msg91_sender_id" value="<?php echo esc_attr( get_option( 'msg91_sender_id' ) ); ?>" size="30" />
+							<p class="description"><?php echo esc_html( msg91_translate( 'Your DLT Approved Sender ID. Used for OTP and Transactional SMS.' ) ); ?></p>
+						</td>
 					</tr>
+<tr valign="top">
+    <th scope="row">
+        <?php echo msg91_translate('Send OTP to users through WhatsApp?'); ?>
+    </th>
+    <td>
+        <label>
+            <input type="checkbox" id="whatsapp_auth_checkbox" name="whatsapp_auth_enabled" value="1" <?php checked(get_option('whatsapp_auth_enabled'), 1); ?> />
+            <?php echo msg91_translate('Yes'); ?>
+        </label>
+        <div id="whatsapp_auth_inputs" style="margin-top: 10px; <?php echo get_option('whatsapp_auth_enabled') ? '' : 'display:none;'; ?>">
+            <p class="lable-input-between">
+                <label ><strong >Integrated Number:</strong><br>
+                    <input type="text" class="input-top" size="50" name="whatsapp_integrated_number" value="<?php echo esc_attr(get_option('whatsapp_integrated_number')); ?>" class="regular-text" />
+                </label>
+            </p>
+            <p class="lable-input-between"> 
+                <label style="margin-bottom: 12px;"><strong>Template Name:</strong><br>
+                    <input type="text" class="input-top"  size="50" name="whatsapp_template_name" value="<?php echo esc_attr(get_option('whatsapp_template_name')); ?>" class="regular-text" />
+                </label>
+            </p> 
+            <p class="lable-input-between">
+                <label style="margin-bottom: 12px;"><strong>Template Namespace:</strong><br>
+                    <input type="text" class="input-top"  size="50" name="whatsapp_template_namespace" value="<?php echo esc_attr(get_option('whatsapp_template_namespace')); ?>" class="regular-text" />
+                </label>
+            </p>
+            <p class="lable-input-between">
+                <label style="margin-bottom: 12px;"><strong>Language Code:</strong><br>
+                    <input type="text"class="input-top"  size="50" name="whatsapp_language_code" value="<?php echo esc_attr(get_option('whatsapp_language_code')); ?>" class="regular-text" />
+                </label>
+            </p>
+
+			<p class="lable-input-between">
+                <label style="margin-bottom: 12px;"><strong>Button Text (Example : Send OTP via Whatsapp)</strong><br>
+                    <input type="text"class="input-top"  size="50" name="whatsapp_button_text" value="<?php echo esc_attr(get_option('whatsapp_button_text')); ?>" class="regular-text" />
+                </label>
+            </p>
+        </div>
+    </td>
+</tr>
+
+					
+
+
 				</table>
 			</div>
+
 
 			<div id="otp_settings" class="tab-content <?php echo $active_tab == 'otp_settings' ? 'active-tab' : ''; ?>">
 				<h2><?php echo msg91_translate( 'OTP Login Settings' ); ?></h2>
@@ -442,6 +497,8 @@ function msg91_otp_settings_page() {
 				</table>
 				<?php endforeach; ?>
 			</div>
+
+
 
 			<?php submit_button(); ?>
 		</form>

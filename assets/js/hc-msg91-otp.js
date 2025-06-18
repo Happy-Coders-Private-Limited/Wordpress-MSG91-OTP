@@ -1,6 +1,55 @@
 jQuery(document).ready(function ($) {
     
     $(document).on('click', '#msg91_send_otp', function () {
+
+        let $button = $(this); 
+        let $container = $button.closest('#otp-form-wrap'); 
+    
+        let mobile = $container.find('#msg91_mobile').val().trim();
+        let countryCode = $container.find('#msg91_country_code').val();
+        let msg = msg91_ajax_obj.sendotp_validation_msg || 'Please enter a valid mobile number (between 5 and 12 digits).';
+    
+        if (!mobile || mobile.length < 5 || mobile.length > 12) {
+            $container.find('#otp-send-status').html('<span style="color:red;">' + msg + '</span>');
+            return;
+        }
+    
+
+        let mobileWithCode = countryCode + mobile;
+    
+        $button.prop('disabled', true).text('Sending...');
+
+        $.post(msg91_ajax_obj.ajax_url, {
+            action: 'happycoders_send_msg91_otp_ajax',
+            mobile: mobileWithCode,
+             otpprocess: 'sms',
+             security_nonce: msg91_ajax_obj.nonce 
+            
+        }, function (res) {
+             $container.find('.sms-button').prop('disabled', false).text('SMS');
+               $container.find('.whatsapp-button').prop('disabled', false).text('Whatsapp');
+           
+             console.log('OTP sent successfully, starting timer...');
+            if (res) {
+                 console.log('OTP sent');
+                if (res.success) {
+                     $container.find('#otpprocess').val('sms');
+                    $container.find('#send_otp_section').hide();
+                    $container.find('#otp_input_wrap').show();
+                    startOTPTimer($container); 
+                } else {
+                    $container.find('#otp-send-status').html('<span style="color:red;">' + res.data.message + '</span>');
+                    $button.prop('disabled', false).text('Send OTP');
+                }
+            } else {
+                 console.log('OTP');
+                $container.find('#otp-send-status').html('<span style="color:red;">Something went wrong. Try again.</span>');
+                $button.prop('disabled', false).text('Send OTP');
+            }
+        });
+    });
+
+     $(document).on('click', '#msg91_send_otp_whatsapp', function () {
         let $button = $(this); 
         let $container = $button.closest('#otp-form-wrap'); 
     
@@ -16,23 +65,29 @@ jQuery(document).ready(function ($) {
         let mobileWithCode = countryCode + mobile;
     
         $button.prop('disabled', true).text('Sending...');
+
     
         $.post(msg91_ajax_obj.ajax_url, {
             action: 'happycoders_send_msg91_otp_ajax',
             mobile: mobileWithCode,
+               otpprocess: 'whatsapp',
              security_nonce: msg91_ajax_obj.nonce 
             
         }, function (res) {
+              $container.find('.sms-button').prop('disabled', false).text('SMS');
+              $container.find('.whatsapp-button').prop('disabled', false).text('Whatsapp');
              console.log('OTP sent successfully, starting timer...');
             if (res) {
                  console.log('OTP sent');
                 if (res.success) {
+                      $container.find('#otpprocess').val('whatsapp');
                     $container.find('#send_otp_section').hide();
                     $container.find('#otp_input_wrap').show();
                     startOTPTimer($container); 
                 } else {
                     $container.find('#otp-send-status').html('<span style="color:red;">' + res.data.message + '</span>');
                     $button.prop('disabled', false).text('Send OTP');
+                    
                 }
             } else {
                  console.log('OTP');
@@ -41,6 +96,7 @@ jQuery(document).ready(function ($) {
             }
         });
     });
+    
     
 
     $('.otp-field').on('input', function () {
@@ -72,18 +128,27 @@ jQuery(document).ready(function ($) {
             $container.find('#otp-verify-status').html('<span style="color:red;font-size: 14px;">' + msg + '</span>');
             return;
         }
+         const otpButtons = $container.find('#otp_method_buttons');
+
+        
+            
     
         $container.find('#otp-verify-status').html('Verifying...');
         $button.prop('disabled', true).text('Verifying...');
+        let otpprocess = $container.find('#otpprocess').val(); 
     
         $.post(msg91_ajax_obj.ajax_url, {
             action: 'happycoders_verify_msg91_otp_ajax',
             mobile: mobileWithCode,
+            otpprocess : otpprocess,
             otp: otp,
               security_nonce: msg91_ajax_obj.nonce 
         }, function (res) {
+              
             if (res && res.success) {
                 $container.find('#otp-verify-status').html('<span style="color:green;">OTP Verified!</span>');
+                    // Hide the SMS & WhatsApp buttons
+            otpButtons.hide();
 
                 let redirectUrl = msg91_ajax_obj.redirect_page;
     
@@ -102,9 +167,7 @@ jQuery(document).ready(function ($) {
                 $container.find('#msg91_verify_otp').hide();
                 $container.find('#resend_otp').hide();
                 $container.find('#resend_timer_text').hide();
-
                 $('#account-tab').removeClass('active show');
-           
                 if ($container.data('is-popup') == '1') {
                     setTimeout(function () {
                         window.location.href = '/';
@@ -112,13 +175,17 @@ jQuery(document).ready(function ($) {
                 }
 
             } else {
+                
                 $container.find('#otp-verify-status').html('<span style="color:red;">Invalid OTP.</span>');
+                    // Hide the SMS & WhatsApp buttons
+            otpButtons.show();
             }
     
             $button.prop('disabled', false).text('Verify OTP');
         }).fail(function () {
             $container.find('#otp-verify-status').html('<span style="color:red;">Server error. Try again.</span>');
             $button.prop('disabled', false).text('Verify OTP');
+                otpButtons.show();
         });
     });
     
@@ -138,12 +205,13 @@ jQuery(document).ready(function ($) {
     
         let mobileWithCode = countryCode + mobile;
     
-        $button.prop('disabled', true).text('Sending...');
+       
         $.post(msg91_ajax_obj.ajax_url, {
             action: 'happycoders_send_msg91_otp_ajax',
             mobile: mobileWithCode,
               security_nonce: msg91_ajax_obj.nonce 
         }, function (res) {
+            
             if (res && res.success) {
                 startOTPTimer($container);
             } else {
@@ -157,7 +225,12 @@ jQuery(document).ready(function ($) {
     function startOTPTimer($container) {
         let timer = msg91_ajax_obj.resend_timer || 30;
         const resendBtn = $container.find('#resend_otp');
-    
+
+         const otpButtons = $container.find('#otp_method_buttons');
+
+            // Hide the SMS & WhatsApp buttons
+            otpButtons.hide();
+            
         resendBtn.prop('disabled', true).text('Resend OTP (' + timer + 's)');
     
         const interval = setInterval(() => {
@@ -165,11 +238,10 @@ jQuery(document).ready(function ($) {
             resendBtn.text('Resend OTP (' + timer + 's)');
             if (timer <= 0) {
                 clearInterval(interval);
-                resendBtn.prop('disabled', false)
+                resendBtn.prop('disabled', true)
                     .html("Didn't receive an OTP?<strong> Resend OTP</strong>")
-                    .css({
-                        'cursor': 'pointer'
-                    });
+                    
+                     otpButtons.show();
             }
         }, 1000);
     }
@@ -243,28 +315,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 jQuery(document).ready(function($) {
-			// Tab functionality
-			$('.nav-tab-wrapper a.nav-tab').click(function(e) {
+	$('.nav-tab-wrapper a.nav-tab').click(function(e) {
 				e.preventDefault();
 				var tab_id = $(this).data('tab');
-
-				// Set active class on tab link
 				$('.nav-tab-wrapper a.nav-tab').removeClass('nav-tab-active');
 				$(this).addClass('nav-tab-active');
-
-				// Show/hide tab content
 				$('.tab-content').removeClass('active-tab').hide();
 				$('#' + tab_id).addClass('active-tab').show();
-
-				// Update hidden input for active tab
 				$('#msg91_active_tab_input').val(tab_id);
-			});
+	});
 });
+jQuery(document).ready(function($) {
+    const $checkbox = $('#whatsapp_auth_checkbox');
+    const $inputsDiv = $('#whatsapp_auth_inputs');
 
-
-
-
-
-
-
-
+    $checkbox.on('change', function() {
+        $inputsDiv.toggle(this.checked);
+    });
+});
