@@ -138,7 +138,7 @@ jQuery(document).ready(function ($) {
         let otpprocess = $container.find('#otpprocess').val(); 
     
         $.post(msg91_ajax_obj.ajax_url, {
-            action: 'happycoders_verify_msg91_otp_ajax',
+            action: 'hcotp_verify_otp_ajax',
             mobile: mobileWithCode,
             otpprocess : otpprocess,
             otp: otp,

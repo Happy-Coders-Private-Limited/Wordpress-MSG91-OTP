@@ -737,8 +737,8 @@ function hcotp_auto_login_user() {
 		)
 	);
 }
-add_action( 'wp_ajax_happycoders_verify_msg91_otp_ajax', 'happycoders_verify_msg91_otp_ajax' );
-add_action( 'wp_ajax_nopriv_happycoders_verify_msg91_otp_ajax', 'happycoders_verify_msg91_otp_ajax' );
+add_action( 'wp_ajax_hcotp_verify_otp_ajax', 'hcotp_verify_otp_ajax' );
+add_action( 'wp_ajax_nopriv_hcotp_verify_otp_ajax', 'hcotp_verify_otp_ajax' );
 
 /**
  * Verify the OTP sent by MSG91 and log in the user if OTP is valid.
@@ -749,7 +749,7 @@ add_action( 'wp_ajax_nopriv_happycoders_verify_msg91_otp_ajax', 'happycoders_ver
  *
  * @return mixed A JSON response with a success message and the user ID if the OTP is valid, or an error message if the OTP is invalid.
  */
-function happycoders_verify_msg91_otp_ajax() {
+function hcotp_verify_otp_ajax() {
 	check_ajax_referer( 'msg91_ajax_nonce_action', 'security_nonce' );
 	$mobile     = sanitize_text_field( wp_unslash( isset( $_POST['mobile'] ) ? $_POST['mobile'] : '' ) );
 	$otpprocess = sanitize_text_field( wp_unslash( $_POST['otpprocess'] ?? '' ) );
