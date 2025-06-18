@@ -154,7 +154,7 @@ function hcotp_register_wc_sms_hooks() {
 
 	// 5. Order on Cart (Abandoned Cart) - Basic Implementation
 	add_action( 'woocommerce_cart_updated', 'hcotp_schedule_abandoned_cart_check' );
-	add_action( 'hc_msg91_trigger_abandoned_cart_sms', 'happycoders_msg91_send_abandoned_cart_sms', 10, 2 );
+	add_action( 'hc_msg91_trigger_abandoned_cart_sms', 'hcotp_send_abandoned_cart_sms', 10, 2 );
 	add_action( 'woocommerce_checkout_order_processed', 'happycoders_msg91_clear_abandoned_cart_check_on_order', 10, 1 );
 }
 
@@ -432,7 +432,7 @@ function hcotp_schedule_abandoned_cart_check() {
 	}
 }
 
-function happycoders_msg91_send_abandoned_cart_sms( $user_id, $scheduled_cart_hash ) {
+function hcotp_send_abandoned_cart_sms( $user_id, $scheduled_cart_hash ) {
 	error_log( "HC MSG91 Abandoned Cart SMS: Fired for User ID: $user_id, Scheduled Cart Hash: $scheduled_cart_hash" );
 
 	// --- Ensure WooCommerce is loaded ---
