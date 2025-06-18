@@ -674,8 +674,8 @@ function hcotp_send_otp_ajax() {
 
 add_action( 'wp_ajax_hcotp_send_otp_ajax', 'hcotp_send_otp_ajax' );
 add_action( 'wp_ajax_nopriv_hcotp_send_otp_ajax', 'hcotp_send_otp_ajax' );
-add_action( 'wp_ajax_msg91_auto_login_user', 'msg91_auto_login_user' );
-add_action( 'wp_ajax_nopriv_msg91_auto_login_user', 'msg91_auto_login_user' );
+add_action( 'wp_ajax_hcotp_auto_login_user', 'hcotp_auto_login_user' );
+add_action( 'wp_ajax_nopriv_hcotp_auto_login_user', 'hcotp_auto_login_user' );
 
 /**
  * Automatically logs in a user based on their mobile number.
@@ -690,7 +690,7 @@ add_action( 'wp_ajax_nopriv_msg91_auto_login_user', 'msg91_auto_login_user' );
  *
  * Sends a JSON response indicating success or failure.
  */
-function msg91_auto_login_user() {
+function hcotp_auto_login_user() {
 	check_ajax_referer( 'msg91_ajax_nonce_action', 'security_nonce' );
 	$mobile = sanitize_text_field( wp_unslash( isset( $_POST['mobile'] ) ? $_POST['mobile'] : '' ) );
 	if ( empty( $mobile ) ) {
@@ -795,7 +795,7 @@ function happycoders_verify_msg91_otp_ajax() {
 					)
 				);
 			} else {
-				msg91_auto_login_user();
+				hcotp_auto_login_user();
 			}
 			setcookie( 'msg91_verified_mobile', $mobile, time() + ( 30 * 24 * 60 * 60 ), COOKIEPATH, COOKIE_DOMAIN );
 			setcookie( 'msg91_verified_user_id', $user->ID, time() + ( 30 * 24 * 60 * 60 ), COOKIEPATH, COOKIE_DOMAIN );
