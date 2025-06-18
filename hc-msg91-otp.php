@@ -723,7 +723,6 @@ function hcotp_auto_login_user() {
 	}
 	wp_set_current_user( $user->ID );
 	wp_set_auth_cookie( $user->ID, true );
-	happycoders_maybe_start_session( 60 * 60 * 24 * 30 );
 
 	setcookie( 'msg91_verified_mobile', $mobile, time() + ( 30 * 24 * 60 * 60 ), COOKIEPATH, COOKIE_DOMAIN );
 	setcookie( 'msg91_verified_user_id', $user->ID, time() + ( 30 * 24 * 60 * 60 ), COOKIEPATH, COOKIE_DOMAIN );
@@ -786,8 +785,6 @@ function hcotp_verify_otp_ajax() {
 				setcookie( 'msg91_verified_mobile', $mobile, time() + ( 30 * 24 * 60 * 60 ), COOKIEPATH, COOKIE_DOMAIN );
 				setcookie( 'msg91_verified_user_id', $user->ID, time() + ( 30 * 24 * 60 * 60 ), COOKIEPATH, COOKIE_DOMAIN );
 
-				happycoders_maybe_start_session( 60 * 60 * 24 * 30 );
-
 				wp_send_json_success(
 					array(
 						'message' => 'OTP Verified Successfully, User logged in',
@@ -827,7 +824,6 @@ function hcotp_verify_otp_ajax() {
 
 		wp_set_current_user( $user->ID );
 		wp_set_auth_cookie( $user->ID, true );
-		happycoders_maybe_start_session( 60 * 60 * 24 * 30 );
 
 		setcookie( 'msg91_verified_mobile', $mobile, time() + ( 30 * 24 * 60 * 60 ), COOKIEPATH, COOKIE_DOMAIN );
 		setcookie( 'msg91_verified_user_id', $user->ID, time() + ( 30 * 24 * 60 * 60 ), COOKIEPATH, COOKIE_DOMAIN );
@@ -843,21 +839,7 @@ function hcotp_verify_otp_ajax() {
 	}
 }
 
-/**
- * Starts a PHP session if it hasn't been started yet.
- *
- * This function checks if headers have been sent and if a session is already
- * active. If not, it sets the session.gc_maxlifetime to the specified value
- * and starts a session.
- *
- * @param int $session_lifetime The lifetime of the session in seconds.
- */
-function happycoders_maybe_start_session( $session_lifetime ) {
-	if ( ! headers_sent() && ! session_id() ) {
-		session_set_cookie_params( $session_lifetime );
-		session_start();
-	}
-}
+
 
 // Register custom order statuses
 add_action( 'init', 'happycoders_msg91_register_custom_order_statuses' );
