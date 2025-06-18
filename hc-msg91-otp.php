@@ -363,7 +363,7 @@ add_shortcode(
 					</div>';
 		}
 
-		return happycoders_msg91_otp_form( $options, false );
+		return hcotp_otp_form( $options, false );
 	}
 );
 
@@ -385,7 +385,7 @@ add_action(
 						<button id="next-to-address" style="margin-top: 20px;">Next</button>
 					</div>';
 		} else {
-			echo happycoders_msg91_otp_form( $options, true );
+			echo hcotp_otp_form( $options, true );
 		}
 	}
 );
@@ -412,7 +412,7 @@ add_action(
  *
  * @return string The rendered form.
  */
-function happycoders_msg91_otp_form( $options, $is_popup = false ) {
+function hcotp_otp_form( $options, $is_popup = false ) {
 	ob_start();
 
 	?>
