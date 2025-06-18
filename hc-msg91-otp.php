@@ -178,7 +178,7 @@ add_action( 'wp_enqueue_scripts', 'hcotp_enqueue_scripts' );
 
 
 register_activation_hook( __FILE__, 'hcotp_create_blocked_numbers_table' );
-register_activation_hook( __FILE__, 'msg91_add_otp_column_to_users_table' );
+register_activation_hook( __FILE__, 'hcotp_add_otp_column_to_users_table' );
 register_deactivation_hook( __FILE__, 'hcotp_delete_blocked_numbers_table' );
 
 /**
@@ -211,7 +211,7 @@ function hcotp_create_blocked_numbers_table() {
 	dbDelta( $sql );
 }
 
-function msg91_add_otp_column_to_users_table() {
+function hcotp_add_otp_column_to_users_table() {
 	global $wpdb;
 	$table_name = $wpdb->users;
 
