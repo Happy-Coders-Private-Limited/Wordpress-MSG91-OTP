@@ -267,7 +267,7 @@ add_action( 'wp_ajax_nopriv_hcotp_send_otp_ajax', 'hcotp_send_otp_ajax' );
  * - 'verify_otp_button_color': The background color of the verify OTP button.
  * - 'top_verify_image': URL of the image displayed at the top of the verify OTP form.
  */
-function msg91_get_options() {
+function hcotp_get_options() {
 	return array(
 		'send_otp_label'          => happycoders_msg91_get_option_with_default( 'msg91_sendotp_lable', 'Mobile Number' ),
 		'send_otp_label_color'    => happycoders_msg91_get_option_with_default( 'msg91_sendotp_lable_color', '#000000' ),
@@ -346,7 +346,7 @@ function happycoders_msg91_country_select( $options ) {
 add_shortcode(
 	'msg91_otp_form',
 	function () {
-		$options = msg91_get_options();
+		$options = hcotp_get_options();
 
 		if ( empty( $options['top_image'] ) ) {
 			$options['top_image'] = HCOTP_PLUGIN_URL . 'assets/images/send-otp.png';
@@ -371,7 +371,7 @@ add_shortcode(
 add_action(
 	'wp_footer',
 	function () {
-		$options = msg91_get_options();
+		$options = hcotp_get_options();
 		if ( empty( $options['top_image'] ) ) {
 			$options['top_image'] = HCOTP_PLUGIN_URL . 'assets/images/send-otp.png';
 		}
