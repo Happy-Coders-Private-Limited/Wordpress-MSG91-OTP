@@ -306,7 +306,7 @@ function hcotp_get_option_with_default( $option_name, $default_value ) {
  * @param array $options The plugin options retrieved from the WordPress options table.
  * @return string The HTML for the country select dropdown.
  */
-function happycoders_msg91_country_select( $options ) {
+function hcotp_country_select( $options ) {
 	$html          = '';
 	$all_countries = happycoders_msg91_get_countries_with_iso();
 
@@ -448,7 +448,7 @@ function happycoders_msg91_otp_form( $options, $is_popup = false ) {
 
 			<div class="mobile-input-wrap">
 				<?php
-				echo happycoders_msg91_country_select( $options );
+				echo hcotp_country_select( $options );
 				?>
 				<input type="hidden" id="otpprocess" value="">
 				<input type="tel" id="msg91_mobile" maxlength="10" pattern="\d*" placeholder="Mobile Number" oninput="this.value = this.value.replace(/[^0-9]/g, '' );" />
