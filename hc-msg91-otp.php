@@ -269,26 +269,26 @@ add_action( 'wp_ajax_nopriv_hcotp_send_otp_ajax', 'hcotp_send_otp_ajax' );
  */
 function hcotp_get_options() {
 	return array(
-		'send_otp_label'          => happycoders_msg91_get_option_with_default( 'msg91_sendotp_lable', 'Mobile Number' ),
-		'send_otp_label_color'    => happycoders_msg91_get_option_with_default( 'msg91_sendotp_lable_color', '#000000' ),
-		'send_otp_desc'           => happycoders_msg91_get_option_with_default( 'msg91_sendotp_dec', 'We will send you an OTP' ),
-		'send_otp_desc_color'     => happycoders_msg91_get_option_with_default( 'msg91_sendotp_dec_color', '#000000' ),
-		'send_otp_button_text'    => happycoders_msg91_get_option_with_default( 'msg91_sendotp_button_text', 'Send OTP' ),
-		'send_otp_button_color'   => happycoders_msg91_get_option_with_default( 'msg91_sendotp_button_color', '#0073aa' ),
-		'top_image'               => happycoders_msg91_get_option_with_default( 'msg91_top_image', HCOTP_PLUGIN_URL . 'assets/images/send-otp.png' ),
-		'verify_otp_lable'        => happycoders_msg91_get_option_with_default( 'msg91_verifyotp_lable', 'Enter Mobile' ),
-		'verify_otp_lable_color'  => happycoders_msg91_get_option_with_default( 'msg91_verifyotp_lable_color', '#000000' ),
-		'verify_otp_dec'          => happycoders_msg91_get_option_with_default( 'msg91_verifyotp_dec', 'Enter your 4-digit OTP' ),
-		'verify_otp_dec_color'    => happycoders_msg91_get_option_with_default( 'msg91_verifyotp_desc_color', '#000000' ),
-		'verify_otp_buttontext'   => happycoders_msg91_get_option_with_default( 'msg91_verifyotp_button_text', 'Verify OTP' ),
-		'verify_otp_button_color' => happycoders_msg91_get_option_with_default( 'msg91_verifyotp_button_color', '#0073aa' ),
-		'top_verify_image'        => happycoders_msg91_get_option_with_default( 'msg91_top_verify_image', HCOTP_PLUGIN_URL . 'assets/images/verify-otp.png' ),
-		'whatsapp_auth_enabled'   => happycoders_msg91_get_option_with_default( 'whatsapp_auth_enabled', 0 ),
-		'whatsapp_button_text'    => happycoders_msg91_get_option_with_default( 'whatsapp_button_text', 'Send OTP via Whatsapp' ),
+		'send_otp_label'          => hcotp_get_option_with_default( 'msg91_sendotp_lable', 'Mobile Number' ),
+		'send_otp_label_color'    => hcotp_get_option_with_default( 'msg91_sendotp_lable_color', '#000000' ),
+		'send_otp_desc'           => hcotp_get_option_with_default( 'msg91_sendotp_dec', 'We will send you an OTP' ),
+		'send_otp_desc_color'     => hcotp_get_option_with_default( 'msg91_sendotp_dec_color', '#000000' ),
+		'send_otp_button_text'    => hcotp_get_option_with_default( 'msg91_sendotp_button_text', 'Send OTP' ),
+		'send_otp_button_color'   => hcotp_get_option_with_default( 'msg91_sendotp_button_color', '#0073aa' ),
+		'top_image'               => hcotp_get_option_with_default( 'msg91_top_image', HCOTP_PLUGIN_URL . 'assets/images/send-otp.png' ),
+		'verify_otp_lable'        => hcotp_get_option_with_default( 'msg91_verifyotp_lable', 'Enter Mobile' ),
+		'verify_otp_lable_color'  => hcotp_get_option_with_default( 'msg91_verifyotp_lable_color', '#000000' ),
+		'verify_otp_dec'          => hcotp_get_option_with_default( 'msg91_verifyotp_dec', 'Enter your 4-digit OTP' ),
+		'verify_otp_dec_color'    => hcotp_get_option_with_default( 'msg91_verifyotp_desc_color', '#000000' ),
+		'verify_otp_buttontext'   => hcotp_get_option_with_default( 'msg91_verifyotp_button_text', 'Verify OTP' ),
+		'verify_otp_button_color' => hcotp_get_option_with_default( 'msg91_verifyotp_button_color', '#0073aa' ),
+		'top_verify_image'        => hcotp_get_option_with_default( 'msg91_top_verify_image', HCOTP_PLUGIN_URL . 'assets/images/verify-otp.png' ),
+		'whatsapp_auth_enabled'   => hcotp_get_option_with_default( 'whatsapp_auth_enabled', 0 ),
+		'whatsapp_button_text'    => hcotp_get_option_with_default( 'whatsapp_button_text', 'Send OTP via Whatsapp' ),
 
 	);
 }
-function happycoders_msg91_get_option_with_default( $option_name, $default_value ) {
+function hcotp_get_option_with_default( $option_name, $default_value ) {
 	$value = get_option( $option_name );
 	return ( $value === false || $value === '' ) ? $default_value : $value;
 }
