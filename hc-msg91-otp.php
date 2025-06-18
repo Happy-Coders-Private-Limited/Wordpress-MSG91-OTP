@@ -842,8 +842,8 @@ function hcotp_verify_otp_ajax() {
 
 
 // Register custom order statuses
-add_action( 'init', 'happycoders_msg91_register_custom_order_statuses' );
-function happycoders_msg91_register_custom_order_statuses() {
+add_action( 'init', 'hcotp_register_custom_order_statuses' );
+function hcotp_register_custom_order_statuses() {
 	// Status: Shipped
 	register_post_status(
 		'wc-shipped',
