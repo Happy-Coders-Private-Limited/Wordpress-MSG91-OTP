@@ -153,7 +153,7 @@ function hcotp_register_wc_sms_hooks() {
 	add_action( 'woocommerce_order_status_changed', 'hcotp_sms_on_order_status_change', 10, 3 );
 
 	// 5. Order on Cart (Abandoned Cart) - Basic Implementation
-	add_action( 'woocommerce_cart_updated', 'happycoders_msg91_schedule_abandoned_cart_check' );
+	add_action( 'woocommerce_cart_updated', 'hcotp_schedule_abandoned_cart_check' );
 	add_action( 'hc_msg91_trigger_abandoned_cart_sms', 'happycoders_msg91_send_abandoned_cart_sms', 10, 2 );
 	add_action( 'woocommerce_checkout_order_processed', 'happycoders_msg91_clear_abandoned_cart_check_on_order', 10, 1 );
 }
@@ -362,14 +362,14 @@ function hcotp_sms_on_order_status_change( $order_id, $old_status, $new_status )
 }
 
 
-function happycoders_msg91_schedule_abandoned_cart_check() {
-	error_log( 'happycoders_msg91_schedule_abandoned_cart_check - Fired.' );
+function hcotp_schedule_abandoned_cart_check() {
+	error_log( 'hcotp_schedule_abandoned_cart_check - Fired.' );
 	if ( is_admin() || ! get_option( 'msg91_sms_oac_enable', 0 ) ) {
 		return;
 	}
 
 	if ( WC()->cart->is_empty() ) {
-		error_log( 'happycoders_msg91_schedule_abandoned_cart_check - Cart is now empty.' );
+		error_log( 'hcotp_schedule_abandoned_cart_check - Cart is now empty.' );
 			$user_id = get_current_user_id();
 		if ( $user_id ) {
 			error_log( "HC MSG91 Schedule: Cart is empty for user $user_id. Attempting to clear scheduled tasks." );
@@ -401,7 +401,7 @@ function happycoders_msg91_schedule_abandoned_cart_check() {
 	}
 
 	$delay_hours = (float) get_option( 'msg91_sms_oac_delay_hours', 1 );
-	error_log( 'happycoders_msg91_schedule_abandoned_cart_check - Delay hours: ' . $delay_hours );
+	error_log( 'hcotp_schedule_abandoned_cart_check - Delay hours: ' . $delay_hours );
 	if ( $delay_hours <= 0 ) {
 		$delay_hours = 1;
 	}
@@ -419,7 +419,7 @@ function happycoders_msg91_schedule_abandoned_cart_check() {
 			if ( isset( $cron['hc_msg91_trigger_abandoned_cart_sms'] ) ) {
 				foreach ( $cron['hc_msg91_trigger_abandoned_cart_sms'] as $hash => $details ) {
 					if ( isset( $details['args'][0] ) && $details['args'][0] == $user_id ) {
-						error_log( 'happycoders_msg91_schedule_abandoned_cart_check - Clearing previous schedule for User ID: ' . $user_id );
+						error_log( 'hcotp_schedule_abandoned_cart_check - Clearing previous schedule for User ID: ' . $user_id );
 						wp_unschedule_event( $time, 'hc_msg91_trigger_abandoned_cart_sms', $details['args'] );
 					}
 				}
