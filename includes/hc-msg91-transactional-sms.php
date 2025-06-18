@@ -327,9 +327,9 @@ function hcotp_sms_on_order_status_change( $order_id, $old_status, $new_status )
 	if ( $shipped_enabled && ! empty( $shipped_template_id ) && $new_status === $shipped_target_status ) {
 		error_log( 'hcotp_sms_on_order_status_change - Order Shipped SMS enabled. Template ID: ' . $shipped_template_id );
 
-		$tracking_id       = get_post_meta( $order_id, '_hc_msg91_tracking_id', true );
-		$tracking_url      = get_post_meta( $order_id, '_hc_msg91_tracking_url', true );
-		$shipping_provider = get_post_meta( $order_id, '_hc_msg91_shipping_provider', true );
+		$tracking_id       = get_post_meta( $order_id, '_hcotp_tracking_id', true );
+		$tracking_url      = get_post_meta( $order_id, '_hcotp_tracking_url', true );
+		$shipping_provider = get_post_meta( $order_id, '_hcotp_shipping_provider', true );
 		// If using another plugin, the meta key for tracking number might be different.
 
 		$vars = array(
@@ -712,9 +712,9 @@ function hcotp_shipment_details_meta_box_html( $object ) {
 
 	wp_nonce_field( 'hc_msg91_save_shipment_details', 'hc_msg91_shipment_nonce' );
 
-	$tracking_id       = get_post_meta( $order_id, '_hc_msg91_tracking_id', true );
-	$tracking_url      = get_post_meta( $order_id, '_hc_msg91_tracking_url', true );
-	$shipping_provider = get_post_meta( $order_id, '_hc_msg91_shipping_provider', true );
+	$tracking_id       = get_post_meta( $order_id, '_hcotp_tracking_id', true );
+	$tracking_url      = get_post_meta( $order_id, '_hcotp_tracking_url', true );
+	$shipping_provider = get_post_meta( $order_id, '_hcotp_shipping_provider', true );
 	?>
 	<p>
 		<label for="hc_msg91_tracking_id"><?php esc_html_e( 'Tracking ID:', 'happy-coders-otp-login' ); ?></label><br>
@@ -756,13 +756,13 @@ function hcotp_save_shipment_details_meta( $order_id ) {
 	}
 
 	if ( isset( $_POST['hc_msg91_tracking_id'] ) ) {
-		update_post_meta( $order_id, '_hc_msg91_tracking_id', sanitize_text_field( $_POST['hc_msg91_tracking_id'] ) );
+		update_post_meta( $order_id, '_hcotp_tracking_id', sanitize_text_field( $_POST['hc_msg91_tracking_id'] ) );
 	}
 	if ( isset( $_POST['hc_msg91_tracking_url'] ) ) {
-		update_post_meta( $order_id, '_hc_msg91_tracking_url', esc_url_raw( $_POST['hc_msg91_tracking_url'] ) );
+		update_post_meta( $order_id, '_hcotp_tracking_url', esc_url_raw( $_POST['hc_msg91_tracking_url'] ) );
 	}
 	if ( isset( $_POST['hc_msg91_shipping_provider'] ) ) {
-		update_post_meta( $order_id, '_hc_msg91_shipping_provider', sanitize_text_field( $_POST['hc_msg91_shipping_provider'] ) );
+		update_post_meta( $order_id, '_hcotp_shipping_provider', sanitize_text_field( $_POST['hc_msg91_shipping_provider'] ) );
 	}
 }
 
