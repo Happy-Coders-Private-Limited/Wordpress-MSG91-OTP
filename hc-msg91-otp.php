@@ -38,26 +38,7 @@ function happycoders_msg91_init_woocommerce_hooks() {
 
 add_action( 'plugins_loaded', 'happycoders_msg91_init_woocommerce_hooks', 20 );
 
-add_action(
-	'plugins_loaded',
-	function () {
-		$locale    = happycoders_determine_locale();
-		$lang_file = HCOTP_PLUGIN_DIR . 'languages/msg91-otp-' . $locale . '.php';
-
-		if ( file_exists( $lang_file ) ) {
-			$GLOBALS['msg91_otp_translations'] = include $lang_file;
-		} else {
-			$GLOBALS['msg91_otp_translations'] = array();
-		}
-	}
-);
 add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'msg91_otp_plugin_action_links' );
-
-if ( ! function_exists( 'happycoders_determine_locale' ) ) {
-	function happycoders_determine_locale() {
-		return get_user_locale();
-	}
-}
 
 register_activation_hook( __FILE__, 'happycoders_msg91_activate_plugin' );
 register_deactivation_hook( __FILE__, 'happycoders_msg91_deactivate_plugin' );
@@ -876,12 +857,6 @@ function happycoders_maybe_start_session( $session_lifetime ) {
 		session_set_cookie_params( $session_lifetime );
 		session_start();
 	}
-}
-
-
-
-function msg91_translate( $text ) {
-	return $GLOBALS['msg91_otp_translations'][ $text ] ?? $text;
 }
 
 // Register custom order statuses
