@@ -348,7 +348,7 @@ function msg91_otp_settings_page() {
 							<select name="msg91_default_country" id="msg91_default_country">
 								<?php
 									$default_country = get_option( 'msg91_default_country', '+91' );
-									$countries       = happycoders_msg91_get_countries_with_iso();
+									$countries       = hcotp_get_countries_with_iso();
 
 								foreach ( $countries as $country ) {
 											$dial_code = $country['code'];
@@ -385,7 +385,7 @@ function msg91_otp_settings_page() {
 							<select name="msg91_selected_countries[]" id="msg91_selected_countries" multiple="multiple" style="width: 100%; height: 150px;">
 								<?php
 									$default_countries = get_option( 'msg91_selected_countries', array( '+91' ) );
-									$countries         = happycoders_msg91_get_countries_with_iso();
+									$countries         = hcotp_get_countries_with_iso();
 								foreach ( $countries as $country ) {
 									$dial_code = $country['code'];
 									$name      = $country['name'];

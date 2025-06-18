@@ -308,7 +308,7 @@ function hcotp_get_option_with_default( $option_name, $default_value ) {
  */
 function hcotp_country_select( $options ) {
 	$html          = '';
-	$all_countries = happycoders_msg91_get_countries_with_iso();
+	$all_countries = hcotp_get_countries_with_iso();
 
 	$selected_countries = get_option( 'msg91_selected_countries', array( '+91' ) );
 

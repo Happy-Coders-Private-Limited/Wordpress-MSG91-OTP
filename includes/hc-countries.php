@@ -7,7 +7,7 @@ function hcotp_iso_to_flag( $iso ) {
 	}
 	return $flag;
 }
-function happycoders_msg91_get_countries_with_iso() {
+function hcotp_get_countries_with_iso() {
 	return array(
 		array(
 			'name' => 'Afghanistan',
