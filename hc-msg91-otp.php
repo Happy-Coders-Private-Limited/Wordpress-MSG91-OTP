@@ -197,7 +197,7 @@ register_deactivation_hook( __FILE__, 'hcotp_delete_blocked_numbers_table' );
  */
 function hcotp_create_blocked_numbers_table() {
 	global $wpdb;
-	$table_name      = $wpdb->prefix . 'msg91_blocked_number';
+	$table_name      = $wpdb->prefix . 'hcotp_blocked_numbers';
 	$charset_collate = $wpdb->get_charset_collate();
 
 	$sql = "CREATE TABLE $table_name (
@@ -235,7 +235,7 @@ function hcotp_add_otp_column_to_users_table() {
  */
 function hcotp_delete_blocked_numbers_table() {
 	global $wpdb;
-	$table_name = $wpdb->prefix . 'msg91_blocked_number';
+	$table_name = $wpdb->prefix . 'hcotp_blocked_numbers';
 	$sql        = "DROP TABLE IF EXISTS $table_name;";
 	$wpdb->query( $sql );
 }
@@ -522,7 +522,7 @@ function hcotp_send_otp_ajax() {
 	$mobile        = sanitize_text_field( wp_unslash( $_POST['mobile'] ?? '' ) );
 	$otpprocess    = sanitize_text_field( wp_unslash( $_POST['otpprocess'] ?? '' ) );
 	$ip_address    = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
-	$table_name    = $wpdb->prefix . 'msg91_blocked_number';
+	$table_name    = $wpdb->prefix . 'hcotp_blocked_numbers';
 	$per_day_limit = intval( get_option( 'hcotp_msg91_perday_otplimit', 5 ) );
 	$today         = gmdate( 'Y-m-d' );
 
