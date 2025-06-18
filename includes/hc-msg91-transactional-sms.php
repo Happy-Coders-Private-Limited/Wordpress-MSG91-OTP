@@ -88,7 +88,7 @@ function hcotp_send_transactional_sms( $mobile, $flow_id, $vars = array(), $forc
  * @param int|WC_Order $order_or_user_id Order object, Order ID, or User ID.
  * @return string|null Phone number with country code, or null if not found.
  */
-function happycoders_msg91_get_customer_phone( $order_or_user_id ) {
+function hcotp_get_customer_phone( $order_or_user_id ) {
 	$phone = null;
 
 	if ( is_a( $order_or_user_id, 'WC_Order' ) ) {
@@ -178,7 +178,7 @@ function happycoders_msg91_sms_on_new_customer_registration( $user_id ) {
 		return;
 	}
 
-	$phone = happycoders_msg91_get_customer_phone( $user_id );
+	$phone = hcotp_get_customer_phone( $user_id );
 	if ( ! $phone ) {
 		return;
 	}
@@ -217,7 +217,7 @@ function happycoders_msg91_sms_on_new_order_placed( $order_id, $posted_data, $or
 		}
 	}
 
-	$phone = happycoders_msg91_get_customer_phone( $order );
+	$phone = hcotp_get_customer_phone( $order );
 	error_log( 'happycoders_msg91_sms_on_new_order_placed - Phone: ' . $phone );
 	if ( ! $phone ) {
 		error_log( 'happycoders_msg91_sms_on_new_order_placed - Phone number not found.' );
@@ -269,7 +269,7 @@ function happycoders_msg91_sms_on_thankyou_page( $order_id ) {
 		return;
 	}
 
-	$phone = happycoders_msg91_get_customer_phone( $order );
+	$phone = hcotp_get_customer_phone( $order );
 	error_log( 'happycoders_msg91_sms_on_thankyou_page - Phone: ' . $phone );
 	if ( ! $phone ) {
 		error_log( 'happycoders_msg91_sms_on_thankyou_page - Phone number not found.' );
@@ -306,7 +306,7 @@ function happycoders_msg91_sms_on_order_status_change( $order_id, $old_status, $
 	error_log( 'happycoders_msg91_sms_on_order_status_change - Fired. Order ID: ' . $order_id );
 	$order = wc_get_order( $order_id );
 
-	$phone = happycoders_msg91_get_customer_phone( $order );
+	$phone = hcotp_get_customer_phone( $order );
 	if ( ! $phone ) {
 		return;
 	}
@@ -395,7 +395,7 @@ function happycoders_msg91_schedule_abandoned_cart_check() {
 		return; // Only for logged-in users for simplicity
 	}
 
-	$phone = happycoders_msg91_get_customer_phone( $user_id );
+	$phone = hcotp_get_customer_phone( $user_id );
 	if ( ! $phone ) {
 		return;
 	}
@@ -623,7 +623,7 @@ function happycoders_msg91_send_abandoned_cart_sms( $user_id, $scheduled_cart_ha
 		return; // User placed an order
 	}
 
-	$phone = happycoders_msg91_get_customer_phone( $user_id );
+	$phone = hcotp_get_customer_phone( $user_id );
 	if ( ! $phone ) {
 		return;
 	}
