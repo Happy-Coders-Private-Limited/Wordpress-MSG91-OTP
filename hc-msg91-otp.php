@@ -326,7 +326,7 @@ function hcotp_country_select( $options ) {
 
 	foreach ( $filtered_countries as $country ) {
 		$selected  = 'selected';
-		$flag      = happycoders_msg91_iso_to_flag( $country['iso'] );
+		$flag      = hcotp_iso_to_flag( $country['iso'] );
 		$flag_html = $show_flag ? $flag : '';
 		$html     .= sprintf(
 			/* translators: 1: Country code, 2: Flag icon, 3: Selected attribute, 4: Country name, 5: Country code */

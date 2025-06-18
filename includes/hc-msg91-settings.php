@@ -355,7 +355,7 @@ function msg91_otp_settings_page() {
 											$name      = $country['name'];
 											$iso       = $country['iso'];
 
-											$flag = function_exists( 'happycoders_msg91_iso_to_flag' ) ? happycoders_msg91_iso_to_flag( $iso ) : '';
+											$flag = function_exists( 'hcotp_iso_to_flag' ) ? hcotp_iso_to_flag( $iso ) : '';
 
 											printf(
 												'<option value="%s" %s>%s %s (%s)</option>',
@@ -392,7 +392,7 @@ function msg91_otp_settings_page() {
 									$iso       = $country['iso'];
 
 									$selected = in_array( $dial_code, $default_countries ) ? 'selected' : '';
-									$flag     = function_exists( 'happycoders_msg91_iso_to_flag' ) ? happycoders_msg91_iso_to_flag( $iso ) : '';
+									$flag     = function_exists( 'hcotp_iso_to_flag' ) ? hcotp_iso_to_flag( $iso ) : '';
 
 									$background_color = ( $selected ) ? 'background-color: #009ee8; color: white;' : '';
 

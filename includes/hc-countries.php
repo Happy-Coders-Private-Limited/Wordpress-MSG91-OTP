@@ -1,5 +1,5 @@
 <?php
-function happycoders_msg91_iso_to_flag( $iso ) {
+function hcotp_iso_to_flag( $iso ) {
 	$iso  = strtoupper( $iso );
 	$flag = '';
 	for ( $i = 0; $i < strlen( $iso ); $i++ ) {
