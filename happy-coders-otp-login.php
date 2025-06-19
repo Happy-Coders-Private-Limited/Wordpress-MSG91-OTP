@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Happy Coders OTP Login
- * Text Domain: Happy Coders OTP Login
+ * Text Domain: happy-coders-otp-login
  * Description: Seamless OTP-based login for WordPress/WooCommerce using MSG91. Supports mobile OTP login, and automatic SMS alerts for user registration, order placed, order shipped, order completed, and cart reminder via cronjob.
  * Version: 1.5
  * Author: Happy Coders
@@ -12,20 +12,24 @@
  * @package happy-coders-otp-login
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 define( 'HCOTP_PLUGIN_FILE', __FILE__ );
 define( 'HCOTP_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HCOTP_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+define( 'HCOTP_VERSION', '1.5' );
 
 require_once HCOTP_PLUGIN_DIR . 'includes/hc-msg91-settings.php';
 require_once HCOTP_PLUGIN_DIR . 'includes/hc-countries.php';
 require_once HCOTP_PLUGIN_DIR . 'includes/hc-msg91-transactional-sms.php';
 
+/**
+ * Initialize WooCommerce-specific hooks if WooCommerce is active.
+ *
+ * @since 1.5
+ */
 function hcotp_init_woocommerce_hooks() {
 	include_once ABSPATH . 'wp-admin/includes/plugin.php';
 
@@ -40,13 +44,15 @@ add_action( 'plugins_loaded', 'hcotp_init_woocommerce_hooks', 20 );
 
 add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'hcotp_plugin_action_links' );
 
-register_activation_hook( __FILE__, 'hcotp_activate_plugin' );
-register_deactivation_hook( __FILE__, 'hcotp_deactivate_plugin' );
-
+/**
+ * Run on plugin activation. Creates tables and sets default options.
+ *
+ * @since 1.5
+ */
 function hcotp_activate_plugin() {
 	hcotp_create_blocked_numbers_table();
 
-	// Default OTP form texts (if not already set)
+	// Default OTP form texts (if not already set).
 	$options_to_set = array(
 		'hcotp_msg91_sendotp_lable'            => 'Mobile Number',
 		'hcotp_msg91_sendotp_dec'              => 'we will send you an OTP',
@@ -57,16 +63,16 @@ function hcotp_activate_plugin() {
 		'hcotp_msg91_verifyotp_button_text'    => 'Verify OTP',
 		'hcotp_msg91_verifyotp_validation_msg' => 'Please enter the OTP',
 		'hcotp_msg91_perday_otplimit'          => 5,
-		'hcotp_msg91_resend_timer'             => 60, // Default resend timer
+		'hcotp_msg91_resend_timer'             => 60, // Default resend timer.
 	);
 
 	foreach ( $options_to_set as $option_name => $default_value ) {
-		if ( get_option( $option_name ) === false ) { // Check if option does not exist
+		if ( false === get_option( $option_name ) ) { // Check if option does not exist.
 			update_option( $option_name, $default_value );
 		}
 	}
 
-	// Default values for new SMS settings (set only if they don't exist)
+	// Default values for new SMS settings (set only if they don't exist).
 	$sms_defaults = array(
 		'hcotp_msg91_sms_ncr_enable'      => 0,
 		'hcotp_msg91_sms_ncr_template_id' => '',
@@ -89,17 +95,23 @@ function hcotp_activate_plugin() {
 	);
 
 	foreach ( $sms_defaults as $key => $value ) {
-		if ( get_option( $key ) === false ) {
+		if ( false === get_option( $key ) ) {
 			update_option( $key, $value );
 		}
 	}
 }
+register_activation_hook( __FILE__, 'hcotp_activate_plugin' );
 
+/**
+ * Run on plugin deactivation. Cleans up tables and scheduled hooks.
+ *
+ * @since 1.5
+ */
 function hcotp_deactivate_plugin() {
 	hcotp_delete_blocked_numbers_table();
 	wp_clear_scheduled_hook( 'hcotp_trigger_abandoned_cart_sms' );
 }
-
+register_deactivation_hook( __FILE__, 'hcotp_deactivate_plugin' );
 
 /**
  * Add settings link to the plugin list.
@@ -108,11 +120,11 @@ function hcotp_deactivate_plugin() {
  * @return array The modified links with the settings link added.
  */
 function hcotp_plugin_action_links( $links ) {
-	$settings_link = '<a href="' . admin_url( 'options-general.php?page=msg91-otp-settings' ) . '">Settings</a>';
+	$settings_link = '<a href="' . esc_url( admin_url( 'admin.php?page=msg91-otp-settings' ) ) . '">' . esc_html__( 'Settings', 'happy-coders-otp-login' ) . '</a>';
 	array_unshift( $links, $settings_link );
 	return $links;
 }
-add_filter( 'plugin_row_meta', 'hcotp_plugin_row_meta', 10, 4 );
+add_filter( 'plugin_row_meta', 'hcotp_plugin_row_meta', 10, 3 );
 
 /**
  * Adds custom meta links to the plugin row in the plugins list table.
@@ -120,15 +132,14 @@ add_filter( 'plugin_row_meta', 'hcotp_plugin_row_meta', 10, 4 );
  * @param array  $plugin_meta  An array of the plugin's meta data.
  * @param string $plugin_file  Path to the plugin file relative to the plugins directory.
  * @param array  $plugin_data  An array of plugin data.
- * @param string $status       The plugin's status.
  * @return array The modified array of plugin meta data with additional links.
  */
-function hcotp_plugin_row_meta( $plugin_meta, $plugin_file, $plugin_data, $status ) {
+function hcotp_plugin_row_meta( $plugin_meta, $plugin_file, $plugin_data ) {
 	if ( plugin_basename( __FILE__ ) === $plugin_file ) {
-		if ( stripos( $plugin_data['Author'], 'HAPPY CODERS' ) !== false ) {
-			$plugin_meta[] = '<a href="https://www.happycoders.in/msg91-plugin-documentation/" target="_blank">Documentation</a>';
-			$plugin_meta[] = '<a href="https://www.happycoders.in/" target="_blank">Support</a>';
-			$plugin_meta[] = '<a href="https://github.com/Happy-Coders-Private-Limited" target="_blank">GitHub</a>';
+		if ( false !== stripos( $plugin_data['Author'], 'Happy Coders' ) ) {
+			$plugin_meta[] = sprintf( '<a href="%s" target="_blank">%s</a>', 'https://www.happycoders.in/msg91-plugin-documentation/', esc_html__( 'Documentation', 'happy-coders-otp-login' ) );
+			$plugin_meta[] = sprintf( '<a href="%s" target="_blank">%s</a>', 'https://www.happycoders.in/', esc_html__( 'Support', 'happy-coders-otp-login' ) );
+			$plugin_meta[] = sprintf( '<a href="%s" target="_blank">%s</a>', 'https://github.com/Happy-Coders-Private-Limited', esc_html__( 'GitHub', 'happy-coders-otp-login' ) );
 		}
 	}
 	return $plugin_meta;
@@ -137,29 +148,21 @@ function hcotp_plugin_row_meta( $plugin_meta, $plugin_file, $plugin_data, $statu
 
 
 /**
- * Translates a given text using MSG91 translations.
- *
- * This function attempts to translate the provided text using
- * the global MSG91 OTP translations array. If a translation
- * exists for the given text, it returns the translated string;
- * otherwise, it returns the original text.
- *
- * @param string $text The text to be translated.
- * @return string The translated text or the original text if no translation is found.
+ * Enqueues scripts and styles for the frontend.
  */
 function hcotp_enqueue_scripts() {
 	wp_enqueue_script(
 		'hcotp-main-js',
 		HCOTP_PLUGIN_URL . 'assets/js/hc-msg91-otp.js',
 		array( 'jquery' ),
-		defined( 'HC_MSG91_VERSION' ) ? HC_MSG91_VERSION : time(),
+		HCOTP_VERSION,
 		true
 	);
 	wp_enqueue_style(
-		'msg91-otp-css',
+		'hcotp-main-css',
 		HCOTP_PLUGIN_URL . 'assets/css/hc-msg91-otp.css',
 		array(),
-		defined( 'HC_MSG91_VERSION' ) ? HC_MSG91_VERSION : time()
+		HCOTP_VERSION
 	);
 	wp_localize_script(
 		'hcotp-main-js',
@@ -171,6 +174,14 @@ function hcotp_enqueue_scripts() {
 			'redirect_page'            => get_option( 'hcotp_msg91_redirect_page' ),
 			'sendotp_validation_msg'   => get_option( 'hcotp_msg91_sendotp_validation_msg', 'Please enter a valid mobile number (between 5 and 12 digits).' ),
 			'verifyotp_validation_msg' => get_option( 'hcotp_msg91_verifyotp_validation_msg', 'Please enter the otp' ),
+			'sending_text'             => __( 'Sending...', 'happy-coders-otp-login' ),
+			'verifying_text'           => __( 'Verifying...', 'happy-coders-otp-login' ),
+			'error_text'               => __( 'Something went wrong. Please try again.', 'happy-coders-otp-login' ),
+			'verified_text'            => __( 'OTP Verified!', 'happy-coders-otp-login' ),
+			'invalid_otp_text'         => __( 'Invalid OTP. Please try again.', 'happy-coders-otp-login' ),
+			'server_error_text'        => __( 'Server error. Please try again.', 'happy-coders-otp-login' ),
+			'send_otp_text'            => get_option( 'hcotp_msg91_sendotp_button_text', __( 'Send OTP', 'happy-coders-otp-login' ) ),
+			'verify_otp_text'          => get_option( 'hcotp_msg91_verifyotp_button_text', __( 'Verify OTP', 'happy-coders-otp-login' ) ),
 		)
 	);
 }
@@ -211,21 +222,37 @@ function hcotp_create_blocked_numbers_table() {
 	dbDelta( $sql );
 }
 
+/**
+ * Adds a custom column to the users table for storing OTP codes.
+ *
+ * Note: Modifying core tables is generally discouraged.
+ * User meta is a better alternative for storing user-specific data.
+ */
 function hcotp_add_otp_column_to_users_table() {
 	global $wpdb;
-	$table_name = $wpdb->users;
+	$table_name  = $wpdb->users;
+	$column_name = 'otp_code';
 
-	$column_exists = $wpdb->get_results(
-		"SHOW COLUMNS FROM $table_name LIKE 'otp_code';"
-	);
+	// Define a cache key for this specific check.
+	$cache_key = 'hcotp_otp_column_exists';
+
+	// Try to get the cached result first.
+	$column_exists = wp_cache_get( $cache_key );
+
+	if ( false === $column_exists ) {
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+		$column_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW COLUMNS FROM %s LIKE %s', $table_name, $column_name ) );
+		wp_cache_set( $cache_key, $column_exists, 'hcotp' );
+	}
 
 	if ( empty( $column_exists ) ) {
-		$wpdb->query(
-			"ALTER TABLE $table_name ADD COLUMN otp_code VARCHAR(10) DEFAULT NULL;"
-		);
+
+		$sql = "ALTER TABLE $table_name ADD COLUMN $column_name VARCHAR(10) DEFAULT NULL;";
+
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		dbDelta( $sql );
 	}
 }
-
 
 /**
  * Drops the database table for storing blocked mobile numbers.
@@ -236,8 +263,25 @@ function hcotp_add_otp_column_to_users_table() {
 function hcotp_delete_blocked_numbers_table() {
 	global $wpdb;
 	$table_name = $wpdb->prefix . 'hcotp_blocked_numbers';
-	$sql        = "DROP TABLE IF EXISTS $table_name;";
-	$wpdb->query( $sql );
+
+	// Define a cache key for this specific check.
+	$cache_key = 'hcotp_blocked_numbers_table_exists';
+
+	// Try to get the cached result first.
+	$table_exists = wp_cache_get( $cache_key );
+
+	if ( false === $table_exists ) {
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+		$table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) );
+		wp_cache_set( $cache_key, $table_exists );
+	}
+
+	if ( $table_exists ) {
+		$sql = "DROP TABLE IF EXISTS $table_name;";
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		dbDelta( $sql );
+	}
 }
 add_action( 'wp_ajax_hcotp_send_otp_ajax', 'hcotp_send_otp_ajax' );
 add_action( 'wp_ajax_nopriv_hcotp_send_otp_ajax', 'hcotp_send_otp_ajax' );
@@ -269,28 +313,36 @@ add_action( 'wp_ajax_nopriv_hcotp_send_otp_ajax', 'hcotp_send_otp_ajax' );
  */
 function hcotp_get_options() {
 	return array(
-		'send_otp_label'          => hcotp_get_option_with_default( 'hcotp_msg91_sendotp_lable', 'Mobile Number' ),
-		'send_otp_label_color'    => hcotp_get_option_with_default( 'hcotp_msg91_sendotp_lable_color', '#000000' ),
-		'send_otp_desc'           => hcotp_get_option_with_default( 'hcotp_msg91_sendotp_dec', 'We will send you an OTP' ),
-		'send_otp_desc_color'     => hcotp_get_option_with_default( 'hcotp_msg91_sendotp_dec_color', '#000000' ),
-		'send_otp_button_text'    => hcotp_get_option_with_default( 'hcotp_msg91_sendotp_button_text', 'Send OTP' ),
-		'send_otp_button_color'   => hcotp_get_option_with_default( 'hcotp_msg91_sendotp_button_color', '#0073aa' ),
-		'top_image'               => hcotp_get_option_with_default( 'hcotp_msg91_top_image', HCOTP_PLUGIN_URL . 'assets/images/send-otp.png' ),
-		'verify_otp_lable'        => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_lable', 'Enter Mobile' ),
-		'verify_otp_lable_color'  => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_lable_color', '#000000' ),
-		'verify_otp_dec'          => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_dec', 'Enter your 4-digit OTP' ),
-		'verify_otp_dec_color'    => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_desc_color', '#000000' ),
-		'verify_otp_buttontext'   => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_button_text', 'Verify OTP' ),
-		'verify_otp_button_color' => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_button_color', '#0073aa' ),
-		'top_verify_image'        => hcotp_get_option_with_default( 'hcotp_msg91_top_verify_image', HCOTP_PLUGIN_URL . 'assets/images/verify-otp.png' ),
-		'hcotp_whatsapp_auth_enabled'   => hcotp_get_option_with_default( 'hcotp_whatsapp_auth_enabled', 0 ),
-		'hcotp_whatsapp_button_text'    => hcotp_get_option_with_default( 'hcotp_whatsapp_button_text', 'Send OTP via Whatsapp' ),
+		'send_otp_label'              => hcotp_get_option_with_default( 'hcotp_msg91_sendotp_lable', 'Mobile Number' ),
+		'send_otp_label_color'        => hcotp_get_option_with_default( 'hcotp_msg91_sendotp_lable_color', '#000000' ),
+		'send_otp_desc'               => hcotp_get_option_with_default( 'hcotp_msg91_sendotp_dec', 'We will send you an OTP' ),
+		'send_otp_desc_color'         => hcotp_get_option_with_default( 'hcotp_msg91_sendotp_dec_color', '#000000' ),
+		'send_otp_button_text'        => hcotp_get_option_with_default( 'hcotp_msg91_sendotp_button_text', 'Send OTP' ),
+		'send_otp_button_color'       => hcotp_get_option_with_default( 'hcotp_msg91_sendotp_button_color', '#0073aa' ),
+		'top_image'                   => hcotp_get_option_with_default( 'hcotp_msg91_top_image', HCOTP_PLUGIN_URL . 'assets/images/send-otp.png' ),
+		'verify_otp_lable'            => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_lable', 'Enter Mobile' ),
+		'verify_otp_lable_color'      => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_lable_color', '#000000' ),
+		'verify_otp_dec'              => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_dec', 'Enter your 4-digit OTP' ),
+		'verify_otp_dec_color'        => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_desc_color', '#000000' ),
+		'verify_otp_buttontext'       => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_button_text', 'Verify OTP' ),
+		'verify_otp_button_color'     => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_button_color', '#0073aa' ),
+		'top_verify_image'            => hcotp_get_option_with_default( 'hcotp_msg91_top_verify_image', HCOTP_PLUGIN_URL . 'assets/images/verify-otp.png' ),
+		'hcotp_whatsapp_auth_enabled' => hcotp_get_option_with_default( 'hcotp_whatsapp_auth_enabled', 0 ),
+		'hcotp_whatsapp_button_text'  => hcotp_get_option_with_default( 'hcotp_whatsapp_button_text', 'Send OTP via Whatsapp' ),
 
 	);
 }
+
+/**
+ * Gets a plugin option with a default value if it's not set.
+ *
+ * @param string $option_name   The name of the option.
+ * @param mixed  $default_value The default value.
+ * @return mixed The option value or the default.
+ */
 function hcotp_get_option_with_default( $option_name, $default_value ) {
 	$value = get_option( $option_name );
-	return ( $value === false || $value === '' ) ? $default_value : $value;
+	return ( false === $value || '' === $value ) ? $default_value : $value;
 }
 
 
@@ -303,10 +355,9 @@ function hcotp_get_option_with_default( $option_name, $default_value ) {
  * countries, and generates the HTML for the select dropdown. The HTML includes
  * the flag icon for each country, if the flag show setting is enabled.
  *
- * @param array $options The plugin options retrieved from the WordPress options table.
  * @return string The HTML for the country select dropdown.
  */
-function hcotp_country_select( $options ) {
+function hcotp_country_select() {
 	$html          = '';
 	$all_countries = hcotp_get_countries_with_iso();
 
@@ -385,6 +436,8 @@ add_action(
 						<button id="next-to-address" style="margin-top: 20px;">Next</button>
 					</div>';
 		} else {
+			// Nonce is for image which is not enqueued.
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			echo hcotp_otp_form( $options, true );
 		}
 	}
@@ -448,7 +501,7 @@ function hcotp_otp_form( $options, $is_popup = false ) {
 
 			<div class="mobile-input-wrap">
 				<?php
-				echo hcotp_country_select( $options );
+				echo hcotp_country_select(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				?>
 				<input type="hidden" id="otpprocess" value="">
 				<input type="tel" id="msg91_mobile" maxlength="10" pattern="\d*" placeholder="Mobile Number" oninput="this.value = this.value.replace(/[^0-9]/g, '' );" />
@@ -488,10 +541,10 @@ function hcotp_otp_form( $options, $is_popup = false ) {
 						<button id="msg91_verify_otp" style="background-color: <?php echo esc_attr( $options['verify_otp_button_color'] ); ?>; color: #fff;"><?php echo esc_html( $options['verify_otp_buttontext'] ); ?></button>
 					</div>
 					<div style="text-align:center;">
-						<h4 id="resend_otp"><?php echo esc_html( msg91_translate( 'Didn"t receive an OTP? Resend OTP' ) ); ?></h4>
+						<h4 id="resend_otp"><?php esc_html_e( 'Didn\'t receive an OTP? Resend OTP', 'happy-coders-otp-login' ); ?></h4>
 						<div class="row" id="otp_method_buttons">
-							<a id="msg91_send_otp" class="send-button sms-button" disabled><?php echo esc_html( msg91_translate( 'SMS' ) ); ?></a>
-						<a id="msg91_send_otp_whatsapp" class="send-button whatsapp-button" disabled><?php echo esc_html( msg91_translate( ' Whatsapp' ) ); ?></a>
+							<a id="msg91_send_otp" class="send-button sms-button" disabled><?php esc_html_e( 'SMS', 'happy-coders-otp-login' ); ?></a>
+						<a id="msg91_send_otp_whatsapp" class="send-button whatsapp-button" disabled><?php esc_html_e( 'Whatsapp', 'happy-coders-otp-login' ); ?></a>
 						</div>
 						<div id="resend_timer_text"></div>
 					</div>
@@ -526,13 +579,29 @@ function hcotp_send_otp_ajax() {
 	$per_day_limit = intval( get_option( 'hcotp_msg91_perday_otplimit', 5 ) );
 	$today         = gmdate( 'Y-m-d' );
 
-	$otp_count_today = $wpdb->get_var(
-		$wpdb->prepare(
-			'SELECT COUNT(*) FROM ' . $table_name . ' WHERE mobile_number = %s AND DATE(created_at) = %s',
-			$mobile,
-			$today
-		)
-	);
+	// Define a cache key for this specific check.
+	$cache_key = 'hcotp_blocked_numbers_table_exists';
+
+	$table_exists = wp_cache_get( $cache_key );
+
+	if ( false === $table_exists ) {
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+		$table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) );
+		wp_cache_set( $cache_key, $table_exists );
+	}
+
+	if ( $table_exists ) {
+		$otp_count_today = 0;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+		$otp_count_today = $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT COUNT(*) FROM %s WHERE mobile_number = %s AND DATE(created_at) = %s',
+				$table_name,
+				$mobile,
+				$today
+			)
+		);
+	}
 
 	if ( $otp_count_today >= $per_day_limit ) {
 		wp_send_json_error( array( 'message' => 'You have reached the OTP request limit for today.' ) );
@@ -549,7 +618,7 @@ function hcotp_send_otp_ajax() {
 
 	$hcotp_whatsapp_language_code = get_option( 'hcotp_whatsapp_language_code' );
 
-	if ( $otpprocess === 'sms' ) {
+	if ( 'sms' === $otpprocess ) {
 
 		$url = "https://control.msg91.com/api/v5/otp?authkey=$authkey&otp_expiry=5&template_id=$template_id&mobile=$mobile&realTimeResponse";
 
@@ -558,9 +627,11 @@ function hcotp_send_otp_ajax() {
 		$result   = json_decode( $body, true );
 
 		if ( isset( $result['type'] ) && 'success' === $result['type'] ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 			$wpdb->query(
 				$wpdb->prepare(
-					'INSERT INTO ' . $table_name . ' (mobile_number, ip_address, created_at) VALUES (%s, %s, %s)',
+					'INSERT INTO  %s (mobile_number, ip_address, created_at) VALUES (%s, %s, %s)',
+					$table_name,
 					$mobile,
 					$ip_address,
 					current_time( 'mysql' )
@@ -576,7 +647,7 @@ function hcotp_send_otp_ajax() {
 			wp_send_json_error( array( 'message' => $result['message'] ?? 'Failed to send OTP via SMS.' ) );
 		}
 	} else {
-		$otp_code = rand( 1000, 9999 );
+		$otp_code = wp_rand( 1000, 9999 );
 
 		$wa_url     = 'https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/';
 		$wa_payload = array(
@@ -626,18 +697,21 @@ function hcotp_send_otp_ajax() {
 		$body   = wp_remote_retrieve_body( $response );
 		$result = json_decode( $body, true );
 
-		if ( isset( $result['status'] ) && $result['status'] === 'success' ) {
+		if ( isset( $result['status'] ) && 'success' === $result['status'] ) {
 
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 				$wpdb->query(
 					$wpdb->prepare(
-						'INSERT INTO ' . $table_name . ' (mobile_number, ip_address, created_at) VALUES (%s, %s, %s)',
+						'INSERT INTO %s (mobile_number, ip_address, created_at) VALUES (%s, %s, %s)',
+						$table_name,
 						$mobile,
 						$ip_address,
 						current_time( 'mysql' )
 					)
 				);
 				$clean_mobile = preg_replace( '/\D/', '', $mobile );
-				$user         = $wpdb->get_row(
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+				$user = $wpdb->get_row(
 					$wpdb->prepare(
 						"SELECT * FROM {$wpdb->users} WHERE user_login = %s",
 						$clean_mobile
@@ -698,7 +772,7 @@ function hcotp_auto_login_user() {
 	}
 
 	$username = $mobile;
-	$email    = $username . '@oorna.com';
+	$email    = $username . '@example.com';
 
 	$user = get_user_by( 'login', $username );
 
@@ -761,7 +835,7 @@ function hcotp_verify_otp_ajax() {
 
 	$mobile = preg_replace( '/[^0-9]/', '', $mobile );
 
-	if ( $otpprocess == 'sms' ) {
+	if ( 'sms' === $otpprocess ) {
 		$url = 'https://api.msg91.com/api/verifyRequestOTP.php?authkey=' . get_option( 'hcotp_msg91_auth_key' ) . "&mobile={$mobile}&otp={$otp}";
 
 		$response = wp_remote_get( $url );
@@ -773,7 +847,7 @@ function hcotp_verify_otp_ajax() {
 
 			$created = strtotime( $user->user_registered );
 
-				$is_very_recent_user = ( time() - $created ) < 120;
+			$is_very_recent_user = ( time() - $created ) < 120;
 
 			if ( $is_very_recent_user ) {
 				hcotp_sms_on_new_customer_registration( $user->ID );
@@ -806,7 +880,7 @@ function hcotp_verify_otp_ajax() {
 		} else {
 			wp_send_json_error( array( 'message' => $result['message'] ?? 'OTP verification failed' ) );
 		}
-	} elseif ( $otpprocess === 'whatsapp' ) {
+	} elseif ( 'whatsapp' === $otpprocess ) {
 
 		$user    = get_user_by( 'login', $mobile );
 		$created = strtotime( $user->user_registered );
@@ -841,10 +915,11 @@ function hcotp_verify_otp_ajax() {
 
 
 
-// Register custom order statuses
-add_action( 'init', 'hcotp_register_custom_order_statuses' );
+/**
+ * Register custom order statuses for 'Shipped' and 'Delivered'.
+ */
 function hcotp_register_custom_order_statuses() {
-	// Status: Shipped
+	// Status: Shipped.
 	register_post_status(
 		'wc-shipped',
 		array(
@@ -853,11 +928,12 @@ function hcotp_register_custom_order_statuses() {
 			'exclude_from_search'       => false,
 			'show_in_admin_all_list'    => true,
 			'show_in_admin_status_list' => true,
+			/* translators: %s: number of orders */
 			'label_count'               => _n_noop( 'Shipped <span class="count">(%s)</span>', 'Shipped <span class="count">(%s)</span>', 'happy-coders-otp-login' ),
 		)
 	);
 
-	// Status: Delivered
+	// Status: Delivered.
 	register_post_status(
 		'wc-delivered',
 		array(
@@ -866,25 +942,31 @@ function hcotp_register_custom_order_statuses() {
 			'exclude_from_search'       => false,
 			'show_in_admin_all_list'    => true,
 			'show_in_admin_status_list' => true,
+			/* translators: %s: number of orders */
 			'label_count'               => _n_noop( 'Delivered <span class="count">(%s)</span>', 'Delivered <span class="count">(%s)</span>', 'happy-coders-otp-login' ),
 		)
 	);
 }
+add_action( 'init', 'hcotp_register_custom_order_statuses' );
 
-// Add custom statuses to WooCommerce order statuses list
-add_filter( 'wc_order_statuses', 'hcotp_add_custom_statuses_to_order_list' );
+/**
+ * Add custom statuses to the WooCommerce order statuses list.
+ *
+ * @param array $order_statuses Existing order statuses.
+ * @return array Modified order statuses.
+ */
 function hcotp_add_custom_statuses_to_order_list( $order_statuses ) {
 	$new_order_statuses = array();
 
-	// Add new statuses after 'Processing' or 'Completed'
+	// Add new statuses after 'Processing' or 'Completed'.
 	foreach ( $order_statuses as $key => $status ) {
 		$new_order_statuses[ $key ] = $status;
-		if ( 'wc-processing' === $key || 'wc-completed' === $key ) { // Choose where to insert them
+		if ( 'wc-processing' === $key || 'wc-completed' === $key ) { // Choose where to insert them.
 			$new_order_statuses['wc-shipped']   = _x( 'Shipped', 'Order status', 'happy-coders-otp-login' );
 			$new_order_statuses['wc-delivered'] = _x( 'Delivered', 'Order status', 'happy-coders-otp-login' );
 		}
 	}
-	// Ensure they are added if the above hooks didn't catch
+	// Ensure they are added if the above hooks didn't catch.
 	if ( ! isset( $new_order_statuses['wc-shipped'] ) ) {
 		$new_order_statuses['wc-shipped'] = _x( 'Shipped', 'Order status', 'happy-coders-otp-login' );
 	}
@@ -894,28 +976,34 @@ function hcotp_add_custom_statuses_to_order_list( $order_statuses ) {
 
 	return $new_order_statuses;
 }
+add_filter( 'wc_order_statuses', 'hcotp_add_custom_statuses_to_order_list' );
 
 remove_action( 'woocommerce_login_form', 'woocommerce_login_form_start', 10 );
 remove_action( 'woocommerce_login_form', 'woocommerce_login_form', 20 );
 remove_action( 'woocommerce_login_form', 'woocommerce_login_form_end', 30 );
 
-// Remove WooCommerce register form
+// Remove WooCommerce register form.
 remove_action( 'woocommerce_register_form', 'woocommerce_register_form_start', 10 );
 remove_action( 'woocommerce_register_form', 'woocommerce_register_form', 20 );
 remove_action( 'woocommerce_register_form', 'woocommerce_register_form_end', 30 );
 
-// Remove login form on checkout
-remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_login_form', 10 );
 
-// Add your custom shortcode
-add_action( 'woocommerce_before_customer_login_form', 'hcotp_replace_wc_login_with_otp' );
+/**
+ * Replaces the default WooCommerce login/register forms with the OTP form.
+ *
+ * @since 1.5
+ */
 function hcotp_replace_wc_login_with_otp() {
 	if ( ! is_user_logged_in() ) {
 		echo do_shortcode( '[msg91_otp_form]' );
 	}
 }
 
-add_action( 'woocommerce_before_checkout_form', 'hcotp_message_before_checkout', 5 );
+/**
+ * Adds a custom message before the checkout form for non-logged-in users.
+ *
+ * @since 1.5
+ */
 function hcotp_message_before_checkout() {
 	if ( ! is_user_logged_in() ) {
 		echo '<div class="woocommerce-info custom-login-notice">';
@@ -924,9 +1012,23 @@ function hcotp_message_before_checkout() {
 
 	}
 }
-add_action(
-	'wp_loaded',
-	function () {
-		remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_login_form', 10 );
-	}
-);
+
+/**
+ * Hooks into WooCommerce to replace forms.
+ *
+ * @since 1.5
+ */
+function hcotp_override_wc_forms() {
+	// Remove default login/register forms from My Account page.
+	remove_action( 'woocommerce_before_customer_login_form', 'woocommerce_output_all_notices', 10 );
+	remove_action( 'woocommerce_customer_login_form', 'woocommerce_login_form', 10 );
+	remove_action( 'woocommerce_customer_registration_form', 'woocommerce_registration_form', 10 );
+
+	// Add our OTP form.
+	add_action( 'woocommerce_before_customer_login_form', 'hcotp_replace_wc_login_with_otp' );
+
+	// Remove login form from checkout.
+	remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_login_form', 10 );
+	add_action( 'woocommerce_before_checkout_form', 'hcotp_message_before_checkout', 5 );
+}
+add_action( 'wp_loaded', 'hcotp_override_wc_forms' );

@@ -1,12 +1,37 @@
 <?php
+/**
+ * Country data functions for the plugin.
+ *
+ * @package happy-coders-otp-login
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
+/**
+ * Converts a 2-letter ISO country code to a country flag emoji.
+ *
+ * @param string $iso The 2-letter ISO country code (e.g., 'US').
+ * @return string The flag emoji.
+ */
 function hcotp_iso_to_flag( $iso ) {
 	$iso  = strtoupper( $iso );
 	$flag = '';
-	for ( $i = 0; $i < strlen( $iso ); $i++ ) {
+	if ( strlen( $iso ) !== 2 ) {
+		return '';
+	}
+	for ( $i = 0; $i < 2; $i++ ) {
 		$flag .= mb_convert_encoding( '&#' . ( 127397 + ord( $iso[ $i ] ) ) . ';', 'UTF-8', 'HTML-ENTITIES' );
 	}
 	return $flag;
 }
+
+/**
+ * Returns an array of countries with their names, dial codes, and ISO codes.
+ *
+ * @return array List of countries.
+ */
 function hcotp_get_countries_with_iso() {
 	return array(
 		array(
