@@ -326,8 +326,8 @@ jQuery(document).ready(function($) {
 	});
 });
 jQuery(document).ready(function($) {
-    const $checkbox = $('#whatsapp_auth_checkbox');
-    const $inputsDiv = $('#whatsapp_auth_inputs');
+    const $checkbox = $('#hcotp_whatsapp_auth_checkbox');
+    const $inputsDiv = $('#hcotp_whatsapp_auth_inputs');
 
     $checkbox.on('change', function() {
         $inputsDiv.toggle(this.checked);
