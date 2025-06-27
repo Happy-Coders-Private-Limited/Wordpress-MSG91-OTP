@@ -315,10 +315,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 jQuery(document).ready(function($) {
-	$('.nav-tab-wrapper a.nav-tab').click(function(e) {
+	$('#hcotp-settings-wrap .nav-tab-wrapper a.nav-tab').on('click', function(e){
 				e.preventDefault();
 				var tab_id = $(this).data('tab');
-				$('.nav-tab-wrapper a.nav-tab').removeClass('nav-tab-active');
+				$('#hcotp-settings-wrap .nav-tab-wrapper a.nav-tab').removeClass('nav-tab-active');
 				$(this).addClass('nav-tab-active');
 				$('.tab-content').removeClass('active-tab').hide();
 				$('#' + tab_id).addClass('active-tab').show();
