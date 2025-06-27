@@ -28,6 +28,8 @@ add_action( 'admin_menu', 'hcotp_add_admin_menu' );
 
 /**
  * Enqueues scripts and styles for the admin settings page.
+ *
+ * @param string $hook The current admin page.
  */
 function hcotp_admin_enqueue_scripts( $hook ) {
 	if ( 'toplevel_page_hcotp-settings' !== $hook ) {
