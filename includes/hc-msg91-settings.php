@@ -29,7 +29,10 @@ add_action( 'admin_menu', 'hcotp_add_admin_menu' );
 /**
  * Enqueues scripts and styles for the admin settings page.
  */
-function hcotp_admin_enqueue_scripts() {
+function hcotp_admin_enqueue_scripts( $hook ) {
+	if ( 'toplevel_page_hcotp-settings' !== $hook ) {
+		return;
+	}
 	wp_enqueue_script( 'hcotp-admin-js', HCOTP_PLUGIN_URL . 'assets/js/hc-msg91-otp.js', array( 'jquery' ), time(), true );
 	wp_enqueue_style( 'hcotp-admin-css', HCOTP_PLUGIN_URL . 'assets/css/hc-msg91-otp.css', array(), time() );
 }
@@ -124,7 +127,7 @@ function hcotp_sanitize_positive_float( $input ) {
 function hcotp_settings_page() {
 	$active_tab = get_option( 'hcotp_msg91_active_tab', 'otp_settings' );
 	?>
-	<div class="wrap">
+	<div class="wrap" id="hcotp-settings-wrap"> 
 		<h1><?php esc_html_e( 'Happy Coders MSG91 Settings', 'happy-coders-otp-login' ); ?></h1>
 
 		<h2 class="nav-tab-wrapper">   
