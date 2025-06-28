@@ -1032,3 +1032,90 @@ function hcotp_override_wc_forms() {
 	add_action( 'woocommerce_before_checkout_form', 'hcotp_message_before_checkout', 5 );
 }
 add_action( 'wp_loaded', 'hcotp_override_wc_forms' );
+
+/**
+ * Asks for a plugin review after a period of time.
+ */
+function hcotp_ask_for_review() {
+	// Only show to admins who can install plugins.
+	if ( ! current_user_can( 'install_plugins' ) ) {
+		return;
+	}
+
+	// Check if the notice was dismissed.
+	$dismissed = get_option( 'hcotp_review_notice_dismissed' );
+	if ( $dismissed ) {
+		return;
+	}
+
+	// Check when the plugin was activated.
+	$activation_time = get_option( 'hcotp_activation_time' );
+	if ( ! $activation_time ) {
+		// If it's not set, set it now.
+		update_option( 'hcotp_activation_time', time() );
+		return;
+	}
+
+	// Wait 7 days before showing the notice.
+	if ( time() < $activation_time + ( 7 * DAY_IN_SECONDS ) ) {
+		return;
+	}
+
+	// Create the links.
+	$review_url  = 'https://wordpress.org/support/plugin/happy-coders-otp-login/reviews/?filter=5#new-post';
+	$support_url = 'https://wordpress.org/support/plugin/happy-coders-otp-login/';
+
+	$base_dismiss_url = add_query_arg( 'hcotp_dismiss_review_notice', '1' );
+
+	$dismiss_url = wp_nonce_url( $base_dismiss_url, 'hcotp-dismiss-review-action', 'hcotp_review_nonce' );
+
+	?>
+	<div class="notice notice-info is-dismissible">
+		<p>
+			<?php
+			printf(
+				/* translators: %s: Plugin name */
+				esc_html__( 'Hey! You have been using %s for a while now. We hope you are enjoying it!', 'happy-coders-otp-login' ),
+				'<strong>Happy Coders OTP Login</strong>'
+			);
+			?>
+		</p>
+		<p>
+			<a href="<?php echo esc_url( $review_url ); ?>" class="button button-primary" target="_blank" style="margin-right:10px;"><?php esc_html_e( 'Yes, I\'ll leave a 5-star review!', 'happy-coders-otp-login' ); ?></a>
+			<a href="<?php echo esc_url( $support_url ); ?>" class="button button-secondary" target="_blank" style="margin-right:10px;"><?php esc_html_e( 'I need some help first', 'happy-coders-otp-login' ); ?></a>
+			<a href="<?php echo esc_url( $dismiss_url ); ?>" class="button button-secondary"><?php esc_html_e( 'No, thanks / I already did', 'happy-coders-otp-login' ); ?></a>
+		</p>
+	</div>
+	<script>
+	// Make the core dismiss button work with our logic.
+	document.addEventListener('click', function(event) {
+		if (event.target.matches('.notice-dismiss[data-hcotp-dismiss-url]')) {
+			window.location.href = event.target.dataset.hcotpDismissUrl;
+		}
+	});
+	</script>
+	<?php
+}
+add_action( 'admin_notices', 'hcotp_ask_for_review' );
+
+/**
+ * Handle the dismissal of the review notice.
+ */
+function hcotp_handle_dismiss_review_notice() {
+	if ( isset( $_GET['hcotp_dismiss_review_notice'] ) && '1' === $_GET['hcotp_dismiss_review_notice'] ) {
+		if ( ! isset( $_GET['hcotp_review_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_GET['hcotp_review_nonce'] ), 'hcotp-dismiss-review-action' ) ) {
+			// Nonce is missing or invalid. Stop execution and show an error.
+			wp_die( esc_html__( 'Security check failed. Please try again.', 'happy-coders-otp-login' ), 'Security Check', array( 'response' => 403 ) );
+		}
+		update_option( 'hcotp_review_notice_dismissed', true );
+		wp_safe_redirect( remove_query_arg( array( 'hcotp_dismiss_review_notice', 'hcotp_review_nonce' ) ) );
+		exit;
+	}
+}
+add_action( 'admin_init', 'hcotp_handle_dismiss_review_notice' );
+
+// Add this to your main plugin activation hook `hcotp_activate_plugin()`
+// This ensures we have a timestamp to check against.
+if ( false === get_option( 'hcotp_activation_time' ) ) {
+	update_option( 'hcotp_activation_time', time() );
+}
