@@ -32,7 +32,7 @@ add_action( 'admin_menu', 'hcotp_add_admin_menu' );
  * @param string $hook The current admin page.
  */
 function hcotp_admin_enqueue_scripts( $hook ) {
-	if ( 'toplevel_page_hcotp-settings' !== $hook ) {
+	if ( 'toplevel_page_msg91-otp-settings' !== $hook ) {
 		return;
 	}
 	wp_enqueue_script( 'hcotp-admin-js', HCOTP_PLUGIN_URL . 'assets/js/hc-msg91-otp.js', array( 'jquery' ), time(), true );

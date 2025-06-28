@@ -319,9 +319,11 @@ jQuery(document).ready(function($) {
 				e.preventDefault();
 				var tab_id = $(this).data('tab');
 				$('#hcotp-settings-wrap .nav-tab-wrapper a.nav-tab').removeClass('nav-tab-active');
-				$(this).addClass('nav-tab-active');
-				$('.tab-content').removeClass('active-tab').hide();
+                $('#hcotp-settings-wrap .tab-content').removeClass('active-tab').hide();
+				
+                $(this).addClass('nav-tab-active');
 				$('#' + tab_id).addClass('active-tab').show();
+
 				$('#hcotp_msg91_active_tab_input').val(tab_id);
 	});
 });
