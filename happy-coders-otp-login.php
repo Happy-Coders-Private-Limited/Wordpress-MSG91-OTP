@@ -429,13 +429,7 @@ add_action(
 		if ( empty( $options['top_verify_image'] ) ) {
 			$options['top_verify_image'] = HCOTP_PLUGIN_URL . 'assets/images/verify-otp.png';
 		}
-		if ( is_user_logged_in() ) {
-			$user = wp_get_current_user();
-			echo '<div style="text-align: center;">
-						<h3>Welcome, ' . esc_html( $user->display_name ) . '!</h3>
-						<button id="next-to-address" style="margin-top: 20px;">Next</button>
-					</div>';
-		} else {
+		if ( ! is_user_logged_in() ) {
 			// Nonce is for image which is not enqueued.
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			echo hcotp_otp_form( $options, true );
