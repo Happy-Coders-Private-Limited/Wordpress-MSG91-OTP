@@ -1005,22 +1005,22 @@ function hcotp_message_before_checkout() {
  * @since 1.5
  */
 function hcotp_replace_wc_login_and_register_forms() {
-    // First, ensure we are on the My Account page and the user is logged out.
-    if ( ! function_exists( 'is_account_page' ) || ! is_account_page() || is_user_logged_in() ) {
-        return;
-    }
+	// First, ensure we are on the My Account page and the user is logged out.
+	if ( ! function_exists( 'is_account_page' ) || ! is_account_page() || is_user_logged_in() ) {
+		return;
+	}
 
-    // --- Handle the Login Form ---
-    // The start hook will begin capturing the output.
-    // The end hook will discard the captured output and print our form.
-    add_action( 'woocommerce_before_customer_login_form', 'hcotp_start_form_buffer', 1 );
-    add_action( 'woocommerce_after_customer_login_form', 'hcotp_output_otp_form_and_end_buffer', 99 );
+	// --- Handle the Login Form ---
+	// The start hook will begin capturing the output.
+	// The end hook will discard the captured output and print our form.
+	add_action( 'woocommerce_before_customer_login_form', 'hcotp_start_form_buffer', 1 );
+	add_action( 'woocommerce_after_customer_login_form', 'hcotp_output_otp_form_and_end_buffer', 99 );
 
-    // --- Handle the Registration Form ---
-    // We will capture the registration form and output nothing, effectively hiding it.
-    // This is necessary because some themes might display the forms differently.
-    add_action( 'woocommerce_before_registration_form', 'hcotp_start_form_buffer', 1 );
-    add_action( 'woocommerce_after_registration_form', 'hcotp_discard_buffer', 99 );
+	// --- Handle the Registration Form ---
+	// We will capture the registration form and output nothing, effectively hiding it.
+	// This is necessary because some themes might display the forms differently.
+	add_action( 'woocommerce_before_registration_form', 'hcotp_start_form_buffer', 1 );
+	add_action( 'woocommerce_after_registration_form', 'hcotp_discard_buffer', 99 );
 }
 add_action( 'template_redirect', 'hcotp_replace_wc_login_and_register_forms' );
 
@@ -1030,7 +1030,7 @@ add_action( 'template_redirect', 'hcotp_replace_wc_login_and_register_forms' );
  * @since 1.5
  */
 function hcotp_start_form_buffer() {
-    ob_start();
+	ob_start();
 }
 
 /**
@@ -1040,7 +1040,7 @@ function hcotp_start_form_buffer() {
  * @since 1.5
  */
 function hcotp_discard_buffer() {
-    ob_end_clean();
+	ob_end_clean();
 }
 
 /**
@@ -1049,13 +1049,13 @@ function hcotp_discard_buffer() {
  * @since 1.5
  */
 function hcotp_output_otp_form_and_end_buffer() {
-    // Discard the original WooCommerce login form HTML that was captured.
-    ob_end_clean();
+	// Discard the original WooCommerce login form HTML that was captured.
+	ob_end_clean();
 
-    // Now, print our own form.
-    echo '<div>'; // Wrapper for styling if needed.
-    echo do_shortcode( '[msg91_otp_form]' );
-    echo '</div>';
+	// Now, print our own form.
+	echo '<div>'; // Wrapper for styling if needed.
+	echo do_shortcode( '[msg91_otp_form]' );
+	echo '</div>';
 }
 
 /**
