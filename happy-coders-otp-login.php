@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'HCOTP_PLUGIN_FILE', __FILE__ );
 define( 'HCOTP_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HCOTP_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-define( 'HCOTP_VERSION', '1.5' );
+define( 'HCOTP_VERSION', '1.6' );
 
 require_once HCOTP_PLUGIN_DIR . 'includes/hc-msg91-settings.php';
 require_once HCOTP_PLUGIN_DIR . 'includes/hc-countries.php';
@@ -417,7 +417,6 @@ add_shortcode(
 		return hcotp_otp_form( $options, false );
 	}
 );
-
 
 add_action(
 	'wp_footer',
@@ -972,15 +971,6 @@ function hcotp_add_custom_statuses_to_order_list( $order_statuses ) {
 }
 add_filter( 'wc_order_statuses', 'hcotp_add_custom_statuses_to_order_list' );
 
-remove_action( 'woocommerce_login_form', 'woocommerce_login_form_start', 10 );
-remove_action( 'woocommerce_login_form', 'woocommerce_login_form', 20 );
-remove_action( 'woocommerce_login_form', 'woocommerce_login_form_end', 30 );
-
-// Remove WooCommerce register form.
-remove_action( 'woocommerce_register_form', 'woocommerce_register_form_start', 10 );
-remove_action( 'woocommerce_register_form', 'woocommerce_register_form', 20 );
-remove_action( 'woocommerce_register_form', 'woocommerce_register_form_end', 30 );
-
 
 /**
  * Replaces the default WooCommerce login/register forms with the OTP form.
@@ -1008,24 +998,65 @@ function hcotp_message_before_checkout() {
 }
 
 /**
- * Hooks into WooCommerce to replace forms.
+ * A robust function to replace both the WooCommerce login and registration forms.
+ * This method uses output buffering to capture and replace the default forms,
+ * making it resilient to theme overrides and hook priority issues.
  *
  * @since 1.5
  */
-function hcotp_override_wc_forms() {
-	// Remove default login/register forms from My Account page.
-	remove_action( 'woocommerce_before_customer_login_form', 'woocommerce_output_all_notices', 10 );
-	remove_action( 'woocommerce_customer_login_form', 'woocommerce_login_form', 10 );
-	remove_action( 'woocommerce_customer_registration_form', 'woocommerce_registration_form', 10 );
+function hcotp_replace_wc_login_and_register_forms() {
+    // First, ensure we are on the My Account page and the user is logged out.
+    if ( ! function_exists( 'is_account_page' ) || ! is_account_page() || is_user_logged_in() ) {
+        return;
+    }
 
-	// Add our OTP form.
-	add_action( 'woocommerce_before_customer_login_form', 'hcotp_replace_wc_login_with_otp' );
+    // --- Handle the Login Form ---
+    // The start hook will begin capturing the output.
+    // The end hook will discard the captured output and print our form.
+    add_action( 'woocommerce_before_customer_login_form', 'hcotp_start_form_buffer', 1 );
+    add_action( 'woocommerce_after_customer_login_form', 'hcotp_output_otp_form_and_end_buffer', 99 );
 
-	// Remove login form from checkout.
-	remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_login_form', 10 );
-	add_action( 'woocommerce_before_checkout_form', 'hcotp_message_before_checkout', 5 );
+    // --- Handle the Registration Form ---
+    // We will capture the registration form and output nothing, effectively hiding it.
+    // This is necessary because some themes might display the forms differently.
+    add_action( 'woocommerce_before_registration_form', 'hcotp_start_form_buffer', 1 );
+    add_action( 'woocommerce_after_registration_form', 'hcotp_discard_buffer', 99 );
 }
-add_action( 'wp_loaded', 'hcotp_override_wc_forms' );
+add_action( 'template_redirect', 'hcotp_replace_wc_login_and_register_forms' );
+
+/**
+ * Starts an output buffer. This is a generic helper function.
+ *
+ * @since 1.5
+ */
+function hcotp_start_form_buffer() {
+    ob_start();
+}
+
+/**
+ * Discards the contents of the current output buffer.
+ * Used to hide the registration form.
+ *
+ * @since 1.5
+ */
+function hcotp_discard_buffer() {
+    ob_end_clean();
+}
+
+/**
+ * Discards the captured buffer (the default login form) and prints our OTP form instead.
+ *
+ * @since 1.5
+ */
+function hcotp_output_otp_form_and_end_buffer() {
+    // Discard the original WooCommerce login form HTML that was captured.
+    ob_end_clean();
+
+    // Now, print our own form.
+    echo '<div>'; // Wrapper for styling if needed.
+    echo do_shortcode( '[msg91_otp_form]' );
+    echo '</div>';
+}
 
 /**
  * Asks for a plugin review after a period of time.
