@@ -3,7 +3,7 @@
  * Plugin Name: Happy Coders OTP Login
  * Text Domain: happy-coders-otp-login
  * Description: Seamless OTP-based login for WordPress/WooCommerce using MSG91. Supports mobile OTP login, and automatic SMS alerts for user registration, order placed, order shipped, order completed, and cart reminder via cronjob.
- * Version: 1.6
+ * Version: 1.7
  * Author: Happy Coders
  * Author URI: https://www.happycoders.in/
  * License: GPL-2.0-or-later
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'HCOTP_PLUGIN_FILE', __FILE__ );
 define( 'HCOTP_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HCOTP_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-define( 'HCOTP_VERSION', '1.6' );
+define( 'HCOTP_VERSION', '1.7' );
 
 require_once HCOTP_PLUGIN_DIR . 'includes/hc-msg91-settings.php';
 require_once HCOTP_PLUGIN_DIR . 'includes/hc-countries.php';
@@ -588,8 +588,7 @@ function hcotp_send_otp_ajax() {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 		$otp_count_today = $wpdb->get_var(
 			$wpdb->prepare(
-				'SELECT COUNT(*) FROM %s WHERE mobile_number = %s AND DATE(created_at) = %s',
-				$table_name,
+				'SELECT COUNT(*) FROM wp_hcotp_blocked_numbers WHERE mobile_number = %s AND DATE(created_at) = %s',
 				$mobile,
 				$today
 			)
@@ -623,8 +622,7 @@ function hcotp_send_otp_ajax() {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 			$wpdb->query(
 				$wpdb->prepare(
-					'INSERT INTO  %s (mobile_number, ip_address, created_at) VALUES (%s, %s, %s)',
-					$table_name,
+					'INSERT INTO  wp_hcotp_blocked_numbers (mobile_number, ip_address, created_at) VALUES (%s, %s, %s)',
 					$mobile,
 					$ip_address,
 					current_time( 'mysql' )
@@ -695,8 +693,7 @@ function hcotp_send_otp_ajax() {
 				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 				$wpdb->query(
 					$wpdb->prepare(
-						'INSERT INTO %s (mobile_number, ip_address, created_at) VALUES (%s, %s, %s)',
-						$table_name,
+						'INSERT INTO wp_hcotp_blocked_numbers (mobile_number, ip_address, created_at) VALUES (%s, %s, %s)',
 						$mobile,
 						$ip_address,
 						current_time( 'mysql' )

@@ -32,18 +32,20 @@ jQuery(document).ready(function ($) {
              console.log('OTP sent successfully, starting timer...');
             if (res) {
                  console.log('OTP sent');
-                if (res.success) {
+                if (res.success && res.success === true) {
                      $container.find('#otpprocess').val('sms');
                     $container.find('#send_otp_section').hide();
                     $container.find('#otp_input_wrap').show();
                     startOTPTimer($container); 
                 } else {
                     $container.find('#otp-send-status').html('<span style="color:red;">' + res.data.message + '</span>');
+                    $container.find('#otp-verify-status').html('<span style="color:red;">' + res.data.message + '</span>');
                     $button.prop('disabled', false).text('Send OTP');
                 }
             } else {
                  console.log('OTP');
                 $container.find('#otp-send-status').html('<span style="color:red;">Something went wrong. Try again.</span>');
+                $container.find('#otp-verify-status').html('<span style="color:red;">Something went wrong. Try again.</span>');
                 $button.prop('disabled', false).text('Send OTP');
             }
         });
@@ -79,19 +81,21 @@ jQuery(document).ready(function ($) {
              console.log('OTP sent successfully, starting timer...');
             if (res) {
                  console.log('OTP sent');
-                if (res.success) {
+                if (res.success && res.success === true) {
                       $container.find('#otpprocess').val('whatsapp');
                     $container.find('#send_otp_section').hide();
                     $container.find('#otp_input_wrap').show();
                     startOTPTimer($container); 
                 } else {
                     $container.find('#otp-send-status').html('<span style="color:red;">' + res.data.message + '</span>');
+                     $container.find('#otp-verify-status').html('<span style="color:red;">' + res.data.message + '</span>');
                     $button.prop('disabled', false).text('Send OTP');
                     
                 }
             } else {
                  console.log('OTP');
                 $container.find('#otp-send-status').html('<span style="color:red;">Something went wrong. Try again.</span>');
+                $container.find('#otp-verify-status').html('<span style="color:red;">Something went wrong. Try again.</span>');
                 $button.prop('disabled', false).text('Send OTP');
             }
         });
@@ -216,6 +220,7 @@ jQuery(document).ready(function ($) {
                 startOTPTimer($container);
             } else {
                 $container.find('#otp-send-status').html('<span style="color:red;">' + res.data.message + '</span>');
+                $container.find('#otp-verify-status').html('<span style="color:red;">' + res.data.message + '</span>');
                 $button.prop('disabled', false).text('Resend OTP');
             }
         });
