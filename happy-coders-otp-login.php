@@ -3,7 +3,7 @@
  * Plugin Name: Happy Coders OTP Login
  * Text Domain: happy-coders-otp-login
  * Description: Seamless OTP-based login for WordPress/WooCommerce using MSG91. Supports mobile OTP login, and automatic SMS alerts for user registration, order placed, order shipped, order completed, and cart reminder via cronjob.
- * Version: 1.7
+ * Version: 1.8
  * Author: Happy Coders
  * Author URI: https://www.happycoders.in/
  * License: GPL-2.0-or-later
@@ -414,7 +414,7 @@ add_shortcode(
 					</div>';
 		}
 
-		return hcotp_otp_form( $options, false );
+		return msg91_otp_form( $options, false );
 	}
 );
 
@@ -431,7 +431,7 @@ add_action(
 		if ( ! is_user_logged_in() ) {
 			// Nonce is for image which is not enqueued.
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			echo hcotp_otp_form( $options, true );
+			echo msg91_otp_form( $options, true );
 		}
 	}
 );
@@ -458,7 +458,7 @@ add_action(
  *
  * @return string The rendered form.
  */
-function hcotp_otp_form( $options, $is_popup = false ) {
+function msg91_otp_form( $options, $is_popup = false ) {
 	ob_start();
 
 	?>

@@ -4,7 +4,7 @@
 * Requires at least: 5.0
 * Tested up to: 6.8
 * Requires PHP: 7.4
-* Stable tag: 1.7
+* Stable tag: 1.8
 * License: GPLv2 or later
 * License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,7 +80,7 @@ Visit [MSG91's Terms of Service](https://msg91.com/legal/terms) and [Privacy Pol
 == Configuration ==
 1.  **Get an MSG91 Account:** This plugin requires an MSG91 account. If you don't have one, you can **[sign up here](https://msg91.com/signup?utm_source=happycoders)**.
 2.  **Enter Credentials:** In the plugin settings, enter your MSG91 Auth Key, Sender ID, and DLT-approved Template IDs.
-3.  **Display the Form:** Use the shortcode `[hcotp_otp_form]` on any page or add the CSS class `otp-popup-trigger` to a button/link to show the login form.
+3.  **Display the Form:** Use the shortcode `[msg91_otp_form]` on any page or add the CSS class `otp-popup-trigger` to a button/link to show the login form.
 
 == Support ==
 
@@ -121,6 +121,9 @@ Yes. In the "Transactional SMS Settings" tab, each notification type (new order,
 
 == Changelog ==
 
+= 1.8 =
+* Fix: General bug fixes and performance improvements.
+
 = 1.7 =
 * Feature: Added support for sending OTPs via WhatsApp.
 * Tweak: Improved UI and clarity on the settings pages.
@@ -139,5 +142,5 @@ Yes. In the "Transactional SMS Settings" tab, each notification type (new order,
 
 == Upgrade Notice ==
 
-= 1.7 =
-This version adds WhatsApp OTP support! After updating, please visit the settings page to configure the new WhatsApp options if you wish to use this feature.
+= 1.8 =
+General bug fixes and performance improvements.
