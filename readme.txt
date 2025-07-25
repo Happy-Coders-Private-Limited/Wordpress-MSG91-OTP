@@ -16,6 +16,10 @@ Happy Coders OTP Login is a simple, secure, and customizable OTP login plugin fo
 
 The plugin supports full-screen and popup login forms, integrates smoothly with WooCommerce, and improves user experience by replacing traditional email/password logins with secure phone-based authentication.
 
+**Watch our [quick video tutorial](https://www.youtube.com/watch?v=JTToziAf5gM) to see how easy it is to set up!**
+
+[youtube https://www.youtube.com/watch?v=JTToziAf5gM]
+
 *NEW in version 1.7:*  
 - Automatic SMS notifications for:
   - New user registrations
