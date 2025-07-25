@@ -1,10 +1,10 @@
-=== Happy Coders OTP Login ===
+=== Happy Coders OTP Login for WooCommerce ===
 * Contributors: happycoders, kombiahrk, muthupandi2002, imgopi2002, sureshkumar22
 * Tags: otp, woocommerce, msg91, passwordless, whatsapp otp
 * Requires at least: 5.0
 * Tested up to: 6.8
 * Requires PHP: 7.4
-* Stable tag: 1.8
+* Stable tag: 1.9
 * License: GPLv2 or later
 * License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -128,6 +128,9 @@ Yes. In the "Transactional SMS Settings" tab, each notification type (new order,
 = 1.8 =
 * Fix: General bug fixes and performance improvements.
 
+= 1.8 =
+* Fix: General bug fixes and performance improvements.
+
 = 1.7 =
 * Feature: Added support for sending OTPs via WhatsApp.
 * Tweak: Improved UI and clarity on the settings pages.
@@ -146,5 +149,5 @@ Yes. In the "Transactional SMS Settings" tab, each notification type (new order,
 
 == Upgrade Notice ==
 
-= 1.8 =
+= 1.9 =
 General bug fixes and performance improvements.
