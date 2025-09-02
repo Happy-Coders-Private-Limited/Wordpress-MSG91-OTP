@@ -1148,19 +1148,21 @@ if ( false === get_option( 'hcotp_activation_time' ) ) {
  * @since 2.0
  */
 function hcotp_migrate_old_settings() {
-    if ( get_option( 'hcotp_settings_migrated' ) ) {
-        return;
-    }
+	if ( get_option( 'hcotp_settings_migrated' ) ) {
+		return;
+	}
 
-    global $wpdb;
-    $old_options = $wpdb->get_results( "SELECT option_name, option_value FROM $wpdb->options WHERE option_name LIKE 'msg91_%'" );
+	global $wpdb;
 
-    foreach ( $old_options as $option ) {
-        $new_option_name = str_replace( 'msg91_', 'hcotp_msg91_', $option->option_name );
-        update_option( $new_option_name, $option->option_value );
-        delete_option( $option->option_name );
-    }
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+	$old_options = $wpdb->get_results( "SELECT option_name, option_value FROM $wpdb->options WHERE option_name LIKE 'msg91_%'" );
 
-    update_option( 'hcotp_settings_migrated', true );
+	foreach ( $old_options as $option ) {
+		$new_option_name = str_replace( 'msg91_', 'hcotp_msg91_', $option->option_name );
+		update_option( $new_option_name, $option->option_value );
+		delete_option( $option->option_name );
+	}
+
+	update_option( 'hcotp_settings_migrated', true );
 }
 add_action( 'admin_init', 'hcotp_migrate_old_settings' );
