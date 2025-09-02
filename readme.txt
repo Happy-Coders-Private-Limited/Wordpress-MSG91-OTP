@@ -4,7 +4,7 @@
 * Requires at least: 5.0
 * Tested up to: 6.8
 * Requires PHP: 7.4
-* Stable tag: 1.9
+* Stable tag: 2.0
 * License: GPLv2 or later
 * License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -125,7 +125,11 @@ Yes. In the "Transactional SMS Settings" tab, each notification type (new order,
 
 == Changelog ==
 
-= 1.8 =
+= 2.0 =
+* Fix: Corrected an issue where SMS settings were not being saved properly.
+* Feature: Added a migration function to move old settings to a new format.
+
+= 1.9 =
 * Fix: General bug fixes and performance improvements.
 
 = 1.8 =
@@ -148,6 +152,9 @@ Yes. In the "Transactional SMS Settings" tab, each notification type (new order,
 * Initial release with OTP login features (full-screen and popup) and core MSG91 integration.
 
 == Upgrade Notice ==
+
+= 2.0 =
+This version includes important fixes for saving SMS settings and migrates your old settings to a new format. Please update to ensure all features work correctly.
 
 = 1.9 =
 General bug fixes and performance improvements.

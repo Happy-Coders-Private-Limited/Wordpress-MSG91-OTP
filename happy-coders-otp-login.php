@@ -3,7 +3,7 @@
  * Plugin Name: Happy Coders OTP Login for WooCommerce
  * Text Domain: happy-coders-otp-login
  * Description: Seamless OTP-based login for WordPress/WooCommerce using MSG91. Supports mobile OTP login, and automatic SMS alerts for user registration, order placed, order shipped, order completed, and cart reminder via cronjob.
- * Version: 1.9
+ * Version: 2.0
  * Author: Happy Coders
  * Author URI: https://www.happycoders.in/
  * License: GPL-2.0-or-later
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'HCOTP_PLUGIN_FILE', __FILE__ );
 define( 'HCOTP_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HCOTP_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-define( 'HCOTP_VERSION', '1.9' );
+define( 'HCOTP_VERSION', '2.0' );
 
 require_once HCOTP_PLUGIN_DIR . 'includes/hc-msg91-settings.php';
 require_once HCOTP_PLUGIN_DIR . 'includes/hc-countries.php';
@@ -1141,3 +1141,26 @@ add_action( 'admin_init', 'hcotp_handle_dismiss_review_notice' );
 if ( false === get_option( 'hcotp_activation_time' ) ) {
 	update_option( 'hcotp_activation_time', time() );
 }
+
+/**
+ * Migrate old settings to the new format.
+ *
+ * @since 2.0
+ */
+function hcotp_migrate_old_settings() {
+    if ( get_option( 'hcotp_settings_migrated' ) ) {
+        return;
+    }
+
+    global $wpdb;
+    $old_options = $wpdb->get_results( "SELECT option_name, option_value FROM $wpdb->options WHERE option_name LIKE 'msg91_%'" );
+
+    foreach ( $old_options as $option ) {
+        $new_option_name = str_replace( 'msg91_', 'hcotp_msg91_', $option->option_name );
+        update_option( $new_option_name, $option->option_value );
+        delete_option( $option->option_name );
+    }
+
+    update_option( 'hcotp_settings_migrated', true );
+}
+add_action( 'admin_init', 'hcotp_migrate_old_settings' );

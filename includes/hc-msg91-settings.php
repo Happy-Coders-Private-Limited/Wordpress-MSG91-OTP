@@ -414,9 +414,9 @@ function hcotp_settings_page() {
 				);
 
 				foreach ( $sms_event_types as $key => $label ) :
-					$enable_option      = "msg91_sms_{$key}_enable";
-					$template_id_option = "msg91_sms_{$key}_template_id";
-					$notes_option       = "msg91_sms_{$key}_notes";
+					$enable_option      = "hcotp_msg91_sms_{$key}_enable";
+					$template_id_option = "hcotp_msg91_sms_{$key}_template_id";
+					$notes_option       = "hcotp_msg91_sms_{$key}_notes";
 					?>
 				<hr>
 				<h3><?php echo esc_html( $label ); ?></h3>
@@ -441,7 +441,7 @@ function hcotp_settings_page() {
 					</tr>
 					<?php
 					if ( 'osh' === $key || 'odl' === $key ) :
-						$status_slug_option = "msg91_sms_{$key}_status_slug";
+						$status_slug_option = "hcotp_msg91_sms_{$key}_status_slug";
 						$default_slug       = ( 'osh' === $key ) ? 'shipped' : 'delivered';
 						?>
 					<tr valign="top">
@@ -454,7 +454,7 @@ function hcotp_settings_page() {
 					<?php endif; ?>
 					<?php
 					if ( 'oac' === $key ) :
-						$delay_option = "msg91_sms_{$key}_delay_hours";
+						$delay_option = "hcotp_msg91_sms_{$key}_delay_hours";
 						?>
 					<tr valign="top">
 						<th scope="row"><label for="<?php echo esc_attr( $delay_option ); ?>"><?php esc_html_e( 'Abandonment Delay (Hours)', 'happy-coders-otp-login' ); ?></label></th>
