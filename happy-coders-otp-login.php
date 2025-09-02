@@ -50,6 +50,8 @@ add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'hcotp_plugin_
  * @since 1.5
  */
 function hcotp_activate_plugin() {
+	error_log( 'hcotp_activate_plugin started.' ); // New log
+
 	hcotp_create_blocked_numbers_table();
 
 	// Default OTP form texts (if not already set).
@@ -69,6 +71,7 @@ function hcotp_activate_plugin() {
 	foreach ( $options_to_set as $option_name => $default_value ) {
 		if ( false === get_option( $option_name ) ) { // Check if option does not exist.
 			update_option( $option_name, $default_value );
+			error_log( "hcotp_activate_plugin: Setting OTP option '{$option_name}' to '{$default_value}'." ); // New log
 		}
 	}
 
@@ -76,29 +79,32 @@ function hcotp_activate_plugin() {
 	$sms_defaults = array(
 		'hcotp_msg91_sms_ncr_enable'      => 0,
 		'hcotp_msg91_sms_ncr_template_id' => '',
-		'hcotp_msg91_sms_ncr_notes'       => 'New Customer: VAR1=CustomerName, VAR2=SiteName, VAR3=ShopURL',
+		'hcotp_msg91_sms_ncr_notes'       => 'Hi ##customer_name##, Welcome to ##site_name##!', // Now used for message template
 		'hcotp_msg91_sms_npo_enable'      => 0,
 		'hcotp_msg91_sms_npo_template_id' => '',
-		'hcotp_msg91_sms_npo_notes'       => 'New Order: VAR1=CustomerName, VAR2=OrderID, VAR3=OrderTotal, VAR4=SiteName, VAR5=ShopURL',
+		'hcotp_msg91_sms_npo_notes'       => 'Hi ##customer_name##, Thank you for choosing Motorpark! Your order has been confirmed. Your order ID is ##order_id##.', // Now used for message template
 		'hcotp_msg91_sms_osh_enable'      => 0,
 		'hcotp_msg91_sms_osh_template_id' => '',
 		'hcotp_msg91_sms_osh_status_slug' => 'shipped',
-		'hcotp_msg91_sms_osh_notes'       => 'Order Shipped: VAR1=CustomerName, VAR2=OrderID, VAR3=TrackingID, VAR4=ShippingProvider, VAR5=TrackingLink, VAR6=SiteName',
+		'hcotp_msg91_sms_osh_notes'       => 'Hi ##customer_name##, Your order ##order_id## has been shipped! Tracking ID: ##tracking_id##. Track here: ##tracking_url##', // Now used for message template
 		'hcotp_msg91_sms_odl_enable'      => 0,
 		'hcotp_msg91_sms_odl_template_id' => '',
 		'hcotp_msg91_sms_odl_status_slug' => 'delivered',
-		'hcotp_msg91_sms_odl_notes'       => 'Order Delivered: VAR1=CustomerName, VAR2=OrderID, VAR3=SiteName',
+		'hcotp_msg91_sms_odl_notes'       => 'Hi ##customer_name##, Your order ##order_id## has been delivered! Thank you for shopping with us.', // Now used for message template
 		'hcotp_msg91_sms_oac_enable'      => 0,
 		'hcotp_msg91_sms_oac_template_id' => '',
 		'hcotp_msg91_sms_oac_delay_hours' => 1,
-		'hcotp_msg91_sms_oac_notes'       => 'Abandoned Cart: VAR1=CustomerName, VAR2=CartItemsCount, VAR3=CartTotal, VAR4=SiteName, VAR5=CartURL',
+		'hcotp_msg91_sms_oac_notes'       => 'Hi ##customer_name##, You left items in your cart! ##cart_items_count## items worth ##cart_total##. Complete your order now!', // Now used for message template
 	);
 
 	foreach ( $sms_defaults as $key => $value ) {
 		if ( false === get_option( $key ) ) {
 			update_option( $key, $value );
+			error_log( "hcotp_activate_plugin: Setting SMS default option '{$key}' to '{$value}'." ); // New log
 		}
 	}
+
+	error_log( 'hcotp_activate_plugin finished.' ); // New log
 }
 register_activation_hook( __FILE__, 'hcotp_activate_plugin' );
 

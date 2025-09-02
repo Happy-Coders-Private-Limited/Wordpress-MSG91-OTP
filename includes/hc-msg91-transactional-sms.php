@@ -10,6 +10,54 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 
 /**
+ * Prepares SMS variables for MSG91 and replaces placeholders in the message.
+ *
+ * @param string $message_template The raw message template with ##placeholders##.
+ * @param array  $data             Associative array of standardized variables (e.g., ['customer_name' => 'John Doe']).
+ * @return array An array containing 'message' (with placeholders replaced) and 'msg91_vars' (VARx array).
+ */
+function hcotp_prepare_sms_variables( $message_template, $data ) {
+    $msg91_vars = array();
+    $processed_message = $message_template;
+    $var_counter = 1;
+
+    // Define a mapping from common names to VARx
+    // This is a simple example, you might want a more robust mapping
+    $variable_map = array(
+        'customer_name' => 'customer_name',
+        'order_id'      => 'order_id',
+        'site_name'     => 'site_name',
+        'tracking_id'   => 'tracking_id',
+        'tracking_url'  => 'tracking_url',
+        'cart_items_count' => 'cart_items_count',
+        'cart_total'    => 'cart_total',
+        // Add more as needed
+    );
+
+    foreach ( $data as $key => $value ) {
+        // Replace ##key## in the message template
+        $processed_message = str_replace( '##' . $key . '##', $value, $processed_message );
+
+        // Map to VARx for MSG91
+        if ( isset( $variable_map[ $key ] ) ) {
+            $msg91_vars[ $variable_map[ $key ] ] = $value;
+        } else {
+            // Fallback for variables not in map, assign a generic VARx
+            $msg91_vars[ 'VAR' . $var_counter ] = $value;
+            $var_counter++;
+        }
+    }
+
+    // Handle any ##placeholders## that were not replaced (e.g., if data was missing)
+    $processed_message = preg_replace( '/##(.*?)##/', '', $processed_message ); // Remove any remaining placeholders
+
+    return array(
+        'message'    => $processed_message,
+        'msg91_vars' => $msg91_vars,
+    );
+}
+
+/**
  * Sends a transactional SMS using MSG91 Flow API.
  *
  * @param string $mobile Recipient mobile number (with country code, e.g., 91XXXXXXXXXX).
@@ -17,65 +65,70 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableControlle
  * @param array  $vars Associative array of variables for the template (e.g., ['VAR1' => 'Value1', 'VAR2' => 'Value2']).
  * @return bool|WP_Error True on success, WP_Error on failure.
  */
-function hcotp_send_transactional_sms( $mobile, $flow_id, $vars = array() ) {
-	$authkey   = get_option( 'hcotp_msg91_auth_key' );
-	$sender_id = get_option( 'hcotp_msg91_sender_id' );
+function hcotp_send_transactional_sms( $mobile, $flow_id, $message_template, $data = array() ) {
+    $authkey   = get_option( 'hcotp_msg91_auth_key' );
+    $sender_id = get_option( 'hcotp_msg91_sender_id' );
 
-	if ( empty( $authkey ) || empty( $sender_id ) || empty( $flow_id ) || empty( $mobile ) ) {
-		return new WP_Error( 'config_missing', 'MSG91 SMS configuration or recipient mobile is missing.' );
-	}
+    error_log( "hcotp_send_transactional_sms" );
 
-	// Ensure mobile is in format 91XXXXXXXXXX (without +).
-	$mobile_cleaned = str_replace( '+', '', $mobile );
-	if ( ! ctype_digit( $mobile_cleaned ) || strlen( $mobile_cleaned ) < 10 ) {
-		return new WP_Error( 'invalid_mobile', 'Invalid mobile number format for MSG91 SMS.' );
-	}
+    if ( empty( $authkey ) || empty( $sender_id ) || empty( $flow_id ) || empty( $mobile ) ) {
+        return new WP_Error( 'config_missing', 'MSG91 SMS configuration or recipient mobile is missing.' );
+    }
 
-	$api_url = 'https://control.msg91.com/api/v5/flow/';
+    // Ensure mobile is in format 91XXXXXXXXXX (without +).
+    $mobile_cleaned = str_replace( '+', '', $mobile );
+    if ( ! ctype_digit( $mobile_cleaned ) || strlen( $mobile_cleaned ) < 10 ) {
+        return new WP_Error( 'invalid_mobile', 'Invalid mobile number format for MSG91 SMS.' );
+    }
 
-	$payload = array(
-		'template_id' => $flow_id,
-		'sender'      => $sender_id,
-		'short_url'   => '1', // 1 for on, 0 for off - typically '1' for tracking if desired
-		'mobiles'     => $mobile_cleaned,
-	);
+    $api_url = 'https://control.msg91.com/api/v5/flow/';
 
-	// Add variables like "VAR1", "VAR2".
-	if ( ! empty( $vars ) && is_array( $vars ) ) {
-		foreach ( $vars as $key => $value ) {
-			// MSG91 expects variables like VAR1, VAR2. Ensure $key matches this.
-			// Or if $vars is like ['customer_name' => 'Test'], map it here.
-			// For simplicity, this example assumes $vars already contains keys like 'VAR1'.
-			// The calling functions will need to prepare $vars correctly.
-			$payload[ $key ] = $value;
-		}
-	}
+    // Prepare variables using the new helper function
+    $prepared_data = hcotp_prepare_sms_variables( $message_template, $data );
+    $msg91_vars    = $prepared_data['msg91_vars'];
+    $final_message = $prepared_data['message']; // Not directly used by MSG91 Flow API, but good for logging/future use
 
-	$args = array(
-		'method'  => 'POST',
-		'headers' => array(
-			'authkey'      => $authkey,
-			'Content-Type' => 'application/json',
-		),
-		'body'    => wp_json_encode( $payload ),
-		'timeout' => 15, // seconds.
-	);
+    $payload = array(
+        'template_id' => $flow_id,
+        'sender'      => $sender_id,
+        'short_url'   => '1', // 1 for on, 0 for off - typically '1' for tracking if desired
+        'mobiles'     => $mobile_cleaned,
+    );
 
-	$response = wp_remote_post( $api_url, $args );
+    // Add variables like "VAR1", "VAR2" from the prepared data
+    if ( ! empty( $msg91_vars ) && is_array( $msg91_vars ) ) {
+        foreach ( $msg91_vars as $key => $value ) {
+            $payload[ $key ] = $value;
+        }
+    }
 
-	if ( is_wp_error( $response ) ) {
-		return $response;
-	}
+    error_log( "hcotp_send_transactional_sms payload: " . json_encode( $payload ) );
 
-	$body   = wp_remote_retrieve_body( $response );
-	$result = json_decode( $body, true );
+    $args = array(
+        'method'  => 'POST',
+        'headers' => array(
+            'authkey'      => $authkey,
+            'Content-Type' => 'application/json',
+        ),
+        'body'    => wp_json_encode( $payload ),
+        'timeout' => 15, // seconds.
+    );
 
-	if ( isset( $result['type'] ) && 'success' === $result['type'] ) {
-		return true;
-	} else {
-		$error_message = isset( $result['message'] ) ? $result['message'] : 'Unknown error sending MSG91 SMS.';
-		return new WP_Error( 'api_error', $error_message );
-	}
+    $response = wp_remote_post( $api_url, $args );
+
+    if ( is_wp_error( $response ) ) {
+        return $response;
+    }
+
+    $body   = wp_remote_retrieve_body( $response );
+    $result = json_decode( $body, true );
+
+    if ( isset( $result['type'] ) && 'success' === $result['type'] ) {
+        return true;
+    } else {
+        $error_message = isset( $result['message'] ) ? $result['message'] : 'Unknown error sending MSG91 SMS.';
+        return new WP_Error( 'api_error', $error_message );
+    }
 }
 
 /**
@@ -160,7 +213,10 @@ function hcotp_sms_on_new_customer_registration( $user_id ) {
 		return;
 	}
 	$template_id = get_option( 'hcotp_msg91_sms_ncr_template_id' );
-	if ( empty( $template_id ) ) {
+	// Changed: Get the message template from notes
+	$message_template = get_option( 'hcotp_msg91_sms_ncr_notes', 'Hi ##customer_name##, Welcome to ##site_name##!' );
+
+	if ( empty( $template_id ) || empty( $message_template ) ) {
 		return;
 	}
 
@@ -174,12 +230,13 @@ function hcotp_sms_on_new_customer_registration( $user_id ) {
 		return;
 	}
 
-	$vars = array(
-		'var1' => $user->display_name ? $user->display_name : $user->user_login, // Customer Name.
-		'var2' => get_bloginfo( 'name' ),                   // Site Name.
+	// Use standardized variable names
+	$data = array(
+		'customer_name' => $user->display_name ? $user->display_name : $user->user_login, // Customer Name.
+		'site_name'     => get_bloginfo( 'name' ),                   // Site Name.
 	);
 
-	hcotp_send_transactional_sms( $phone, $template_id, $vars );
+	hcotp_send_transactional_sms( $phone, $template_id, $message_template, $data );
 }
 
 /**
@@ -188,11 +245,15 @@ function hcotp_sms_on_new_customer_registration( $user_id ) {
  * @param int $order_id The order ID.
  */
 function hcotp_sms_on_thankyou_page( $order_id ) {
+	error_log( "hcotp_sms_on_thankyou_page" );
 	if ( ! get_option( 'hcotp_msg91_sms_npo_enable', 0 ) ) {
 		return;
 	}
 	$template_id = get_option( 'hcotp_msg91_sms_npo_template_id' );
-	if ( empty( $template_id ) ) {
+	// Changed: Get the message template from notes
+	$message_template = get_option( 'hcotp_msg91_sms_npo_notes', 'Hi ##customer_name##, Thank you for choosing ##site_name##! Your order has been confirmed. Your order ID is ##order_id##.' );
+
+	if ( empty( $template_id ) || empty( $message_template ) ) { // Check message_template too
 		return;
 	}
 	$order = wc_get_order( $order_id );
@@ -213,12 +274,17 @@ function hcotp_sms_on_thankyou_page( $order_id ) {
 		$customer_name = 'Valued Customer';
 	}
 
-	$vars = array(
-		'var1' => $customer_name,
-		'var2' => $order->get_order_number(),
+	// Use standardized variable names
+	$data = array(
+		'customer_name' => $customer_name,
+		'order_id'      => $order->get_order_number(),
+		'site_name'     => get_bloginfo( 'name' ),
 	);
 
-	hcotp_send_transactional_sms( $phone, $template_id, $vars );
+	error_log( "vars: " . json_encode( $data ) );
+
+	// Pass message template and data to send function
+	hcotp_send_transactional_sms( $phone, $template_id, $message_template, $data );
 }
 
 /**
@@ -244,36 +310,52 @@ function hcotp_sms_on_order_status_change( $order_id, $old_status, $new_status )
 		$customer_name = 'Valued Customer';
 	}
 	$site_url = get_site_url();
+
 	// Order Shipped.
 	$shipped_enabled       = get_option( 'hcotp_msg91_sms_osh_enable', 0 );
 	$shipped_template_id   = get_option( 'hcotp_msg91_sms_osh_template_id' );
+	// Changed: Get the message template from notes
+	$shipped_message_template = get_option( 'hcotp_msg91_sms_osh_notes', 'Hi ##customer_name##, Your order ##order_id## has been shipped! Tracking ID: ##tracking_id##. Track here: ##tracking_url##' );
 	$shipped_target_status = get_option( 'hcotp_msg91_sms_osh_status_slug', 'shipped' );
+	
+	error_log( "shipped vars: " . json_encode( $shipped_message_template ) );
+	error_log( "shipped slug: " . json_encode( $shipped_target_status ) );
+	
+	error_log("new status: " . json_encode($new_status));
 
-	if ( $shipped_enabled && ! empty( $shipped_template_id ) && $new_status === $shipped_target_status ) {
+	if ( $shipped_enabled && ! empty( $shipped_template_id ) && ! empty( $shipped_message_template ) && $new_status === $shipped_target_status ) {
+		error_log( "shipped enabled" );
 		$tracking_id       = get_post_meta( $order_id, '_hcotp_tracking_id', true );
 		$tracking_url      = get_post_meta( $order_id, '_hcotp_tracking_url', true );
 		$shipping_provider = get_post_meta( $order_id, '_hcotp_shipping_provider', true );
-		// If using another plugin, the meta key for tracking number might be different.
 
-		$vars = array(
-			'var1' => $tracking_id,             // Customer Name.
-			'var2' => $tracking_url ? $tracking_url : $site_url,
+		$data = array(
+			'customer_name'     => $customer_name,
+			'order_id'          => $order->get_order_number(),
+			'tracking_id'       => $tracking_id,
+			'tracking_url'      => $tracking_url ? $tracking_url : $site_url,
+			'shipping_provider' => $shipping_provider,
+			'site_name'         => get_bloginfo( 'name' ),
 		);
-		hcotp_send_transactional_sms( $phone, $shipped_template_id, $vars );
+		hcotp_send_transactional_sms( $phone, $shipped_template_id, $shipped_message_template, $data );
 	}
 
 	// Order Delivered.
 	$delivered_enabled       = get_option( 'hcotp_msg91_sms_odl_enable', 0 );
 	$delivered_template_id   = get_option( 'hcotp_msg91_sms_odl_template_id' );
+	// Changed: Get the message template from notes
+	$delivered_message_template = get_option( 'hcotp_msg91_sms_odl_notes', 'Hi ##customer_name##, Your order ##order_id## has been delivered! Thank you for shopping with us.' );
 	$delivered_target_status = get_option( 'hcotp_msg91_sms_odl_status_slug', 'delivered' );
+	
+	error_log( "shipped slug: " . json_encode( $delivered_target_status ) );
 
-	if ( $delivered_enabled && ! empty( $delivered_template_id ) && $new_status === $delivered_target_status ) {
-		$vars = array(
-			'var1' => $customer_name,
-			'var2' => $order->get_order_number(),  // Order ID.
-			// 'VAR3' => get_bloginfo('name'),       // Site Name.
+	if ( $delivered_enabled && ! empty( $delivered_template_id ) && ! empty( $delivered_message_template ) && $new_status === $delivered_target_status ) {
+		$data = array(
+			'customer_name' => $customer_name,
+			'order_id'      => $order->get_order_number(),
+			'site_name'     => get_bloginfo( 'name' ),
 		);
-		hcotp_send_transactional_sms( $phone, $delivered_template_id, $vars );
+		hcotp_send_transactional_sms( $phone, $delivered_template_id, $delivered_message_template, $data );
 	}
 }
 
@@ -369,7 +451,10 @@ function hcotp_send_abandoned_cart_sms( $user_id ) {
 		return;
 	}
 	$template_id = get_option( 'hcotp_msg91_sms_oac_template_id' );
-	if ( empty( $template_id ) ) {
+	// Changed: Get the message template from notes
+	$message_template = get_option( 'hcotp_msg91_sms_oac_notes', 'Hi ##customer_name##, You left items in your cart! ##cart_items_count## items worth ##cart_total##. Complete your order now!' );
+
+	if ( empty( $template_id ) || empty( $message_template ) ) {
 		return;
 	}
 
@@ -477,10 +562,7 @@ function hcotp_send_abandoned_cart_sms( $user_id ) {
 		} elseif ( method_exists( WC()->cart, 'get_cart_from_session' ) ) {
 				WC()->cart->get_cart_from_session();
 		}
-	} else {
-		return;
 	}
-	// --- End Robust WooCommerce Initialization ---
 
 	// ... (rest of your function: check if cart is empty, check recent orders, get phone, send SMS) ...
 	// The checks for WC()->cart->is_empty(), get_cart_contents_count(), get_cart_total() should now work.
@@ -510,15 +592,16 @@ function hcotp_send_abandoned_cart_sms( $user_id ) {
 	$cart_items_count = WC()->cart->get_cart_contents_count();
 	$cart_total       = WC()->cart->get_cart_total();
 
-	$vars = array(
-		'var1' => $customer_name,        // Customer Name.
-		'var2' => $cart_items_count,     // Cart Items Count.
-		// 'VAR3' => $cart_total,           // Cart Total.
-		// 'VAR4' => get_bloginfo('name'),   // Site Name.
-		// 'VAR5' => wc_get_cart_url(),      // Cart URL.
+	// Use standardized variable names
+	$data = array(
+		'customer_name'    => $customer_name,        // Customer Name.
+		'cart_items_count' => $cart_items_count,     // Cart Items Count.
+		'cart_total'       => $cart_total,           // Cart Total.
+		'site_name'        => get_bloginfo( 'name' ),   // Site Name.
+		'cart_url'         => wc_get_cart_url(),      // Cart URL.
 	);
 
-	hcotp_send_transactional_sms( $phone, $template_id, $vars );
+	hcotp_send_transactional_sms( $phone, $template_id, $message_template, $data );
 }
 
 /**

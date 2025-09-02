@@ -16,20 +16,11 @@ Happy Coders OTP Login is a simple, secure, and customizable OTP login plugin fo
 
 The plugin supports full-screen and popup login forms, integrates smoothly with WooCommerce, and improves user experience by replacing traditional email/password logins with secure phone-based authentication.
 
+Now, you can fully customize your transactional SMS messages using dynamic variables like `##customer_name##`, `##order_id##`, and more, directly from the plugin settings.
+
 **Watch our [quick video tutorial](https://www.youtube.com/watch?v=JTToziAf5gM) to see how easy it is to set up!**
 
 [youtube https://www.youtube.com/watch?v=JTToziAf5gM]
-
-*NEW in version 1.7:*  
-- Automatic SMS notifications for:
-  - New user registrations
-  - WooCommerce order placed
-  - Order shipped
-  - Order completed
-  - Cart cronjob reminders
-- *WhatsApp Send OTP for login*: users can now receive OTP via WhatsApp instead of (or along with) SMS.
-
-This keeps your customers engaged and ensures they never miss important alerts.
 
 === MSG91 Integration ===
 
@@ -59,7 +50,7 @@ Visit [MSG91's Terms of Service](https://msg91.com/legal/terms) and [Privacy Pol
 - Country code and flag selection
 - Shortcodes for embedding login anywhere
 - Admin panel for MSG91 and plugin settings
-- Language translation support
+- Customizable transactional SMS templates with dynamic variables (e.g., `##customer_name##`, `##order_id##`).
 
 🎯 **Shortcodes:**
 - `[msg91_otp_form]` – Display full-screen OTP login form anywhere (pages, posts, widgets).
@@ -73,6 +64,7 @@ Visit [MSG91's Terms of Service](https://msg91.com/legal/terms) and [Privacy Pol
 - Post-login redirect URL
 - OTP send limit per user/day
 - Enable/disable specific SMS/WhatsApp features (registration, order, cart)
+- Customizable SMS message templates with dynamic variables.
 
 == Installation ==
 1. Upload the plugin to the `/wp-content/plugins/happy-coders-otp-login` directory.
@@ -125,6 +117,11 @@ Yes. In the "Transactional SMS Settings" tab, each notification type (new order,
 
 == Changelog ==
 
+= 2.1 =
+* Feature: Introduced customizable transactional SMS message templates with dynamic variable support (e.g., ##customer_name##, ##order_id##).
+* Tweak: Enhanced settings page to allow direct input of SMS message templates using descriptive variables.
+* Fix: Ensured backward compatibility for existing SMS notes by repurposing the field for message templates.
+
 = 2.0 =
 * Fix: Corrected an issue where SMS settings were not being saved properly.
 * Feature: Added a migration function to move old settings to a new format.
@@ -152,6 +149,9 @@ Yes. In the "Transactional SMS Settings" tab, each notification type (new order,
 * Initial release with OTP login features (full-screen and popup) and core MSG91 integration.
 
 == Upgrade Notice ==
+
+= 2.1 =
+This version introduces customizable transactional SMS message templates with dynamic variables. Your existing SMS notes will now be used as message templates. Please review your settings after updating.
 
 = 2.0 =
 This version includes important fixes for saving SMS settings and migrates your old settings to a new format. Please update to ensure all features work correctly.

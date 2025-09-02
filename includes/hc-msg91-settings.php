@@ -101,7 +101,7 @@ add_action(
 		foreach ( $sms_event_types as $key => $label ) {
 			register_setting( 'hcotp_otp_settings_group', "hcotp_msg91_sms_{$key}_enable", 'absint' );
 			register_setting( 'hcotp_otp_settings_group', "hcotp_msg91_sms_{$key}_template_id", 'sanitize_text_field' );
-			register_setting( 'hcotp_otp_settings_group', "hcotp_msg91_sms_{$key}_notes", 'wp_kses_post' ); // Allows some HTML for notes.
+			register_setting( 'hcotp_otp_settings_group', "hcotp_msg91_sms_{$key}_notes", 'wp_kses_post' ); // Use notes for message template
 			if ( 'osh' === $key || 'odl' === $key ) {
 				register_setting( 'hcotp_otp_settings_group', "hcotp_msg91_sms_{$key}_status_slug", 'sanitize_text_field' );
 			}
@@ -402,7 +402,7 @@ function hcotp_settings_page() {
 				<!-- Code for Transactional SMS Notifications by Kombiah -->
 				<h2><?php esc_html_e( 'Transactional SMS Notifications (WooCommerce)', 'happy-coders-otp-login' ); ?></h2>
 				<p><?php esc_html_e( 'Configure SMS notifications for various events. You need to create corresponding Flow templates in your MSG91 dashboard and provide the Flow ID here as Template ID.', 'happy-coders-otp-login' ); ?></p>
-				<p><?php esc_html_e( 'The plugin will pass predefined variables to MSG91 (e.g., VAR1, VAR2). Please refer to the plugin documentation for the list of variables available for each SMS type.', 'happy-coders-otp-login' ); ?></p>
+				<p><?php esc_html_e( 'The plugin will pass predefined variables to MSG91. Available variables: ##customer_name##, ##order_id##, ##site_name##, ##tracking_id##, ##tracking_url##, ##cart_items_count##, ##cart_total##.', 'happy-coders-otp-login' ); ?></p>
 
 				<?php
 				$sms_event_types = array(
@@ -413,10 +413,21 @@ function hcotp_settings_page() {
 					'oac' => __( 'Abandoned Cart', 'happy-coders-otp-login' ),
 				);
 
+				// Define default message templates for display in settings
+				$default_message_templates = array(
+					'ncr' => 'Hi ##customer_name##, Welcome to ##site_name##!',
+					'npo' => 'Hi ##customer_name##, Thank you for choosing ##site_name##! Your order has been confirmed. Your order ID is ##order_id##.',
+					'osh' => 'Hi ##customer_name##, Your order ##order_id## has been shipped! Tracking ID: ##tracking_id##. Track here: ##tracking_url##',
+					'odl' => 'Hi ##customer_name##, Your order ##order_id## has been delivered! Thank you for shopping with us.',
+					'oac' => 'Hi ##customer_name##, You left items in your cart! ##cart_items_count## items worth ##cart_total##. Complete your order now!',
+				);
+
 				foreach ( $sms_event_types as $key => $label ) :
 					$enable_option      = "hcotp_msg91_sms_{$key}_enable";
 					$template_id_option = "hcotp_msg91_sms_{$key}_template_id";
-					$notes_option       = "hcotp_msg91_sms_{$key}_notes";
+					$notes_option       = "hcotp_msg91_sms_{$key}_notes"; // Now used for message template
+					$sample_message     = $default_message_templates[ $key ];
+					$current_message_template = get_option( $notes_option ) ?: $default_message_templates[ $key ];
 					?>
 				<hr>
 				<h3><?php echo esc_html( $label ); ?></h3>
@@ -439,6 +450,13 @@ function hcotp_settings_page() {
 							<p class="description"><?php esc_html_e( 'Enter the Flow ID from your MSG91 panel for this event.', 'happy-coders-otp-login' ); ?></p>
 						</td>
 					</tr>
+					<tr valign="top">
+						<th scope="row"><label for="<?php echo esc_attr( $notes_option ); ?>"><?php esc_html_e( 'SMS Message Template', 'happy-coders-otp-login' ); ?></label></th>
+						<td>
+							<textarea name="<?php echo esc_attr( $notes_option ); ?>" rows="3" cols="50" class="large-text"><?php echo esc_textarea( $current_message_template ); ?></textarea>
+							<p class="description"><?php esc_html_e( 'Use ##variable_name## for dynamic content. E.g. '. $sample_message, 'happy-coders-otp-login' ); ?></p>
+						</td>
+					</tr>
 					<?php
 					if ( 'osh' === $key || 'odl' === $key ) :
 						$status_slug_option = "hcotp_msg91_sms_{$key}_status_slug";
@@ -448,7 +466,7 @@ function hcotp_settings_page() {
 						<th scope="row"><label for="<?php echo esc_attr( $status_slug_option ); ?>"><?php esc_html_e( 'Target Order Status Slug', 'happy-coders-otp-login' ); ?></label></th>
 						<td>
 							<input type="text" name="<?php echo esc_attr( $status_slug_option ); ?>" value="<?php echo esc_attr( get_option( $status_slug_option, $default_slug ) ); ?>" size="30" />
-							<p class="description"><?php esc_html_e( 'The WooCommerce order status slug that triggers this SMS (e.g. "shipped", "wc-completed").', 'happy-coders-otp-login' ); ?></p>
+							<p class="description"><?php esc_html_e( 'The WooCommerce order status slug that triggers this SMS (e.g. "shipped", "delivered", "completed").', 'happy-coders-otp-login' ); ?></p>
 						</td>
 					</tr>
 					<?php endif; ?>
@@ -464,13 +482,6 @@ function hcotp_settings_page() {
 						</td>
 					</tr>
 					<?php endif; ?>
-					<tr valign="top">
-						<th scope="row"><label for="<?php echo esc_attr( $notes_option ); ?>"><?php esc_html_e( 'Template Notes / Variables', 'happy-coders-otp-login' ); ?></label></th>
-						<td>
-							<textarea name="<?php echo esc_attr( $notes_option ); ?>" rows="3" cols="50" class="large-text"><?php echo esc_textarea( get_option( $notes_option ) ); ?></textarea>							
-							<p class="description"><?php esc_html_e( 'For your reference. Paste your MSG91 template content here or add notes about variables used.', 'happy-coders-otp-login' ); ?></p>
-						</td>
-					</tr>
 				</table>
 				<?php endforeach; ?>
 			</div>
