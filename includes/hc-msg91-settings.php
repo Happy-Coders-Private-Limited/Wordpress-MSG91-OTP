@@ -480,5 +480,3 @@ function hcotp_settings_page() {
 	
 	<?php
 }
-
-?>

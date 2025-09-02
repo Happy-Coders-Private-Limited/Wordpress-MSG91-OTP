@@ -240,8 +240,8 @@ function hcotp_add_otp_column_to_users_table() {
 	$column_exists = wp_cache_get( $cache_key );
 
 	if ( false === $column_exists ) {
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
-		$column_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW COLUMNS FROM %s LIKE %s', $table_name, $column_name ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$column_exists = $wpdb->get_var( $wpdb->prepare( "SHOW COLUMNS FROM `{$table_name}` LIKE %s", $column_name ) );
 		wp_cache_set( $cache_key, $column_exists, 'hcotp' );
 	}
 
