@@ -34,8 +34,8 @@ function hcotp_init_woocommerce_hooks() {
 	include_once ABSPATH . 'wp-admin/includes/plugin.php';
 
 	if ( is_plugin_active( 'woocommerce/woocommerce.php' ) && class_exists( 'WooCommerce' ) ) {
-		if ( function_exists( 'hc_msg91_register_wc_sms_hooks' ) ) {
-			hc_msg91_register_wc_sms_hooks();
+		if ( function_exists( 'hcotp_register_wc_sms_hooks' ) ) {
+			hcotp_register_wc_sms_hooks();
 		}
 	}
 }
