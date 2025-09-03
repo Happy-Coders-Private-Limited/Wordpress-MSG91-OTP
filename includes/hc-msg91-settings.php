@@ -101,7 +101,7 @@ add_action(
 		foreach ( $sms_event_types as $key => $label ) {
 			register_setting( 'hcotp_otp_settings_group', "hcotp_msg91_sms_{$key}_enable", 'absint' );
 			register_setting( 'hcotp_otp_settings_group', "hcotp_msg91_sms_{$key}_template_id", 'sanitize_text_field' );
-			register_setting( 'hcotp_otp_settings_group', "hcotp_msg91_sms_{$key}_notes", 'wp_kses_post' ); // Use notes for message template
+			register_setting( 'hcotp_otp_settings_group', "hcotp_msg91_sms_{$key}_notes", 'wp_kses_post' );
 			if ( 'osh' === $key || 'odl' === $key ) {
 				register_setting( 'hcotp_otp_settings_group', "hcotp_msg91_sms_{$key}_status_slug", 'sanitize_text_field' );
 			}
@@ -413,7 +413,7 @@ function hcotp_settings_page() {
 					'oac' => __( 'Abandoned Cart', 'happy-coders-otp-login' ),
 				);
 
-				// Define default message templates for display in settings
+				// Define default message templates for display in settings.
 				$default_message_templates = array(
 					'ncr' => 'Hi ##customer_name##, Welcome to ##site_name##!',
 					'npo' => 'Hi ##customer_name##, Thank you for choosing ##site_name##! Your order has been confirmed. Your order ID is ##order_id##.',
@@ -425,9 +425,12 @@ function hcotp_settings_page() {
 				foreach ( $sms_event_types as $key => $label ) :
 					$enable_option            = "hcotp_msg91_sms_{$key}_enable";
 					$template_id_option       = "hcotp_msg91_sms_{$key}_template_id";
-					$notes_option             = "hcotp_msg91_sms_{$key}_notes"; // Now used for message template
+					$notes_option             = "hcotp_msg91_sms_{$key}_notes";
 					$sample_message           = $default_message_templates[ $key ];
-					$current_message_template = get_option( $notes_option ) ?: $default_message_templates[ $key ];
+					$current_message_template = get_option( $notes_option );
+					$current_message_template = ! empty( $current_message_template )
+						? $current_message_template
+						: $default_message_templates[ $key ];
 					?>
 				<hr>
 				<h3><?php echo esc_html( $label ); ?></h3>
@@ -454,7 +457,15 @@ function hcotp_settings_page() {
 						<th scope="row"><label for="<?php echo esc_attr( $notes_option ); ?>"><?php esc_html_e( 'SMS Message Template', 'happy-coders-otp-login' ); ?></label></th>
 						<td>
 							<textarea name="<?php echo esc_attr( $notes_option ); ?>" rows="3" cols="50" class="large-text"><?php echo esc_textarea( $current_message_template ); ?></textarea>
-							<p class="description"><?php esc_html_e( 'Use ##variable_name## for dynamic content. E.g. ' . $sample_message, 'happy-coders-otp-login' ); ?></p>
+							<p class="description">
+								<?php
+								printf(
+									/* translators: %s: sample message */
+									esc_html__( 'Use ##variable_name## for dynamic content. E.g. %s', 'happy-coders-otp-login' ),
+									esc_html( $sample_message )
+								);
+								?>
+							</p>
 						</td>
 					</tr>
 					<?php
