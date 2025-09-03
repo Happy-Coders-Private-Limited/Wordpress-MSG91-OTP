@@ -423,10 +423,10 @@ function hcotp_settings_page() {
 				);
 
 				foreach ( $sms_event_types as $key => $label ) :
-					$enable_option      = "hcotp_msg91_sms_{$key}_enable";
-					$template_id_option = "hcotp_msg91_sms_{$key}_template_id";
-					$notes_option       = "hcotp_msg91_sms_{$key}_notes"; // Now used for message template
-					$sample_message     = $default_message_templates[ $key ];
+					$enable_option            = "hcotp_msg91_sms_{$key}_enable";
+					$template_id_option       = "hcotp_msg91_sms_{$key}_template_id";
+					$notes_option             = "hcotp_msg91_sms_{$key}_notes"; // Now used for message template
+					$sample_message           = $default_message_templates[ $key ];
 					$current_message_template = get_option( $notes_option ) ?: $default_message_templates[ $key ];
 					?>
 				<hr>
@@ -454,7 +454,7 @@ function hcotp_settings_page() {
 						<th scope="row"><label for="<?php echo esc_attr( $notes_option ); ?>"><?php esc_html_e( 'SMS Message Template', 'happy-coders-otp-login' ); ?></label></th>
 						<td>
 							<textarea name="<?php echo esc_attr( $notes_option ); ?>" rows="3" cols="50" class="large-text"><?php echo esc_textarea( $current_message_template ); ?></textarea>
-							<p class="description"><?php esc_html_e( 'Use ##variable_name## for dynamic content. E.g. '. $sample_message, 'happy-coders-otp-login' ); ?></p>
+							<p class="description"><?php esc_html_e( 'Use ##variable_name## for dynamic content. E.g. ' . $sample_message, 'happy-coders-otp-login' ); ?></p>
 						</td>
 					</tr>
 					<?php
