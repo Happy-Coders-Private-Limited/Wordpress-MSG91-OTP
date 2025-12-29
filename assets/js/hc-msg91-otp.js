@@ -1,5 +1,5 @@
 jQuery(document).ready(function ($) {
-    
+          
     $(document).on('click', '#msg91_send_otp', function () {
 
         let $button = $(this); 
@@ -51,7 +51,7 @@ jQuery(document).ready(function ($) {
         });
     });
 
-     $(document).on('click', '#msg91_send_otp_whatsapp', function () {
+    $(document).on('click', '#msg91_send_otp_whatsapp', function () {
         let $button = $(this); 
         let $container = $button.closest('#otp-form-wrap'); 
     
@@ -101,8 +101,6 @@ jQuery(document).ready(function ($) {
         });
     });
     
-    
-
     $('.otp-field').on('input', function () {
         let currentInput = $(this);
         if (currentInput.val().length === 1) {
@@ -120,15 +118,19 @@ jQuery(document).ready(function ($) {
         let countryCode = $container.find('#msg91_country_code').val();
 
         let mobileWithCode = countryCode + mobile;
-
-        let otp = $container.find('#otp1').val().trim() +
-                  $container.find('#otp2').val().trim() +
-                  $container.find('#otp3').val().trim() +
-                  $container.find('#otp4').val().trim();
+        
+        let otpLength = $container.find('.otp-field').length;
+        console.log(otpLength);
     
+        let otp = '';
+        
+         $container.find('.otp-field').each(function () {
+            otp += $(this).val().trim();
+        });
+
         let msg = hcotp_params.verifyotp_validation_msg || 'Please enter the OTP.';
     
-        if (otp.length !== 4) {
+        if (otp.length !== otpLength) {
             $container.find('#otp-verify-status').html('<span style="color:red;font-size: 14px;">' + msg + '</span>');
             return;
         }
@@ -193,7 +195,6 @@ jQuery(document).ready(function ($) {
         });
     });
     
-   
     $(document).on('click', '#resend_otp', function () {
         let $button = $(this);
         let $container = $button.closest('#otp-form-wrap');

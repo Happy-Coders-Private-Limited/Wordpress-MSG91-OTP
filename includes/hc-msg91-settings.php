@@ -88,7 +88,12 @@ add_action(
 		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_verifyotp_validation_msg', 'sanitize_text_field' );
 		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_verifyotp_button_text', 'sanitize_text_field' );
 		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_verifyotp_button_color', 'sanitize_hex_color' );
-
+		register_setting( 'hcotp_otp_settings_group',  'hcotp_msg91_otp_length',
+        	function ( $value ) {
+        		$value = intval( $value );
+        		return in_array( $value, array( 4, 6 ), true ) ? $value : 4;
+        	}
+        );
 		// Code for SMS added by Kombiah.
 		$sms_event_types = array(
 			'ncr' => 'New Customer Registration',
@@ -214,6 +219,23 @@ function hcotp_settings_page() {
 						<p class="description"><?php esc_html_e( 'MSG91 DLT Template ID for sending OTPs.', 'happy-coders-otp-login' ); ?></p></td>
 						
 					</tr>
+					<tr valign="top">
+                    	<th scope="row"><?php esc_html_e( 'OTP Length', 'happy-coders-otp-login' ); ?></th>
+                    	<td>
+                    		<select name="hcotp_msg91_otp_length">
+                    			<option value="4" <?php selected( get_option( 'hcotp_msg91_otp_length', 4 ), 4 ); ?>>
+                    				<?php esc_html_e( '4 Digits (Default)', 'happy-coders-otp-login' ); ?>
+                    			</option>
+                    			<option value="6" <?php selected( get_option( 'hcotp_msg91_otp_length', 4 ), 6 ); ?>>
+                    				<?php esc_html_e( '6 Digits', 'happy-coders-otp-login' ); ?>
+                    			</option>
+                    		</select>
+                    		<p class="description">
+                        	<?php esc_html_e( 'Make sure your OTP length is either 4 or 6 digits.', 'happy-coders-otp-login' ); ?>
+                        </p>
+                    
+                    	</td>
+                    </tr>
 					<tr valign="top">
 						<th scope="row"><?php esc_html_e( 'User OTP Limit per day', 'happy-coders-otp-login' ); ?></th>
 						<td><input type="number" name="hcotp_msg91_perday_otplimit" value="<?php echo esc_attr( get_option( 'hcotp_msg91_perday_otplimit' ) ); ?>" size="30" /></td>

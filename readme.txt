@@ -2,7 +2,7 @@
 * Contributors: happycoders, kombiahrk, muthupandi2002, imgopi2002, sureshkumar22
 * Tags: otp, woocommerce, msg91, passwordless, whatsapp otp
 * Requires at least: 5.0
-* Tested up to: 6.8
+* Tested up to: 6.9
 * Requires PHP: 7.4
 * Stable tag: 2.1
 * License: GPLv2 or later

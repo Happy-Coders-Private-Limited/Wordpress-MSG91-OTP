@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'HCOTP_PLUGIN_FILE', __FILE__ );
 define( 'HCOTP_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HCOTP_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-define( 'HCOTP_VERSION', '2.1' );
+define( 'HCOTP_VERSION', '3.1' );
 
 require_once HCOTP_PLUGIN_DIR . 'includes/hc-msg91-settings.php';
 require_once HCOTP_PLUGIN_DIR . 'includes/hc-countries.php';
@@ -60,11 +60,12 @@ function hcotp_activate_plugin() {
 		'hcotp_msg91_sendotp_button_text'      => 'Send OTP',
 		'hcotp_msg91_sendotp_validation_msg'   => 'Please enter the valid mobile number',
 		'hcotp_msg91_verifyotp_lable'          => 'Enter OTP',
-		'hcotp_msg91_verifyotp_dec'            => 'Enter your 4-digit OTP',
+		'hcotp_msg91_verifyotp_dec'            => 'Enter your %d-digit OTP',
 		'hcotp_msg91_verifyotp_button_text'    => 'Verify OTP',
 		'hcotp_msg91_verifyotp_validation_msg' => 'Please enter the OTP',
 		'hcotp_msg91_perday_otplimit'          => 5,
 		'hcotp_msg91_resend_timer'             => 60, // Default resend timer.
+		'hcotp_msg91_otp_length'               => 4, 
 	);
 
 	foreach ( $options_to_set as $option_name => $default_value ) {
@@ -323,14 +324,15 @@ function hcotp_get_options() {
 		'top_image'                   => hcotp_get_option_with_default( 'hcotp_msg91_top_image', HCOTP_PLUGIN_URL . 'assets/images/send-otp.png' ),
 		'verify_otp_lable'            => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_lable', 'Enter Mobile' ),
 		'verify_otp_lable_color'      => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_lable_color', '#000000' ),
-		'verify_otp_dec'              => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_dec', 'Enter your 4-digit OTP' ),
+        // translators: %d is the number of digits in the OTP.
+        'verify_otp_dec' => sprintf( esc_html__( 'Enter your %d-digit OTP', 'happy-coders-otp-login' ), (int) get_option( 'hcotp_msg91_otp_length', 4 )),
 		'verify_otp_dec_color'        => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_desc_color', '#000000' ),
 		'verify_otp_buttontext'       => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_button_text', 'Verify OTP' ),
 		'verify_otp_button_color'     => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_button_color', '#0073aa' ),
 		'top_verify_image'            => hcotp_get_option_with_default( 'hcotp_msg91_top_verify_image', HCOTP_PLUGIN_URL . 'assets/images/verify-otp.png' ),
 		'hcotp_whatsapp_auth_enabled' => hcotp_get_option_with_default( 'hcotp_whatsapp_auth_enabled', 0 ),
 		'hcotp_whatsapp_button_text'  => hcotp_get_option_with_default( 'hcotp_whatsapp_button_text', 'Send OTP via Whatsapp' ),
-
+		'otp_length'                  => (int) get_option('hcotp_msg91_otp_length', 4),
 	);
 }
 
@@ -415,7 +417,7 @@ add_shortcode(
 					</div>';
 		}
 
-		return msg91_otp_form( $options, false );
+		return hcotp_msg91_otp_form( $options, false );
 	}
 );
 
@@ -432,7 +434,7 @@ add_action(
 		if ( ! is_user_logged_in() ) {
 			// Nonce is for image which is not enqueued.
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			echo msg91_otp_form( $options, true );
+			echo hcotp_msg91_otp_form( $options, true );
 		}
 	}
 );
@@ -459,7 +461,7 @@ add_action(
  *
  * @return string The rendered form.
  */
-function msg91_otp_form( $options, $is_popup = false ) {
+function hcotp_msg91_otp_form( $options, $is_popup = false ) {
 	ob_start();
 
 	?>
@@ -526,9 +528,12 @@ function msg91_otp_form( $options, $is_popup = false ) {
 						<label class="descripition" style="color: <?php echo esc_attr( $options['verify_otp_dec_color'] ); ?>;"><?php echo esc_html( $options['verify_otp_dec'] ); ?></label>
 					</div>
 					<div class="otp-inputs">
-						<?php for ( $i = 1; $i <= 4; $i++ ) : ?>
-							<input type="number" class="otp-field" id="otp<?php echo esc_attr( $i ); ?>" maxlength="1" />
-						<?php endfor; ?>
+    					<?php
+                            $otp_length = (int) get_option( 'hcotp_msg91_otp_length', 4 );
+                            for ( $i = 1; $i <= $otp_length; $i++ ) :
+                            ?>
+                            <input type="number" class="otp-field" id="otp<?php echo esc_attr( $i ); ?>" maxlength="1" />
+                        <?php endfor; ?>
 					</div>
 					<div id="otp-verify-status" class="otp-verify-status"></div>
 					<div class="verify-otp">
@@ -639,7 +644,12 @@ function hcotp_send_otp_ajax() {
 			wp_send_json_error( array( 'message' => $result['message'] ?? 'Failed to send OTP via SMS.' ) );
 		}
 	} else {
-		$otp_code = wp_rand( 1000, 9999 );
+		$otp_length = (int) get_option( 'hcotp_msg91_otp_length', 4 );
+
+        $min = pow( 10, $otp_length - 1 );
+        $max = pow( 10, $otp_length ) - 1;
+        
+        $otp_code = wp_rand( $min, $max );
 
 		$wa_url     = 'https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/';
 		$wa_payload = array(
@@ -1085,7 +1095,7 @@ function hcotp_ask_for_review() {
 	}
 
 	// Create the links.
-	$review_url  = 'https://wordpress.org/support/plugin/happy-coders-otp-login/reviews/?filter=5#new-post';
+	$review_url = 'https://wordpress.org/support/plugin/happy-coders-otp-login/reviews/#new-post';
 	$support_url = 'https://wordpress.org/support/plugin/happy-coders-otp-login/';
 
 	$base_dismiss_url = add_query_arg( 'hcotp_dismiss_review_notice', '1' );
