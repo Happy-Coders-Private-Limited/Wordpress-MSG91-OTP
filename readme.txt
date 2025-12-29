@@ -4,7 +4,7 @@
 * Requires at least: 5.0
 * Tested up to: 6.9
 * Requires PHP: 7.4
-* Stable tag: 2.1
+* Stable tag: 2.2
 * License: GPLv2 or later
 * License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -51,6 +51,7 @@ Visit [MSG91's Terms of Service](https://msg91.com/legal/terms) and [Privacy Pol
 - Shortcodes for embedding login anywhere
 - Admin panel for MSG91 and plugin settings
 - Customizable transactional SMS templates with dynamic variables (e.g., `##customer_name##`, `##order_id##`).
+- Dynamic OTP length (4 or 6 digits).
 
 🎯 **Shortcodes:**
 - `[msg91_otp_form]` – Display full-screen OTP login form anywhere (pages, posts, widgets).
@@ -117,6 +118,11 @@ Yes. In the "Transactional SMS Settings" tab, each notification type (new order,
 
 == Changelog ==
 
+= 2.2 =
+* Feature: Added setting to configure OTP length dynamically (4 or 6 digits).
+* Tweak: Updated plugin version to 2.2.
+* Fix: Minor bug fixes and improvements.
+
 = 2.1 =
 * Feature: Introduced customizable transactional SMS message templates with dynamic variable support (e.g., ##customer_name##, ##order_id##).
 * Tweak: Enhanced settings page to allow direct input of SMS message templates using descriptive variables.
@@ -149,6 +155,9 @@ Yes. In the "Transactional SMS Settings" tab, each notification type (new order,
 * Initial release with OTP login features (full-screen and popup) and core MSG91 integration.
 
 == Upgrade Notice ==
+
+= 2.2 =
+This version introduces the ability to configure OTP length dynamically (4 or 6 digits). Please review your OTP settings after updating.
 
 = 2.1 =
 This version introduces customizable transactional SMS message templates with dynamic variables. Your existing SMS notes will now be used as message templates. Please review your settings after updating.
