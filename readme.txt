@@ -4,7 +4,7 @@
 * Requires at least: 5.0
 * Tested up to: 6.9
 * Requires PHP: 7.4
-* Stable tag: 2.2
+* Stable tag: 2.3
 * License: GPLv2 or later
 * License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -118,6 +118,10 @@ Yes. In the "Transactional SMS Settings" tab, each notification type (new order,
 
 == Changelog ==
 
+= 2.3 =
+* Feature: Added 'otp_length' parameter to the MSG91 API call for dynamic OTP length.
+* Tweak: Updated plugin version to 2.3.
+
 = 2.2 =
 * Feature: Added setting to configure OTP length dynamically (4 or 6 digits).
 * Tweak: Updated plugin version to 2.2.
@@ -155,6 +159,9 @@ Yes. In the "Transactional SMS Settings" tab, each notification type (new order,
 * Initial release with OTP login features (full-screen and popup) and core MSG91 integration.
 
 == Upgrade Notice ==
+
+= 2.3 =
+This version adds the 'otp_length' parameter to the MSG91 API call. If you have customized the OTP length, ensure your settings are correct.
 
 = 2.2 =
 This version introduces the ability to configure OTP length dynamically (4 or 6 digits). Please review your OTP settings after updating.
