@@ -617,8 +617,10 @@ function hcotp_send_otp_ajax() {
 	$hcotp_whatsapp_language_code = get_option( 'hcotp_whatsapp_language_code' );
 
 	if ( 'sms' === $otpprocess ) {
+	    
+	    $otp_length = (int) get_option( 'hcotp_msg91_otp_length', 4 );
 
-		$url = "https://control.msg91.com/api/v5/otp?authkey=$authkey&otp_expiry=5&template_id=$template_id&mobile=$mobile&realTimeResponse";
+		$url = "https://control.msg91.com/api/v5/otp?authkey=$authkey&otp_expiry=5&template_id=$template_id&mobile=$mobile&realTimeResponse&otp_length=$otp_length";
 
 		$response = wp_remote_get( $url );
 		$body     = wp_remote_retrieve_body( $response );
