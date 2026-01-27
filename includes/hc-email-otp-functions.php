@@ -1,3 +1,14 @@
+<?php
+/**
+ * Email OTP functionality.
+ *
+ * @package happy-coders-otp-login
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Generate a numeric OTP for email login.
  *
@@ -127,3 +138,158 @@ function hcotp_is_email_otp_enabled() {
 	return (bool) absint( get_option( 'hcotp_email_otp_enabled', 0 ) );
 }
 
+add_action( 'wp_ajax_hcotp_send_email_otp', 'hcotp_send_email_otp_ajax' );
+add_action( 'wp_ajax_nopriv_hcotp_send_email_otp', 'hcotp_send_email_otp_ajax' );
+
+/**
+ * AJAX handler to send Email OTP.
+ *
+ * @return void
+ */
+function hcotp_send_email_otp_ajax() {
+	check_ajax_referer( 'msg91_ajax_nonce_action', 'security_nonce' );
+
+	if ( ! hcotp_is_email_otp_enabled() ) {
+		wp_send_json_error(
+			array( 'message' => esc_html__( 'Email OTP is disabled.', 'happy-coders-otp-login' ) )
+		);
+	}
+
+	$user_id = absint( wp_unslash( $_POST['user_id'] ?? 0 ) );
+	$email   = sanitize_email( wp_unslash( $_POST['email'] ?? '' ) );
+
+	if ( empty( $user_id ) || ! is_email( $email ) ) {
+		wp_send_json_error(
+			array( 'message' => esc_html__( 'Invalid user or email.', 'happy-coders-otp-login' ) )
+		);
+	}
+
+	update_user_meta( $user_id, 'hcotp_email', $email );
+	update_user_meta( $user_id, 'hcotp_email_verified', 0 );
+
+	$user   = get_user_by( 'ID', $user_id );
+	$mobile = get_user_meta( $user_id, 'mobile_number', true );
+
+	if ( ! $user || empty( $mobile ) ) {
+		wp_send_json_error(
+			array( 'message' => esc_html__( 'User data missing.', 'happy-coders-otp-login' ) )
+		);
+	}
+
+	$sent = hcotp_send_email_otp( $user_id, $email, $mobile );
+
+	if ( ! $sent ) {
+		wp_send_json_error(
+			array( 'message' => esc_html__( 'Failed to send Email OTP.', 'happy-coders-otp-login' ) )
+		);
+	}
+
+	wp_send_json_success(
+		array(
+			'message' => esc_html__( 'OTP sent to email.', 'happy-coders-otp-login' ),
+		)
+	);
+}
+
+add_action( 'wp_ajax_hcotp_verify_email_otp', 'hcotp_verify_email_otp_ajax' );
+add_action( 'wp_ajax_nopriv_hcotp_verify_email_otp', 'hcotp_verify_email_otp_ajax' );
+
+/**
+ * AJAX handler to verify Email OTP.
+ *
+ * @return void
+ */
+function hcotp_verify_email_otp_ajax() {
+	check_ajax_referer( 'msg91_ajax_nonce_action', 'security_nonce' );
+
+	if ( ! hcotp_is_email_otp_enabled() ) {
+		wp_send_json_error(
+			array( 'message' => esc_html__( 'Email OTP is disabled.', 'happy-coders-otp-login' ) )
+		);
+	}
+
+	$user_id = absint( wp_unslash( $_POST['user_id'] ?? 0 ) );
+	$otp     = sanitize_text_field( wp_unslash( $_POST['otp'] ?? '' ) );
+
+	if ( empty( $user_id ) || empty( $otp ) ) {
+		wp_send_json_error(
+			array( 'message' => esc_html__( 'Missing OTP or user.', 'happy-coders-otp-login' ) )
+		);
+	}
+
+	if ( ! hcotp_verify_email_otp( $user_id, $otp ) ) {
+		wp_send_json_error(
+			array( 'message' => esc_html__( 'Invalid or expired OTP.', 'happy-coders-otp-login' ) )
+		);
+	}
+
+	hcotp_mark_email_verified( $user_id );
+
+	$email = get_user_meta( $user_id, 'hcotp_email', true );
+
+	if ( is_email( $email ) ) {
+		wp_update_user(
+			array(
+				'ID'         => $user_id,
+				'user_email' => $email,
+			)
+		);
+	}
+
+	wp_send_json_success(
+		array(
+			'message' => esc_html__( 'Email verified successfully.', 'happy-coders-otp-login' ),
+		)
+	);
+}
+
+/**
+ * Check whether user must verify email after login.
+ *
+ * @param int $user_id User ID.
+ * @return bool
+ */
+function hcotp_user_requires_email_verification( $user_id ) {
+	if ( ! hcotp_is_email_otp_enabled() ) {
+		return false;
+	}
+
+	if ( ! absint( get_option( 'hcotp_force_email_after_login', 1 ) ) ) {
+		return false;
+	}
+
+	return ! absint( get_user_meta( $user_id, 'hcotp_email_verified', true ) );
+}
+
+/**
+ * Validate whether email login is allowed.
+ *
+ * @param string $email Email address.
+ * @return int|WP_Error
+ */
+function hcotp_validate_email_login( $email ) {
+	if ( ! hcotp_is_email_otp_enabled() ) {
+		return new WP_Error(
+			'email_otp_disabled',
+			esc_html__( 'Email login is disabled.', 'happy-coders-otp-login' )
+		);
+	}
+
+	$user = get_user_by( 'email', $email );
+
+	if ( ! $user ) {
+		return new WP_Error(
+			'email_not_found',
+			esc_html__( 'No account found with this email.', 'happy-coders-otp-login' )
+		);
+	}
+
+	if ( ! absint( get_user_meta( $user->ID, 'hcotp_email_verified', true ) ) ) {
+		return new WP_Error(
+			'email_not_verified',
+			esc_html__( 'Please verify your email using mobile OTP login.', 'happy-coders-otp-login' )
+		);
+	}
+
+	return $user->ID;
+}
