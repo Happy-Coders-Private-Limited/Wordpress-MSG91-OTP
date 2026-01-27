@@ -118,3 +118,12 @@ function hcotp_mark_email_verified( $user_id ) {
 	delete_user_meta( $user_id, 'hcotp_email_otp_expiry' );
 }
 
+/**
+ * Check whether Email OTP login is enabled.
+ *
+ * @return bool
+ */
+function hcotp_is_email_otp_enabled() {
+	return (bool) absint( get_option( 'hcotp_email_otp_enabled', 0 ) );
+}
+
