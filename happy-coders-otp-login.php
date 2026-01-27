@@ -65,7 +65,28 @@ function hcotp_activate_plugin() {
 		'hcotp_msg91_verifyotp_validation_msg' => 'Please enter the OTP',
 		'hcotp_msg91_perday_otplimit'          => 5,
 		'hcotp_msg91_resend_timer'             => 60, // Default resend timer.
-		'hcotp_msg91_otp_length'               => 4, 
+		'hcotp_msg91_otp_length'               => 4,
+		'hcotp_email_otp_enabled'              => 0,
+		'hcotp_email_otp_length'               => 6,
+		'hcotp_email_otp_expiry'               => 5,
+		'hcotp_force_email_after_login'        => 1,
+		'hcotp_email_otp_subject'              =>  esc_html__(
+			'Your {{site_name}} Login OTP – {{otp}}',
+			'happy-coders-otp-login'
+		),
+		'hcotp_email_otp_header_image'         => '',
+		'hcotp_email_otp_footer_image'         => '',
+		'hcotp_email_otp_body'                 => esc_html__(
+			"Hello,\n\n".
+			"Your One-Time Password (OTP) for logging in to {{site_name}} is:\n\n".
+			"OTP: {{otp}}\n\n".
+			"This OTP is valid for {{expiry}} minutes.\n\n".
+			"If you did not request this OTP, please ignore this email.\n\n".
+			"Regards,\n".
+			"{{site_name}}\n".
+			"{{site_url}}",
+			'happy-coders-otp-login'
+		),
 	);
 
 	foreach ( $options_to_set as $option_name => $default_value ) {
@@ -188,6 +209,21 @@ function hcotp_enqueue_scripts() {
 	);
 }
 add_action( 'wp_enqueue_scripts', 'hcotp_enqueue_scripts' );
+
+/**
+ * Enqueues scripts and styles for the admin area.
+ */
+function hcotp_enqueue_admin_assets() {
+	wp_enqueue_media();
+	wp_enqueue_script(
+		'hcotp-admin-js',
+		HCOTP_PLUGIN_URL . 'assets/js/hcotp-admin.js',
+		array( 'jquery' ),
+		HCOTP_VERSION,
+		true
+	);
+}
+add_action( 'admin_enqueue_scripts', 'hcotp_enqueue_admin_assets' );
 
 
 register_activation_hook( __FILE__, 'hcotp_create_blocked_numbers_table' );

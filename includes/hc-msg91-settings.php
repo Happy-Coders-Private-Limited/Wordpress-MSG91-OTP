@@ -88,12 +88,84 @@ add_action(
 		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_verifyotp_validation_msg', 'sanitize_text_field' );
 		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_verifyotp_button_text', 'sanitize_text_field' );
 		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_verifyotp_button_color', 'sanitize_hex_color' );
-		register_setting( 'hcotp_otp_settings_group',  'hcotp_msg91_otp_length',
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_otp_length',
         	function ( $value ) {
         		$value = intval( $value );
         		return in_array( $value, array( 4, 6 ), true ) ? $value : 4;
         	}
         );
+		register_setting(
+			'hcotp_settings_group',
+			'hcotp_email_otp_enabled',
+			array(
+				'type'              => 'boolean',
+				'sanitize_callback' => 'absint',
+				'default'           => 0,
+			)
+		);
+		register_setting(
+			'hcotp_settings_group',
+			'hcotp_email_otp_length',
+			array(
+				'type'              => 'integer',
+				'sanitize_callback' => 'absint',
+				'default'           => 6,
+			)
+		);
+		register_setting(
+			'hcotp_settings_group',
+			'hcotp_email_otp_expiry',
+			array(
+				'type'              => 'integer',
+				'sanitize_callback' => 'absint',
+				'default'           => 5,
+			)
+		);
+		register_setting(
+			'hcotp_settings_group',
+			'hcotp_force_email_after_login',
+			array(
+				'type'              => 'boolean',
+				'sanitize_callback' => 'absint',
+				'default'           => 1,
+			)
+		);
+		register_setting(
+			'hcotp_settings_group',
+			'hcotp_email_otp_subject',
+			array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+				'default'           => '',
+			)
+		);
+		register_setting(
+			'hcotp_settings_group',
+			'hcotp_email_otp_header_image',
+			array(
+				'type'              => 'string',
+				'sanitize_callback' => 'esc_url_raw',
+				'default'           => '',
+			)
+		);
+		register_setting(
+			'hcotp_settings_group',
+			'hcotp_email_otp_footer_image',
+			array(
+				'type'              => 'string',
+				'sanitize_callback' => 'esc_url_raw',
+				'default'           => '',
+			)
+		);
+		register_setting(
+			'hcotp_settings_group',
+			'hcotp_email_otp_body',
+			array(
+				'type'              => 'string',
+				'sanitize_callback' => 'wp_kses_post',
+				'default'           => '',
+			)
+		);
 		// Code for SMS added by Kombiah.
 		$sms_event_types = array(
 			'ncr' => 'New Customer Registration',
@@ -141,7 +213,7 @@ function hcotp_settings_page() {
 			<a href="#general_settings" class="nav-tab <?php echo 'general_settings' === $active_tab ? 'nav-tab-active' : ''; ?>" data-tab="general_settings"><?php esc_html_e( 'General Settings', 'happy-coders-otp-login' ); ?></a>        
 			<a href="#otp_settings" class="nav-tab <?php echo 'otp_settings' === $active_tab ? 'nav-tab-active' : ''; ?>" data-tab="otp_settings"><?php esc_html_e( 'OTP Login Settings', 'happy-coders-otp-login' ); ?></a>
 			<a href="#sms_settings" class="nav-tab <?php echo 'sms_settings' === $active_tab ? 'nav-tab-active' : ''; ?>" data-tab="sms_settings"><?php esc_html_e( 'Transactional SMS Settings', 'happy-coders-otp-login' ); ?></a>
-			
+			<a href="#hcotp-email-otp" class="nav-tab <?php echo 'hcotp-email-otp' === $active_tab ? 'nav-tab-active' : ''; ?>" data-tab="hcotp-email-otp"><?php esc_html_e( 'Email OTP', 'happy-coders-otp-login' ); ?></a>
 		</h2>
 
 		<form method="post" action="options.php">
@@ -518,6 +590,84 @@ function hcotp_settings_page() {
 				</table>
 				<?php endforeach; ?>
 			</div>
+			
+			<div id="hcotp-email-otp" class="tab-content"  <?php echo 'email_settings' === $active_tab ? 'active-tab' : ''; ?>>
+
+				<h2><?php esc_html_e( 'Email OTP Settings', 'happy-coders-otp-login' ); ?></h2>
+
+				<table class="form-table" role="presentation">
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Enable Email OTP Login', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<input type="checkbox" name="hcotp_email_otp_enabled" value="1"
+							<?php checked( 1, get_option( 'hcotp_email_otp_enabled' ) ); ?> />
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'OTP Length', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<input type="number" min="4" max="8"
+							name="hcotp_email_otp_length"
+							value="<?php echo esc_attr( get_option( 'hcotp_email_otp_length', 6 ) ); ?>" />
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'OTP Expiry (minutes)', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<input type="number" min="1" max="30"
+							name="hcotp_email_otp_expiry"
+							value="<?php echo esc_attr( get_option( 'hcotp_email_otp_expiry', 5 ) ); ?>" />
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Force Email After Login', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<input type="checkbox" name="hcotp_force_email_after_login" value="1"
+							<?php checked( 1, get_option( 'hcotp_force_email_after_login' ) ); ?> />
+					</td>
+				</tr>
+
+				</table>
+
+				<hr />
+
+				<h2><?php esc_html_e( 'Email Template', 'happy-coders-otp-login' ); ?></h2>
+
+				<table class="form-table" role="presentation">
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Email Subject', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<input type="text" class="regular-text"
+							name="hcotp_email_otp_subject"
+							value="<?php echo esc_attr( get_option( 'hcotp_email_otp_subject' ) ); ?>" />
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Email Body', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<textarea rows="8" cols="60"
+							name="hcotp_email_otp_body"><?php echo esc_textarea( get_option( 'hcotp_email_otp_body' ) ); ?></textarea>
+						<p class="description"> Available variables:<br>
+							<code>{{otp}}</code>,
+							<code>{{expiry}}</code>,
+							<code>{{site_name}}</code>,							
+							<code>{{site_url}}</code>,
+							<code>{{user_mobile}}</code>,
+							<code>{{user_email}}</code>,
+						</p>
+					</td>
+				</tr>
+
+				</table>
+
+			</div>
+
 			<?php submit_button(); ?>
 		</form>
 	</div>
