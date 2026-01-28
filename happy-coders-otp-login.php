@@ -24,6 +24,7 @@ define( 'HCOTP_VERSION', '2.3' );
 require_once HCOTP_PLUGIN_DIR . 'includes/hc-msg91-settings.php';
 require_once HCOTP_PLUGIN_DIR . 'includes/hc-countries.php';
 require_once HCOTP_PLUGIN_DIR . 'includes/hc-msg91-transactional-sms.php';
+require_once HCOTP_PLUGIN_DIR . 'includes/hc-email-otp-functions.php';
 
 /**
  * Initialize WooCommerce-specific hooks if WooCommerce is active.
