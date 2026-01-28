@@ -71,21 +71,21 @@ function hcotp_activate_plugin() {
 		'hcotp_email_otp_length'               => 6,
 		'hcotp_email_otp_expiry'               => 5,
 		'hcotp_force_email_after_login'        => 1,
-		'hcotp_email_otp_subject'              =>  esc_html__(
+		'hcotp_email_otp_subject'              => esc_html__(
 			'Your {{site_name}} Login OTP – {{otp}}',
 			'happy-coders-otp-login'
 		),
 		'hcotp_email_otp_header_image'         => '',
 		'hcotp_email_otp_footer_image'         => '',
 		'hcotp_email_otp_body'                 => esc_html__(
-			"Hello,\n\n".
-			"Your One-Time Password (OTP) for logging in to {{site_name}} is:\n\n".
-			"OTP: {{otp}}\n\n".
-			"This OTP is valid for {{expiry}} minutes.\n\n".
-			"If you did not request this OTP, please ignore this email.\n\n".
-			"Regards,\n".
-			"{{site_name}}\n".
-			"{{site_url}}",
+			"Hello,\n\n" .
+			"Your One-Time Password (OTP) for logging in to {{site_name}} is:\n\n" .
+			"OTP: {{otp}}\n\n" .
+			"This OTP is valid for {{expiry}} minutes.\n\n" .
+			"If you did not request this OTP, please ignore this email.\n\n" .
+			"Regards,\n" .
+			"{{site_name}}\n" .
+			'{{site_url}}',
 			'happy-coders-otp-login'
 		),
 	);
@@ -206,15 +206,15 @@ function hcotp_enqueue_scripts() {
 			'server_error_text'        => __( 'Server error. Please try again.', 'happy-coders-otp-login' ),
 			'send_otp_text'            => get_option( 'hcotp_msg91_sendotp_button_text', __( 'Send OTP', 'happy-coders-otp-login' ) ),
 			'verify_otp_text'          => get_option( 'hcotp_msg91_verifyotp_button_text', __( 'Verify OTP', 'happy-coders-otp-login' ) ),
-			'email_otp_enabled'   => function_exists( 'hcotp_is_email_otp_enabled' )
+			'email_otp_enabled'        => function_exists( 'hcotp_is_email_otp_enabled' )
 				? hcotp_is_email_otp_enabled()
 				: false,
-			'user_requires_email' => is_user_logged_in()
+			'user_requires_email'      => is_user_logged_in()
 				? hcotp_user_requires_email_verification( get_current_user_id() )
 				: false,
-			'current_user_id'     => get_current_user_id(),
-					)
-				);
+			'current_user_id'          => get_current_user_id(),
+		)
+	);
 }
 add_action( 'wp_enqueue_scripts', 'hcotp_enqueue_scripts' );
 
@@ -368,15 +368,15 @@ function hcotp_get_options() {
 		'top_image'                   => hcotp_get_option_with_default( 'hcotp_msg91_top_image', HCOTP_PLUGIN_URL . 'assets/images/send-otp.png' ),
 		'verify_otp_lable'            => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_lable', 'Enter Mobile' ),
 		'verify_otp_lable_color'      => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_lable_color', '#000000' ),
-        // translators: %d is the number of digits in the OTP.
-        'verify_otp_dec' => sprintf( esc_html__( 'Enter your %d-digit OTP', 'happy-coders-otp-login' ), (int) get_option( 'hcotp_msg91_otp_length', 4 )),
+		// translators: %d is the number of digits in the OTP.
+		'verify_otp_dec'              => sprintf( esc_html__( 'Enter your %d-digit OTP', 'happy-coders-otp-login' ), (int) get_option( 'hcotp_msg91_otp_length', 4 ) ),
 		'verify_otp_dec_color'        => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_desc_color', '#000000' ),
 		'verify_otp_buttontext'       => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_button_text', 'Verify OTP' ),
 		'verify_otp_button_color'     => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_button_color', '#0073aa' ),
 		'top_verify_image'            => hcotp_get_option_with_default( 'hcotp_msg91_top_verify_image', HCOTP_PLUGIN_URL . 'assets/images/verify-otp.png' ),
 		'hcotp_whatsapp_auth_enabled' => hcotp_get_option_with_default( 'hcotp_whatsapp_auth_enabled', 0 ),
 		'hcotp_whatsapp_button_text'  => hcotp_get_option_with_default( 'hcotp_whatsapp_button_text', 'Send OTP via Whatsapp' ),
-		'otp_length'                  => (int) get_option('hcotp_msg91_otp_length', 4),
+		'otp_length'                  => (int) get_option( 'hcotp_msg91_otp_length', 4 ),
 	);
 }
 
@@ -599,12 +599,12 @@ function hcotp_msg91_otp_form( $options, $is_popup = false ) {
 						<label class="descripition" style="color: <?php echo esc_attr( $options['verify_otp_dec_color'] ); ?>;"><?php echo esc_html( $options['verify_otp_dec'] ); ?></label>
 					</div>
 					<div class="otp-inputs">
-    					<?php
-                            $otp_length = (int) get_option( 'hcotp_msg91_otp_length', 4 );
-                            for ( $i = 1; $i <= $otp_length; $i++ ) :
-                            ?>
-                            <input type="number" class="otp-field" id="otp<?php echo esc_attr( $i ); ?>" maxlength="1" />
-                        <?php endfor; ?>
+						<?php
+							$otp_length = (int) get_option( 'hcotp_msg91_otp_length', 4 );
+						for ( $i = 1; $i <= $otp_length; $i++ ) :
+							?>
+							<input type="number" class="otp-field" id="otp<?php echo esc_attr( $i ); ?>" maxlength="1" />
+						<?php endfor; ?>
 					</div>
 					<div id="otp-verify-status" class="otp-verify-status"></div>
 					<div class="verify-otp">
@@ -688,8 +688,8 @@ function hcotp_send_otp_ajax() {
 	$hcotp_whatsapp_language_code = get_option( 'hcotp_whatsapp_language_code' );
 
 	if ( 'sms' === $otpprocess ) {
-	    
-	    $otp_length = (int) get_option( 'hcotp_msg91_otp_length', 4 );
+
+		$otp_length = (int) get_option( 'hcotp_msg91_otp_length', 4 );
 
 		$url = "https://control.msg91.com/api/v5/otp?authkey=$authkey&otp_expiry=5&template_id=$template_id&mobile=$mobile&realTimeResponse&otp_length=$otp_length";
 
@@ -719,10 +719,10 @@ function hcotp_send_otp_ajax() {
 	} else {
 		$otp_length = (int) get_option( 'hcotp_msg91_otp_length', 4 );
 
-        $min = pow( 10, $otp_length - 1 );
-        $max = pow( 10, $otp_length ) - 1;
-        
-        $otp_code = wp_rand( $min, $max );
+		$min = pow( 10, $otp_length - 1 );
+		$max = pow( 10, $otp_length ) - 1;
+
+		$otp_code = wp_rand( $min, $max );
 
 		$wa_url     = 'https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/';
 		$wa_payload = array(
@@ -1168,7 +1168,7 @@ function hcotp_ask_for_review() {
 	}
 
 	// Create the links.
-	$review_url = 'https://wordpress.org/support/plugin/happy-coders-otp-login/reviews/#new-post';
+	$review_url  = 'https://wordpress.org/support/plugin/happy-coders-otp-login/reviews/#new-post';
 	$support_url = 'https://wordpress.org/support/plugin/happy-coders-otp-login/';
 
 	$base_dismiss_url = add_query_arg( 'hcotp_dismiss_review_notice', '1' );
