@@ -206,8 +206,15 @@ function hcotp_enqueue_scripts() {
 			'server_error_text'        => __( 'Server error. Please try again.', 'happy-coders-otp-login' ),
 			'send_otp_text'            => get_option( 'hcotp_msg91_sendotp_button_text', __( 'Send OTP', 'happy-coders-otp-login' ) ),
 			'verify_otp_text'          => get_option( 'hcotp_msg91_verifyotp_button_text', __( 'Verify OTP', 'happy-coders-otp-login' ) ),
-		)
-	);
+			'email_otp_enabled'   => function_exists( 'hcotp_is_email_otp_enabled' )
+				? hcotp_is_email_otp_enabled()
+				: false,
+			'user_requires_email' => is_user_logged_in()
+				? hcotp_user_requires_email_verification( get_current_user_id() )
+				: false,
+			'current_user_id'     => get_current_user_id(),
+					)
+				);
 }
 add_action( 'wp_enqueue_scripts', 'hcotp_enqueue_scripts' );
 
@@ -514,6 +521,20 @@ function hcotp_msg91_otp_form( $options, $is_popup = false ) {
 				<button onclick="document.getElementById( 'otp-popup-modal' ).style.display='none';" style="background: none; border: none; font-size: 24px; cursor: pointer; outline: none;">&times;</button>
 			</div>
 	<?php endif; ?>
+	
+		<?php if ( function_exists( 'hcotp_is_email_otp_enabled' ) && hcotp_is_email_otp_enabled() ) : ?>
+			<div class="hcotp-login-method">
+				<label>
+					<input type="radio" name="hcotp_login_type" value="mobile" checked />
+					<?php esc_html_e( 'Mobile OTP', 'happy-coders-otp-login' ); ?>
+				</label>
+
+				<label style="margin-left: 15px;">
+					<input type="radio" name="hcotp_login_type" value="email" />
+					<?php esc_html_e( 'Email OTP', 'happy-coders-otp-login' ); ?>
+				</label>
+			</div>
+		<?php endif; ?>
    
 		<div id="send_otp_section">
 			<?php if ( ! empty( $options['top_image'] ) ) : ?>
@@ -539,6 +560,19 @@ function hcotp_msg91_otp_form( $options, $is_popup = false ) {
 				<input type="hidden" id="otpprocess" value="">
 				<input type="tel" id="msg91_mobile" maxlength="10" pattern="\d*" placeholder="Mobile Number" oninput="this.value = this.value.replace(/[^0-9]/g, '' );" />
 			</div>
+			
+			<div class="hcotp-email-input" style="display: none;">
+				<input
+					type="email"
+					id="hcotp_email"
+					class="common-width"
+					placeholder="<?php esc_attr_e( 'Enter your email', 'happy-coders-otp-login' ); ?>"
+				/>
+				<button id="hcotp_send_email_otp" class="common-width">
+					<?php esc_html_e( 'Send Email OTP', 'happy-coders-otp-login' ); ?>
+				</button>
+			</div>
+			
 			<div id="otp-send-status" class="otp-send-status"></div>
 			
 			<button id="msg91_send_otp" class="common-width" style="background-color: <?php echo esc_attr( $options['send_otp_button_color'] ); ?>; color: #fff;"><?php echo esc_html( $options['send_otp_button_text'] ); ?></button>

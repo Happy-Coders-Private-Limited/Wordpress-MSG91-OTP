@@ -341,3 +341,53 @@ jQuery(document).ready(function($) {
         $inputsDiv.toggle(this.checked);
     });
 });
+
+jQuery(document).on('change', 'input[name="hcotp_login_type"]', function () {
+	const type = jQuery(this).val();
+
+	if (type === 'email') {
+		jQuery('.mobile-input-wrap').hide();
+		jQuery('.hcotp-email-input').show();
+	} else {
+		jQuery('.hcotp-email-input').hide();
+		jQuery('.mobile-input-wrap').show();
+	}
+});
+
+jQuery(document).on('click', '#hcotp_send_email_otp', function () {
+	const $container = jQuery(this).closest('#otp-form-wrap');
+	const email = $container.find('#hcotp_email').val().trim();
+
+	if (!email) {
+		$container.find('#otp-send-status')
+			.html('<span style="color:red;">Please enter a valid email.</span>');
+		return;
+	}
+
+	jQuery.post(hcotp_params.ajax_url, {
+		action: 'hcotp_send_email_otp',
+		email: email,
+		user_id: hcotp_params.current_user_id || 0,
+		security_nonce: hcotp_params.nonce
+	}, function (res) {
+		if (res.success) {
+			$container.find('#send_otp_section').hide();
+			$container.find('#otp_input_wrap').show();
+		} else {
+			$container.find('#otp-send-status')
+				.html('<span style="color:red;">' + res.data.message + '</span>');
+		}
+	});
+});
+
+jQuery(document).ready(function () {
+	if (hcotp_params.email_otp_enabled && hcotp_params.user_requires_email) {
+		jQuery('.mobile-input-wrap').hide();
+		jQuery('.hcotp-login-method').hide();
+		jQuery('.hcotp-email-input').show();
+
+		jQuery('#otp-send-status').html(
+			'<span style="color:#d63638;">Please add and verify your email to continue.</span>'
+		);
+	}
+});
