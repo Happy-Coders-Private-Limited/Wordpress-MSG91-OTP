@@ -227,7 +227,7 @@ function hcotp_enqueue_admin_assets() {
 		'hcotp-admin-js',
 		HCOTP_PLUGIN_URL . 'assets/js/hcotp-admin.js',
 		array( 'jquery' ),
-		HCOTP_VERSION,
+		time(),
 		true
 	);
 }
