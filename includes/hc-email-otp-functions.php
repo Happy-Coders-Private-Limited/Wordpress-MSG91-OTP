@@ -99,8 +99,18 @@ function hcotp_send_email_otp( $user_id, $email, $mobile ) {
 	hcotp_store_email_otp( $user_id, $otp );
 
 	$expiry  = absint( get_option( 'hcotp_email_otp_expiry', 5 ) );
-	$subject = get_option( 'hcotp_email_otp_subject', '' );
-	$body    = get_option( 'hcotp_email_otp_body', '' );
+	$subject = get_option(
+		'hcotp_email_otp_subject',
+		__( 'Your Login OTP for {{site_name}}', 'happy-coders-otp-login' )
+	);
+
+	$body = get_option(
+		'hcotp_email_otp_body',
+		__(
+			"Hi,\n\nYour OTP is {{otp}}.\n\nThis OTP will expire in {{expiry}} minutes.\n\nThanks,\n{{site_name}}",
+			'happy-coders-otp-login'
+		)
+	);
 
 	$data = array(
 		'otp'         => $otp,
@@ -112,10 +122,17 @@ function hcotp_send_email_otp( $user_id, $email, $mobile ) {
 	$subject = hcotp_replace_email_placeholders( $subject, $data );
 	$body    = hcotp_replace_email_placeholders( $body, $data );
 
-	$headers = array( 'Content-Type: text/plain; charset=UTF-8' );
+	$headers = array( 'Content-Type: text/html; charset=UTF-8' );
 
 	return wp_mail( $email, $subject, $body, $headers );
 }
+
+add_action(
+	'wp_mail_failed',
+	function ( $error ) {
+		error_log( 'HCOTP MAIL ERROR: ' . print_r( $error, true ) );
+	}
+);
 
 /**
  * Mark user's email as verified.
@@ -126,7 +143,8 @@ function hcotp_send_email_otp( $user_id, $email, $mobile ) {
 function hcotp_mark_email_verified( $user_id ) {
 	update_user_meta( $user_id, 'hcotp_email_verified', 1 );
 	delete_user_meta( $user_id, 'hcotp_email_otp_hash' );
-	delete_user_meta( $user_id, 'hcotp_email_otp_expiry' );
+	delete_user_meta( $user_id, 'hcotp_email_otp_expiry' );	
+	delete_user_meta( $user_id, 'hcotp_pending_email' );
 }
 
 /**
@@ -155,39 +173,41 @@ function hcotp_send_email_otp_ajax() {
 		);
 	}
 
-	$user_id = absint( wp_unslash( $_POST['user_id'] ?? 0 ) );
-	$email   = sanitize_email( wp_unslash( $_POST['email'] ?? '' ) );
+	$email = sanitize_email( wp_unslash( $_POST['email'] ?? '' ) );
 
-	if ( empty( $user_id ) || ! is_email( $email ) ) {
+	if ( ! is_email( $email ) ) {
 		wp_send_json_error(
-			array( 'message' => esc_html__( 'Invalid user or email.', 'happy-coders-otp-login' ) )
+			array( 'message' => __( 'Invalid email address.', 'happy-coders-otp-login' ) )
 		);
 	}
 
-	update_user_meta( $user_id, 'hcotp_email', $email );
+	if ( is_user_logged_in() ) {
+		$user_id = get_current_user_id();
+	} else {
+		$user = get_user_by( 'email', $email );
+		if ( ! $user ) {
+			wp_send_json_error(
+				array( 'message' => __( 'No account found with this email.', 'happy-coders-otp-login' ) )
+			);
+		}
+		$user_id = $user->ID;
+	}
+	
+	update_user_meta( $user_id, 'hcotp_pending_email', $email );
 	update_user_meta( $user_id, 'hcotp_email_verified', 0 );
 
-	$user   = get_user_by( 'ID', $user_id );
 	$mobile = get_user_meta( $user_id, 'mobile_number', true );
-
-	if ( ! $user || empty( $mobile ) ) {
-		wp_send_json_error(
-			array( 'message' => esc_html__( 'User data missing.', 'happy-coders-otp-login' ) )
-		);
-	}
 
 	$sent = hcotp_send_email_otp( $user_id, $email, $mobile );
 
 	if ( ! $sent ) {
 		wp_send_json_error(
-			array( 'message' => esc_html__( 'Failed to send Email OTP.', 'happy-coders-otp-login' ) )
+			array( 'message' => __( 'Failed to send Email OTP.', 'happy-coders-otp-login' ) )
 		);
 	}
 
 	wp_send_json_success(
-		array(
-			'message' => esc_html__( 'OTP sent to email.', 'happy-coders-otp-login' ),
-		)
+		array( 'message' => __( 'OTP sent to email.', 'happy-coders-otp-login' ) )
 	);
 }
 
@@ -208,38 +228,51 @@ function hcotp_verify_email_otp_ajax() {
 		);
 	}
 
-	$user_id = absint( wp_unslash( $_POST['user_id'] ?? 0 ) );
-	$otp     = sanitize_text_field( wp_unslash( $_POST['otp'] ?? '' ) );
+	$otp = sanitize_text_field( wp_unslash( $_POST['otp'] ?? '' ) );
 
-	if ( empty( $user_id ) || empty( $otp ) ) {
+	if ( empty( $otp ) ) {
 		wp_send_json_error(
-			array( 'message' => esc_html__( 'Missing OTP or user.', 'happy-coders-otp-login' ) )
+			array( 'message' => esc_html__( 'OTP is required.', 'happy-coders-otp-login' ) )
 		);
+	}
+
+	if ( is_user_logged_in() ) {
+		$user_id = get_current_user_id();
+	} else {
+		$email = sanitize_email( wp_unslash( $_POST['email'] ?? '' ) );
+		$user  = get_user_by( 'email', $email );
+		if ( ! $user ) {
+			wp_send_json_error(
+				array( 'message' => esc_html__( 'Invalid user.', 'happy-coders-otp-login' ) )
+			);
+		}
+		$user_id = $user->ID;
 	}
 
 	if ( ! hcotp_verify_email_otp( $user_id, $otp ) ) {
 		wp_send_json_error(
-			array( 'message' => esc_html__( 'Invalid or expired OTP.', 'happy-coders-otp-login' ) )
+			array( 'message' => __( 'Invalid or expired OTP.', 'happy-coders-otp-login' ) )
 		);
 	}
 
 	hcotp_mark_email_verified( $user_id );
 
-	$email = get_user_meta( $user_id, 'hcotp_email', true );
-
-	if ( is_email( $email ) ) {
+	$pending_email = get_user_meta( $user_id, 'hcotp_pending_email', true );
+	if ( is_email( $pending_email ) ) {
 		wp_update_user(
 			array(
 				'ID'         => $user_id,
-				'user_email' => $email,
+				'user_email' => $pending_email,
 			)
 		);
+		delete_user_meta( $user_id, 'hcotp_pending_email' );
 	}
 
+	wp_set_current_user( $user_id );
+	wp_set_auth_cookie( $user_id, true );
+
 	wp_send_json_success(
-		array(
-			'message' => esc_html__( 'Email verified successfully.', 'happy-coders-otp-login' ),
-		)
+		array( 'message' => esc_html__( 'Email verified and logged in.', 'happy-coders-otp-login' ) )
 	);
 }
 
@@ -256,6 +289,15 @@ function hcotp_user_requires_email_verification( $user_id ) {
 
 	if ( ! absint( get_option( 'hcotp_force_email_after_login', 1 ) ) ) {
 		return false;
+	}
+
+	$user = get_user_by( 'id', $user_id );
+	if ( ! $user ) {
+		return false;
+	}
+
+	if ( strpos( $user->user_email, '@example.com' ) !== false ) {
+		return true;
 	}
 
 	return ! absint( get_user_meta( $user_id, 'hcotp_email_verified', true ) );

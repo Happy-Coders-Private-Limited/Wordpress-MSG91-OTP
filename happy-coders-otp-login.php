@@ -213,6 +213,8 @@ function hcotp_enqueue_scripts() {
 				? hcotp_user_requires_email_verification( get_current_user_id() )
 				: false,
 			'current_user_id'          => get_current_user_id(),
+			'email_otp_length' => absint( get_option( 'hcotp_email_otp_length', 6 ) ),
+			'sms_otp_length'   => absint( get_option( 'hcotp_msg91_otp_length', 4 ) ),
 		)
 	);
 }
@@ -584,42 +586,35 @@ function hcotp_msg91_otp_form( $options, $is_popup = false ) {
 				<?php endif; ?>
 
 			</div>
-				<div id="otp_input_wrap" style="display: none;">
-					<?php if ( ! empty( $options['top_verify_image'] ) ) : ?>
-						<div style="text-align:center;">
-						<?php // phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage ?>
-							<img src="<?php echo esc_url( $options['top_verify_image'] ); ?>" class="popup-image" />
-						</div>
-					<?php endif; ?>
+			<div id="otp_input_wrap" style="display: none;">
+				<?php if ( ! empty( $options['top_verify_image'] ) ) : ?>
 					<div style="text-align:center;">
-						<label class="lable-style" style="color: <?php echo esc_attr( $options['verify_otp_lable_color'] ); ?>;"><?php echo esc_html( $options['verify_otp_lable'] ); ?>
-						</label>
+					<?php // phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage ?>
+						<img src="<?php echo esc_url( $options['top_verify_image'] ); ?>" class="popup-image" />
 					</div>
-					<div style="text-align:center;">
-						<label class="descripition" style="color: <?php echo esc_attr( $options['verify_otp_dec_color'] ); ?>;"><?php echo esc_html( $options['verify_otp_dec'] ); ?></label>
-					</div>
-					<div class="otp-inputs">
-						<?php
-							$otp_length = (int) get_option( 'hcotp_msg91_otp_length', 4 );
-						for ( $i = 1; $i <= $otp_length; $i++ ) :
-							?>
-							<input type="number" class="otp-field" id="otp<?php echo esc_attr( $i ); ?>" maxlength="1" />
-						<?php endfor; ?>
-					</div>
-					<div id="otp-verify-status" class="otp-verify-status"></div>
-					<div class="verify-otp">
-						<button id="msg91_verify_otp" style="background-color: <?php echo esc_attr( $options['verify_otp_button_color'] ); ?>; color: #fff;"><?php echo esc_html( $options['verify_otp_buttontext'] ); ?></button>
-					</div>
-					<div style="text-align:center;">
-						<h4 id="resend_otp"><?php esc_html_e( 'Didn\'t receive an OTP? Resend OTP', 'happy-coders-otp-login' ); ?></h4>
-						<div class="row" id="otp_method_buttons">
-							<a id="msg91_send_otp" class="send-button sms-button" disabled><?php esc_html_e( 'SMS', 'happy-coders-otp-login' ); ?></a>
-						<a id="msg91_send_otp_whatsapp" class="send-button whatsapp-button" disabled><?php esc_html_e( 'Whatsapp', 'happy-coders-otp-login' ); ?></a>
-						</div>
-						<div id="resend_timer_text"></div>
-					</div>
+				<?php endif; ?>
+				<div style="text-align:center;">
+					<label class="lable-style" style="color: <?php echo esc_attr( $options['verify_otp_lable_color'] ); ?>;"><?php echo esc_html( $options['verify_otp_lable'] ); ?>
+					</label>
 				</div>
-	</div>
+				<div style="text-align:center;">
+					<label class="descripition" style="color: <?php echo esc_attr( $options['verify_otp_dec_color'] ); ?>;"><?php echo esc_html( $options['verify_otp_dec'] ); ?></label>
+				</div>
+				<div class="otp-inputs" id="otp_input_fields"></div>
+				<div id="otp-verify-status" class="otp-verify-status"></div>
+				<div class="verify-otp">
+					<button id="msg91_verify_otp" style="background-color: <?php echo esc_attr( $options['verify_otp_button_color'] ); ?>; color: #fff;"><?php echo esc_html( $options['verify_otp_buttontext'] ); ?></button>
+				</div>
+				<div style="text-align:center;">
+					<h4 id="resend_otp"><?php esc_html_e( 'Didn\'t receive an OTP? Resend OTP', 'happy-coders-otp-login' ); ?></h4>
+					<div class="row" id="otp_method_buttons">
+						<a id="msg91_send_otp" class="send-button sms-button" disabled><?php esc_html_e( 'SMS', 'happy-coders-otp-login' ); ?></a>
+					<a id="msg91_send_otp_whatsapp" class="send-button whatsapp-button" disabled><?php esc_html_e( 'Whatsapp', 'happy-coders-otp-login' ); ?></a>
+					</div>
+					<div id="resend_timer_text"></div>
+				</div>
+			</div>
+		</div>
 
 	<?php if ( $is_popup ) : ?>
 		</div> 
@@ -898,16 +893,37 @@ add_action( 'wp_ajax_nopriv_hcotp_verify_otp_ajax', 'hcotp_verify_otp_ajax' );
  */
 function hcotp_verify_otp_ajax() {
 	check_ajax_referer( 'msg91_ajax_nonce_action', 'security_nonce' );
-	$mobile     = sanitize_text_field( wp_unslash( isset( $_POST['mobile'] ) ? $_POST['mobile'] : '' ) );
-	$otpprocess = sanitize_text_field( wp_unslash( $_POST['otpprocess'] ?? '' ) );
-	$otp        = sanitize_text_field( wp_unslash( isset( $_POST['otp'] ) ? $_POST['otp'] : '' ) );
 
-	if ( empty( $mobile ) || empty( $otp ) ) {
-		wp_send_json_error( array( 'message' => 'Mobile number and OTP are required.' ) );
-		return;
+	$otpprocess = sanitize_text_field( wp_unslash( $_POST['otpprocess'] ?? '' ) );
+	$otp        = sanitize_text_field( wp_unslash( $_POST['otp'] ?? '' ) );
+
+	if ( empty( $otpprocess ) || empty( $otp ) ) {
+		wp_send_json_error( array( 'message' => 'OTP is required.' ) );
 	}
 
-	$mobile = preg_replace( '/[^0-9]/', '', $mobile );
+	/**
+	 * Validate required fields based on OTP process
+	 */
+	if ( in_array( $otpprocess, array( 'sms', 'whatsapp' ), true ) ) {
+
+		$mobile = sanitize_text_field( wp_unslash( $_POST['mobile'] ?? '' ) );
+
+		if ( empty( $mobile ) ) {
+			wp_send_json_error( array( 'message' => 'Mobile number is required.' ) );
+		}
+
+		$mobile = preg_replace( '/[^0-9]/', '', $mobile );
+
+	} elseif ( 'email' === $otpprocess ) {
+
+		$email = sanitize_email( wp_unslash( $_POST['email'] ?? '' ) );
+
+		if ( ! is_email( $email ) ) {
+			wp_send_json_error( array( 'message' => 'Valid email is required.' ) );
+		}
+	} else {
+		wp_send_json_error( array( 'message' => 'Invalid OTP process type.' ) );
+	}
 
 	if ( 'sms' === $otpprocess ) {
 		$url = 'https://api.msg91.com/api/verifyRequestOTP.php?authkey=' . get_option( 'hcotp_msg91_auth_key' ) . "&mobile={$mobile}&otp={$otp}";
@@ -929,6 +945,10 @@ function hcotp_verify_otp_ajax() {
 			if ( $user ) {
 				wp_set_current_user( $user->ID );
 				wp_set_auth_cookie( $user->ID, true );
+				
+				if ( ! metadata_exists( 'user', $user->ID, 'hcotp_email_verified' ) ) {
+					update_user_meta( $user->ID, 'hcotp_email_verified', 0 );
+				}
 
 				setcookie( 'msg91_verified_mobile', $mobile, time() + ( 30 * 24 * 60 * 60 ), COOKIEPATH, COOKIE_DOMAIN );
 				setcookie( 'msg91_verified_user_id', $user->ID, time() + ( 30 * 24 * 60 * 60 ), COOKIEPATH, COOKIE_DOMAIN );
@@ -982,12 +1002,46 @@ function hcotp_verify_otp_ajax() {
 				'user_id' => $user->ID,
 			)
 		);
+	} elseif ( 'email' === $otpprocess ) {
+
+		$email = sanitize_email( wp_unslash( $_POST['email'] ?? '' ) );
+
+		if ( ! is_email( $email ) ) {
+			wp_send_json_error(
+				array( 'message' => esc_html__( 'Invalid email address.', 'happy-coders-otp-login' ) )
+			);
+		}
+
+		$user = get_user_by( 'email', $email );
+
+		if ( ! $user ) {
+			wp_send_json_error(
+				array( 'message' => esc_html__( 'No account found with this email.', 'happy-coders-otp-login' ) )
+			);
+		}
+
+		$user_id = $user->ID;
+
+		if ( ! hcotp_verify_email_otp( $user_id, $otp ) ) {
+			wp_send_json_error( array( 'message' => 'Invalid or expired Email OTP.' ) );
+		}
+
+		hcotp_mark_email_verified( $user_id );
+
+		wp_set_current_user( $user_id );
+		wp_set_auth_cookie( $user_id, true );
+
+		wp_send_json_success(
+			array(
+				'message' => 'Email OTP verified successfully.',
+				'user_id' => $user_id,
+			)
+		);
+
 	} else {
 		wp_send_json_error( array( 'message' => 'Invalid OTP process type.' ) );
 	}
 }
-
-
 
 /**
  * Register custom order statuses for 'Shipped' and 'Delivered'.
@@ -1250,3 +1304,84 @@ function hcotp_migrate_old_settings() {
 	update_option( 'hcotp_settings_migrated', true );
 }
 add_action( 'admin_init', 'hcotp_migrate_old_settings' );
+
+/**
+ * Force users to verify email after mobile login.
+ * 
+ * @since 2.1.0
+ */
+function hcotp_enforce_email_verification() {
+
+	if ( ! is_user_logged_in() ) {
+		return;
+	}
+
+	if ( ! hcotp_is_email_otp_enabled() ) {
+		return;
+	}
+
+	if ( ! absint( get_option( 'hcotp_force_email_after_login', 1 ) ) ) {
+		return;
+	}
+
+	$user_id = get_current_user_id();
+	
+	// wp debug logs
+	error_log( "hcotp_enforce_email_verification: user_id = $user_id" );
+	error_log( "hcotp_enforce_email_verification: email verified = " . get_user_meta( $user_id, 'hcotp_email_verified', true ) );
+
+	if ( ! hcotp_user_requires_email_verification( $user_id ) ) {
+		return;
+	}
+
+	// Allow AJAX and logout
+	if ( wp_doing_ajax() || is_user_logged_in() && isset( $_GET['action'] ) && 'logout' === $_GET['action'] ) {
+		return;
+	}
+
+	// Allow admin access
+	if ( is_admin() ) {
+		return;
+	}
+
+	// Redirect to My Account page (OTP form lives there)
+	$account_page_id = get_option( 'woocommerce_myaccount_page_id' );
+	$redirect_url    = $account_page_id ? get_permalink( $account_page_id ) : home_url();
+	
+	$redirect_url = add_query_arg(
+		array(
+			'hcotp_email_required' => '1',
+		),
+		$redirect_url
+	);
+
+	if ( ! is_page( $account_page_id ) ) {
+		wp_safe_redirect( $redirect_url );
+		exit;
+	}
+}
+add_action( 'template_redirect', 'hcotp_enforce_email_verification', 5 );
+
+/**
+ * Show notice when email verification is required.
+ */
+function hcotp_show_email_required_notice() {
+
+	if ( ! is_user_logged_in() ) {
+		return;
+	}
+
+	if ( empty( $_GET['hcotp_email_required'] ) ) {
+		return;
+	}
+
+	if ( ! function_exists( 'wc_add_notice' ) ) {
+		return;
+	}
+
+	wc_add_notice(
+		esc_html__( 'Please add and verify your email address to continue.', 'happy-coders-otp-login' ),
+		'notice'
+	);
+}
+add_action( 'woocommerce_before_account_navigation', 'hcotp_show_email_required_notice' );
