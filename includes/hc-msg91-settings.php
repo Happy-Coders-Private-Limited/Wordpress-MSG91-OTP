@@ -88,6 +88,23 @@ add_action(
 		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_verifyotp_validation_msg', 'sanitize_text_field' );
 		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_verifyotp_button_text', 'sanitize_text_field' );
 		register_setting( 'hcotp_otp_settings_group', 'hcotp_msg91_verifyotp_button_color', 'sanitize_hex_color' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_email_sendotp_label', 'sanitize_text_field' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_email_sendotp_label_color', 'sanitize_hex_color' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_email_sendotp_desc', 'sanitize_text_field' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_email_sendotp_desc_color', 'sanitize_hex_color' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_email_sendotp_button_text', 'sanitize_text_field' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_email_sendotp_button_color', 'sanitize_hex_color' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_email_verifyotp_lable', 'sanitize_text_field' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_email_verifyotp_lable_color', 'sanitize_hex_color' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_email_verifyotp_desc', 'sanitize_text_field' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_email_verifyotp_desc_color', 'sanitize_hex_color' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_email_verifyotp_buttontext', 'sanitize_text_field' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_email_verifyotp_button_color', 'sanitize_hex_color' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_email_verifyotp_validation_msg', 'sanitize_text_field' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_email_resend_timer', 'intval' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_email_top_image', 'esc_url_raw' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_email_top_verify_image', 'esc_url_raw' );
+		register_setting( 'hcotp_otp_settings_group', 'hcotp_email_perday_otplimit', 'intval' );
 		register_setting(
 			'hcotp_otp_settings_group',
 			'hcotp_msg91_otp_length',
@@ -97,16 +114,14 @@ add_action(
 			}
 		);
 		register_setting(
-			'hcotp_settings_group',
+			'hcotp_otp_settings_group',
 			'hcotp_email_otp_enabled',
-			array(
-				'type'              => 'boolean',
-				'sanitize_callback' => 'absint',
-				'default'           => 0,
-			)
+			function ( $value ) {
+				return '1' === $value ? 1 : 0;
+			}
 		);
 		register_setting(
-			'hcotp_settings_group',
+			'hcotp_otp_settings_group',
 			'hcotp_email_otp_length',
 			array(
 				'type'              => 'integer',
@@ -115,7 +130,7 @@ add_action(
 			)
 		);
 		register_setting(
-			'hcotp_settings_group',
+			'hcotp_otp_settings_group',
 			'hcotp_email_otp_expiry',
 			array(
 				'type'              => 'integer',
@@ -124,7 +139,7 @@ add_action(
 			)
 		);
 		register_setting(
-			'hcotp_settings_group',
+			'hcotp_otp_settings_group',
 			'hcotp_force_email_after_login',
 			array(
 				'type'              => 'boolean',
@@ -133,7 +148,7 @@ add_action(
 			)
 		);
 		register_setting(
-			'hcotp_settings_group',
+			'hcotp_otp_settings_group',
 			'hcotp_email_otp_subject',
 			array(
 				'type'              => 'string',
@@ -142,7 +157,7 @@ add_action(
 			)
 		);
 		register_setting(
-			'hcotp_settings_group',
+			'hcotp_otp_settings_group',
 			'hcotp_email_otp_header_image',
 			array(
 				'type'              => 'string',
@@ -151,7 +166,7 @@ add_action(
 			)
 		);
 		register_setting(
-			'hcotp_settings_group',
+			'hcotp_otp_settings_group',
 			'hcotp_email_otp_footer_image',
 			array(
 				'type'              => 'string',
@@ -160,7 +175,7 @@ add_action(
 			)
 		);
 		register_setting(
-			'hcotp_settings_group',
+			'hcotp_otp_settings_group',
 			'hcotp_email_otp_body',
 			array(
 				'type'              => 'string',
@@ -215,7 +230,7 @@ function hcotp_settings_page() {
 			<a href="#general_settings" class="nav-tab <?php echo 'general_settings' === $active_tab ? 'nav-tab-active' : ''; ?>" data-tab="general_settings"><?php esc_html_e( 'General Settings', 'happy-coders-otp-login' ); ?></a>        
 			<a href="#otp_settings" class="nav-tab <?php echo 'otp_settings' === $active_tab ? 'nav-tab-active' : ''; ?>" data-tab="otp_settings"><?php esc_html_e( 'OTP Login Settings', 'happy-coders-otp-login' ); ?></a>
 			<a href="#sms_settings" class="nav-tab <?php echo 'sms_settings' === $active_tab ? 'nav-tab-active' : ''; ?>" data-tab="sms_settings"><?php esc_html_e( 'Transactional SMS Settings', 'happy-coders-otp-login' ); ?></a>
-			<a href="#hcotp-email-otp" class="nav-tab <?php echo 'hcotp-email-otp' === $active_tab ? 'nav-tab-active' : ''; ?>" data-tab="hcotp-email-otp"><?php esc_html_e( 'Email OTP', 'happy-coders-otp-login' ); ?></a>
+			<a href="#email_settings" class="nav-tab <?php echo 'email_settings' === $active_tab ? 'nav-tab-active' : ''; ?>" data-tab="email_settings"><?php esc_html_e( 'Email OTP', 'happy-coders-otp-login' ); ?></a>
 		</h2>
 
 		<form method="post" action="options.php">
@@ -593,7 +608,7 @@ function hcotp_settings_page() {
 				<?php endforeach; ?>
 			</div>
 			
-			<div id="hcotp-email-otp" class="tab-content"  <?php echo 'email_settings' === $active_tab ? 'active-tab' : ''; ?>>
+			<div id="email_settings" class="tab-content <?php echo 'email_settings' === $active_tab ? 'active-tab' : ''; ?>">
 
 				<h2><?php esc_html_e( 'Email OTP Settings', 'happy-coders-otp-login' ); ?></h2>
 
@@ -602,17 +617,23 @@ function hcotp_settings_page() {
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Enable Email OTP Login', 'happy-coders-otp-login' ); ?></th>
 					<td>
-						<input type="checkbox" name="hcotp_email_otp_enabled" value="1"
-							<?php checked( 1, get_option( 'hcotp_email_otp_enabled' ) ); ?> />
+						<input type="checkbox" name="hcotp_email_otp_enabled" value="1" <?php checked( 1, get_option( 'hcotp_email_otp_enabled' ), true ); ?> />
 					</td>
 				</tr>
 
 				<tr>
 					<th scope="row"><?php esc_html_e( 'OTP Length', 'happy-coders-otp-login' ); ?></th>
 					<td>
-						<input type="number" min="4" max="8"
-							name="hcotp_email_otp_length"
-							value="<?php echo esc_attr( get_option( 'hcotp_email_otp_length', 6 ) ); ?>" />
+						<select name="hcotp_email_otp_length">
+							<option value="4" <?php selected( get_option( 'hcotp_email_otp_length', 4 ), 4 ); ?>>
+								<?php esc_html_e( '4 Digits (Default)', 'happy-coders-otp-login' ); ?>
+							</option>
+							<option value="6" <?php selected( get_option( 'hcotp_email_otp_length', 4 ), 6 ); ?>>
+								<?php esc_html_e( '6 Digits', 'happy-coders-otp-login' ); ?>
+							</option>
+						</select>
+						<p class="description">
+						<?php esc_html_e( 'Make sure your OTP length is either 4 or 6 digits.', 'happy-coders-otp-login' ); ?>
 					</td>
 				</tr>
 
@@ -625,11 +646,167 @@ function hcotp_settings_page() {
 					</td>
 				</tr>
 
+				<tr valign="top">
+					<th scope="row"><?php esc_html_e( 'User OTP Limit per day', 'happy-coders-otp-login' ); ?></th>
+					<td><input type="number" name="hcotp_email_perday_otplimit" value="<?php echo esc_attr( get_option( 'hcotp_email_perday_otplimit' ) ); ?>" size="30" /></td>
+				</tr>
+
+				<tr valign="top">
+					<th scope="row"><?php esc_html_e( 'Resend OTP Timer (sec)', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<input type="number" name="hcotp_email_resend_timer" 
+							value="<?php echo esc_attr( get_option( 'hcotp_email_resend_timer', 60 ) ); ?>" size="30" />
+					</td>
+				</tr>
+
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Force Email After Login', 'happy-coders-otp-login' ); ?></th>
 					<td>
 						<input type="checkbox" name="hcotp_force_email_after_login" value="1"
 							<?php checked( 1, get_option( 'hcotp_force_email_after_login' ) ); ?> />
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Email OTP Label', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<input type="text" class="regular-text"
+							name="hcotp_email_sendotp_label"
+							value="<?php echo esc_attr( get_option( 'hcotp_email_sendotp_label', 'Email Address' ) ); ?>" />
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Email OTP Label Color', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<input type="color"
+							name="hcotp_email_sendotp_label_color"
+							value="<?php echo esc_attr( get_option( 'hcotp_email_sendotp_label_color', '#000000' ) ); ?>" />
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Email OTP Description', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<input type="text" class="regular-text"
+							name="hcotp_email_sendotp_desc"
+							value="<?php echo esc_attr( get_option( 'hcotp_email_sendotp_desc', 'We will send an OTP to your email' ) ); ?>" />
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Email OTP Description Color', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<input type="color"
+							name="hcotp_email_sendotp_desc_color"
+							value="<?php echo esc_attr( get_option( 'hcotp_email_sendotp_desc_color', '#000000' ) ); ?>" />
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Email OTP Button Text', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<input type="text" class="regular-text"
+							name="hcotp_email_sendotp_button_text"
+							value="<?php echo esc_attr( get_option( 'hcotp_email_sendotp_button_text', 'Send Email OTP' ) ); ?>" />
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Email OTP Button Color', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<input type="color"
+							name="hcotp_email_sendotp_button_color"
+							value="<?php echo esc_attr( get_option( 'hcotp_email_sendotp_button_color', '#2271b1' ) ); ?>" />
+					</td>
+				</tr>
+
+				<tr>
+					<th><?php esc_html_e( 'Send OTP Top Image', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<input type="text"
+							name="hcotp_email_top_image"
+							value="<?php echo esc_attr( get_option( 'hcotp_email_top_image', HCOTP_PLUGIN_URL . 'assets/images/email-send-otp.png' ) ); ?>"
+							class="regular-text">
+						<p class="description"><?php esc_html_e( 'Image shown on email OTP send screen.', 'happy-coders-otp-login' ); ?></p>
+					</td>
+				</tr>
+
+				<tr>
+					<th><?php esc_html_e( 'Verify OTP Top Image', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<input type="text"
+							name="hcotp_email_top_verify_image"
+							value="<?php echo esc_attr( get_option( 'hcotp_email_top_verify_image', HCOTP_PLUGIN_URL . 'assets/images/email-verify-otp.png' ) ); ?>"
+							class="regular-text">
+						<p class="description"><?php esc_html_e( 'Image shown on email OTP verification screen.', 'happy-coders-otp-login' ); ?></p>
+					</td>
+				</tr>
+
+				<tr>
+					<th><?php esc_html_e( 'Verify OTP Label', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<input type="text"
+							name="hcotp_email_verifyotp_lable"
+							value="<?php echo esc_attr( get_option( 'hcotp_email_verifyotp_lable', 'Enter OTP' ) ); ?>"
+							class="regular-text">
+					</td>
+				</tr>
+
+				<tr>
+					<th><?php esc_html_e( 'Verify Label Color', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<input type="color"
+							name="hcotp_email_verifyotp_lable_color"
+							value="<?php echo esc_attr( get_option( 'hcotp_email_verifyotp_lable_color', '#000000' ) ); ?>">
+					</td>
+				</tr>
+
+				<tr>
+					<th><?php esc_html_e( 'Verify OTP Description', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<input type="text"
+							name="hcotp_email_verifyotp_desc"
+							value="<?php echo esc_attr( get_option( 'hcotp_email_verifyotp_desc', 'Enter the OTP sent to your email' ) ); ?>"
+							class="regular-text">
+					</td>
+				</tr>
+
+				<tr>
+					<th><?php esc_html_e( 'Verify Description Color', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<input type="color"
+							name="hcotp_email_verifyotp_desc_color"
+							value="<?php echo esc_attr( get_option( 'hcotp_email_verifyotp_desc_color', '#666666' ) ); ?>">
+					</td>
+				</tr>
+
+				<tr>
+					<th><?php esc_html_e( 'Verify Button Text', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<input type="text"
+							name="hcotp_email_verifyotp_buttontext"
+							value="<?php echo esc_attr( get_option( 'hcotp_email_verifyotp_buttontext', 'Verify OTP' ) ); ?>"
+							class="regular-text">
+					</td>
+				</tr>
+
+				<tr>
+					<th><?php esc_html_e( 'Verify Button Color', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<input type="color"
+							name="hcotp_email_verifyotp_button_color"
+							value="<?php echo esc_attr( get_option( 'hcotp_email_verifyotp_button_color', '#2271b1' ) ); ?>">
+					</td>
+				</tr>
+
+				<tr>
+					<th><?php esc_html_e( 'Verify Validation Message', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<input type="text"
+							name="hcotp_email_verifyotp_validation_msg"
+							value="<?php echo esc_attr( get_option( 'hcotp_email_verifyotp_validation_msg', 'Please enter the OTP' ) ); ?>"
+							class="regular-text">
 					</td>
 				</tr>
 

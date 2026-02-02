@@ -173,6 +173,18 @@ function hcotp_send_email_otp_ajax() {
 		);
 	}
 
+	if ( ! hcotp_can_send_email_otp_today( $user_id ) ) {
+		wp_send_json_error(
+			array( 'message' => __( 'Daily OTP limit reached. Try again tomorrow.', 'happy-coders-otp-login' ) )
+		);
+	}
+
+	if ( ! hcotp_can_resend_email_otp( $user_id ) ) {
+		wp_send_json_error(
+			array( 'message' => __( 'Please wait before requesting another OTP.', 'happy-coders-otp-login' ) )
+		);
+	}
+
 	$email = sanitize_email( wp_unslash( $_POST['email'] ?? '' ) );
 
 	if ( ! is_email( $email ) ) {
@@ -205,6 +217,9 @@ function hcotp_send_email_otp_ajax() {
 			array( 'message' => __( 'Failed to send Email OTP.', 'happy-coders-otp-login' ) )
 		);
 	}
+
+	hcotp_increment_email_otp_count( $user_id );
+	update_user_meta( $user_id, 'hcotp_email_otp_last_sent', time() );
 
 	wp_send_json_success(
 		array( 'message' => __( 'OTP sent to email.', 'happy-coders-otp-login' ) )
@@ -334,4 +349,54 @@ function hcotp_validate_email_login( $email ) {
 	}
 
 	return $user->ID;
+}
+
+function hcotp_can_send_email_otp_today( $user_id ) {
+	$limit = absint( get_option( 'hcotp_email_otp_daily_limit', 5 ) );
+	if ( $limit < 1 ) {
+		return true; // unlimited
+	}
+
+	$today = gmdate( 'Y-m-d' );
+	$data  = get_user_meta( $user_id, 'hcotp_email_otp_daily', true );
+
+	if ( ! is_array( $data ) || ( $data['date'] ?? '' ) !== $today ) {
+		$data = array(
+			'date'  => $today,
+			'count' => 0,
+		);
+	}
+
+	return $data['count'] < $limit;
+}
+
+function hcotp_increment_email_otp_count( $user_id ) {
+	$today = gmdate( 'Y-m-d' );
+	$data  = get_user_meta( $user_id, 'hcotp_email_otp_daily', true );
+
+	if ( ! is_array( $data ) || ( $data['date'] ?? '' ) !== $today ) {
+		$data = array(
+			'date'  => $today,
+			'count' => 1,
+		);
+	} else {
+		$data['count']++;
+	}
+
+	update_user_meta( $user_id, 'hcotp_email_otp_daily', $data );
+}
+
+function hcotp_can_resend_email_otp( $user_id ) {
+	$timer = absint( get_option( 'hcotp_email_resend_timer', 30 ) );
+	if ( $timer < 1 ) {
+		return true;
+	}
+
+	$last_sent = absint( get_user_meta( $user_id, 'hcotp_email_otp_last_sent', true ) );
+
+	if ( ! $last_sent ) {
+		return true;
+	}
+
+	return ( time() - $last_sent ) >= $timer;
 }
