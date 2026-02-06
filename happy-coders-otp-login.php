@@ -64,9 +64,9 @@ function hcotp_activate_plugin() {
 		'hcotp_msg91_verifyotp_dec'            => 'Enter your %d-digit OTP',
 		'hcotp_msg91_verifyotp_button_text'    => 'Verify OTP',
 		'hcotp_msg91_verifyotp_validation_msg' => 'Please enter the OTP',
-		'hcotp_email_sendotp_label'        => 'Email Address',
-		'hcotp_email_sendotp_desc'         => 'We will send an OTP to your email',
-		'hcotp_email_sendotp_button_text'  => 'Send Email OTP',
+		'hcotp_email_sendotp_label'            => 'Email Address',
+		'hcotp_email_sendotp_desc'             => 'We will send an OTP to your email',
+		'hcotp_email_sendotp_button_text'      => 'Send Email OTP',
 		'hcotp_msg91_perday_otplimit'          => 5,
 		'hcotp_msg91_resend_timer'             => 60, // Default resend timer.
 		'hcotp_msg91_otp_length'               => 4,
@@ -215,8 +215,8 @@ function hcotp_enqueue_scripts() {
 				? hcotp_user_requires_email_verification( get_current_user_id() )
 				: false,
 			'current_user_id'          => get_current_user_id(),
-			'email_otp_length' => absint( get_option( 'hcotp_email_otp_length', 6 ) ),
-			'sms_otp_length'   => absint( get_option( 'hcotp_msg91_otp_length', 4 ) ),
+			'email_otp_length'         => absint( get_option( 'hcotp_email_otp_length', 6 ) ),
+			'sms_otp_length'           => absint( get_option( 'hcotp_msg91_otp_length', 4 ) ),
 		)
 	);
 }
@@ -363,38 +363,38 @@ add_action( 'wp_ajax_nopriv_hcotp_send_otp_ajax', 'hcotp_send_otp_ajax' );
  */
 function hcotp_get_options() {
 	return array(
-		'send_otp_label'              => hcotp_get_option_with_default( 'hcotp_msg91_sendotp_lable', 'Mobile Number' ),
-		'send_otp_label_color'        => hcotp_get_option_with_default( 'hcotp_msg91_sendotp_lable_color', '#000000' ),
-		'send_otp_desc'               => hcotp_get_option_with_default( 'hcotp_msg91_sendotp_dec', 'We will send you an OTP' ),
-		'send_otp_desc_color'         => hcotp_get_option_with_default( 'hcotp_msg91_sendotp_dec_color', '#000000' ),
-		'send_otp_button_text'        => hcotp_get_option_with_default( 'hcotp_msg91_sendotp_button_text', 'Send OTP' ),
-		'send_otp_button_color'       => hcotp_get_option_with_default( 'hcotp_msg91_sendotp_button_color', '#0073aa' ),
-		'top_image'                   => hcotp_get_option_with_default( 'hcotp_msg91_top_image', HCOTP_PLUGIN_URL . 'assets/images/send-otp.png' ),
-		'email_top_image'             => hcotp_get_option_with_default( 'hcotp_email_top_image', HCOTP_PLUGIN_URL . 'assets/images/email-send-otp.png' ),
-		'verify_otp_lable'            => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_lable', 'Enter Mobile' ),
-		'verify_otp_lable_color'      => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_lable_color', '#000000' ),
-		'email_send_otp_label'        => hcotp_get_option_with_default( 'hcotp_email_sendotp_label', 'Email Address' ),
-		'email_send_otp_label_color' => hcotp_get_option_with_default( 'hcotp_email_sendotp_label_color', '#000000' ),
-		'email_send_otp_desc'        => hcotp_get_option_with_default( 'hcotp_email_sendotp_desc', 'We will send an OTP to your email' ),
-		'email_send_otp_desc_color'  => hcotp_get_option_with_default( 'hcotp_email_sendotp_desc_color', '#000000' ),
-		'email_send_otp_button_text' => hcotp_get_option_with_default( 'hcotp_email_sendotp_button_text', 'Send Email OTP' ),
-		'email_send_otp_button_color' => hcotp_get_option_with_default( 'hcotp_email_sendotp_button_color', '#2271b1' ),
+		'send_otp_label'                => hcotp_get_option_with_default( 'hcotp_msg91_sendotp_lable', 'Mobile Number' ),
+		'send_otp_label_color'          => hcotp_get_option_with_default( 'hcotp_msg91_sendotp_lable_color', '#000000' ),
+		'send_otp_desc'                 => hcotp_get_option_with_default( 'hcotp_msg91_sendotp_dec', 'We will send you an OTP' ),
+		'send_otp_desc_color'           => hcotp_get_option_with_default( 'hcotp_msg91_sendotp_dec_color', '#000000' ),
+		'send_otp_button_text'          => hcotp_get_option_with_default( 'hcotp_msg91_sendotp_button_text', 'Send OTP' ),
+		'send_otp_button_color'         => hcotp_get_option_with_default( 'hcotp_msg91_sendotp_button_color', '#0073aa' ),
+		'top_image'                     => hcotp_get_option_with_default( 'hcotp_msg91_top_image', HCOTP_PLUGIN_URL . 'assets/images/send-otp.png' ),
+		'email_top_image'               => hcotp_get_option_with_default( 'hcotp_email_top_image', HCOTP_PLUGIN_URL . 'assets/images/email-send-otp.png' ),
+		'verify_otp_lable'              => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_lable', 'Enter Mobile' ),
+		'verify_otp_lable_color'        => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_lable_color', '#000000' ),
+		'email_send_otp_label'          => hcotp_get_option_with_default( 'hcotp_email_sendotp_label', 'Email Address' ),
+		'email_send_otp_label_color'    => hcotp_get_option_with_default( 'hcotp_email_sendotp_label_color', '#000000' ),
+		'email_send_otp_desc'           => hcotp_get_option_with_default( 'hcotp_email_sendotp_desc', 'We will send an OTP to your email' ),
+		'email_send_otp_desc_color'     => hcotp_get_option_with_default( 'hcotp_email_sendotp_desc_color', '#000000' ),
+		'email_send_otp_button_text'    => hcotp_get_option_with_default( 'hcotp_email_sendotp_button_text', 'Send Email OTP' ),
+		'email_send_otp_button_color'   => hcotp_get_option_with_default( 'hcotp_email_sendotp_button_color', '#2271b1' ),
 		// translators: %d is the number of digits in the OTP.
-		'verify_otp_dec'              => sprintf( esc_html__( 'Enter your %d-digit OTP', 'happy-coders-otp-login' ), (int) get_option( 'hcotp_msg91_otp_length', 4 ) ),
-		'verify_otp_dec_color'        => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_desc_color', '#000000' ),
-		'verify_otp_buttontext'       => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_button_text', 'Verify OTP' ),
-		'verify_otp_button_color'     => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_button_color', '#0073aa' ),
-		'top_verify_image'            => hcotp_get_option_with_default( 'hcotp_msg91_top_verify_image', HCOTP_PLUGIN_URL . 'assets/images/verify-otp.png' ),
-		'email_verify_otp_lable'            => hcotp_get_option_with_default( 'hcotp_email_verifyotp_lable', 'Enter Email' ),
-		'email_verify_otp_lable_color'      => hcotp_get_option_with_default( 'hcotp_email_verifyotp_lable_color', '#000000' ),
-		'email_verify_otp_desc'              => sprintf( esc_html__( 'Enter your %d-digit OTP', 'happy-coders-otp-login' ), (int) get_option( 'hcotp_email_otp_length', 4 ) ),
-		'email_verify_otp_desc_color'        => hcotp_get_option_with_default( 'hcotp_email_verifyotp_desc_color', '#000000' ),
-		'email_verify_otp_buttontext'       => hcotp_get_option_with_default( 'hcotp_email_verifyotp_button_text', 'Verify OTP' ),
-		'email_verify_otp_button_color'     => hcotp_get_option_with_default( 'hcotp_email_verifyotp_button_color', '#0073aa' ),
-		'email_top_verify_image'            => hcotp_get_option_with_default( 'hcotp_email_top_verify_image', HCOTP_PLUGIN_URL . 'assets/images/email-verify-otp.png' ),
-		'hcotp_whatsapp_auth_enabled' => hcotp_get_option_with_default( 'hcotp_whatsapp_auth_enabled', 0 ),
-		'hcotp_whatsapp_button_text'  => hcotp_get_option_with_default( 'hcotp_whatsapp_button_text', 'Send OTP via Whatsapp' ),
-		'otp_length'                  => (int) get_option( 'hcotp_msg91_otp_length', 4 ),
+		'verify_otp_dec'                => sprintf( esc_html__( 'Enter your %d-digit OTP', 'happy-coders-otp-login' ), (int) get_option( 'hcotp_msg91_otp_length', 4 ) ),
+		'verify_otp_dec_color'          => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_desc_color', '#000000' ),
+		'verify_otp_buttontext'         => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_button_text', 'Verify OTP' ),
+		'verify_otp_button_color'       => hcotp_get_option_with_default( 'hcotp_msg91_verifyotp_button_color', '#0073aa' ),
+		'top_verify_image'              => hcotp_get_option_with_default( 'hcotp_msg91_top_verify_image', HCOTP_PLUGIN_URL . 'assets/images/verify-otp.png' ),
+		'email_verify_otp_lable'        => hcotp_get_option_with_default( 'hcotp_email_verifyotp_lable', 'Enter Email' ),
+		'email_verify_otp_lable_color'  => hcotp_get_option_with_default( 'hcotp_email_verifyotp_lable_color', '#000000' ),
+		'email_verify_otp_desc'         => sprintf( esc_html__( 'Enter your %d-digit OTP', 'happy-coders-otp-login' ), (int) get_option( 'hcotp_email_otp_length', 4 ) ),
+		'email_verify_otp_desc_color'   => hcotp_get_option_with_default( 'hcotp_email_verifyotp_desc_color', '#000000' ),
+		'email_verify_otp_buttontext'   => hcotp_get_option_with_default( 'hcotp_email_verifyotp_button_text', 'Verify OTP' ),
+		'email_verify_otp_button_color' => hcotp_get_option_with_default( 'hcotp_email_verifyotp_button_color', '#0073aa' ),
+		'email_top_verify_image'        => hcotp_get_option_with_default( 'hcotp_email_top_verify_image', HCOTP_PLUGIN_URL . 'assets/images/email-verify-otp.png' ),
+		'hcotp_whatsapp_auth_enabled'   => hcotp_get_option_with_default( 'hcotp_whatsapp_auth_enabled', 0 ),
+		'hcotp_whatsapp_button_text'    => hcotp_get_option_with_default( 'hcotp_whatsapp_button_text', 'Send OTP via Whatsapp' ),
+		'otp_length'                    => (int) get_option( 'hcotp_msg91_otp_length', 4 ),
 	);
 }
 
@@ -780,12 +780,12 @@ function hcotp_send_otp_ajax() {
 		$otp_length = (int) get_option( 'hcotp_msg91_otp_length', 4 );
 
 		// $url = "https://control.msg91.com/api/v5/otp?authkey=$authkey&otp_expiry=5&template_id=$template_id&mobile=$mobile&realTimeResponse&otp_length=$otp_length";
-		
+
 		// $response = wp_remote_get( $url );
 		// $body     = wp_remote_retrieve_body( $response );
 		// $result   = json_decode( $body, true );
 		// if ( isset( $result['type'] ) && 'success' === $result['type'] ) {
-		if( true ){
+		if ( true ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 			$wpdb->query(
 				$wpdb->prepare(
@@ -1026,7 +1026,7 @@ function hcotp_verify_otp_ajax() {
 		// $result   = json_decode( $body, true );
 
 		// if ( isset( $result['type'] ) && 'success' === $result['type'] ) {
-		if( true ){
+		if ( true ) {
 			$user = get_user_by( 'login', $mobile );
 
 			$created = strtotime( $user->user_registered );
@@ -1039,7 +1039,7 @@ function hcotp_verify_otp_ajax() {
 			if ( $user ) {
 				wp_set_current_user( $user->ID );
 				wp_set_auth_cookie( $user->ID, true );
-				
+
 				if ( ! metadata_exists( 'user', $user->ID, 'hcotp_email_verified' ) ) {
 					update_user_meta( $user->ID, 'hcotp_email_verified', 0 );
 				}
@@ -1106,7 +1106,7 @@ function hcotp_verify_otp_ajax() {
 			);
 		}
 
-		if ( !is_user_logged_in() ) {
+		if ( ! is_user_logged_in() ) {
 			$user = get_user_by( 'email', $email );
 
 			if ( ! $user ) {
@@ -1126,14 +1126,16 @@ function hcotp_verify_otp_ajax() {
 
 		hcotp_mark_email_verified( $user_id );
 
-		if ( !is_user_logged_in() ) {
+		if ( ! is_user_logged_in() ) {
 			wp_set_current_user( $user_id );
 			wp_set_auth_cookie( $user_id, true );
 		} else {
-			wp_update_user( array(
-				'ID'         => $user_id,
-				'user_email' => $email
-			) );
+			wp_update_user(
+				array(
+					'ID'         => $user_id,
+					'user_email' => $email,
+				)
+			);
 		}
 
 		wp_send_json_success(
@@ -1412,7 +1414,7 @@ add_action( 'admin_init', 'hcotp_migrate_old_settings' );
 
 /**
  * Force users to verify email after mobile login.
- * 
+ *
  * @since 2.1.0
  */
 function hcotp_enforce_email_verification() {
@@ -1430,10 +1432,10 @@ function hcotp_enforce_email_verification() {
 	}
 
 	$user_id = get_current_user_id();
-	
+
 	// wp debug logs
 	error_log( "hcotp_enforce_email_verification: user_id = $user_id" );
-	error_log( "hcotp_enforce_email_verification: email verified = " . get_user_meta( $user_id, 'hcotp_email_verified', true ) );
+	error_log( 'hcotp_enforce_email_verification: email verified = ' . get_user_meta( $user_id, 'hcotp_email_verified', true ) );
 
 	if ( ! hcotp_user_requires_email_verification( $user_id ) ) {
 		return;
@@ -1452,11 +1454,11 @@ function hcotp_enforce_email_verification() {
 	// Redirect to My Account page (OTP form lives there)
 	$account_page_id = get_option( 'woocommerce_myaccount_page_id' );
 	if ( function_exists( 'wc_get_account_endpoint_url' ) ) {
-		$redirect_url    = $account_page_id ? wc_get_account_endpoint_url( 'edit-account' ) : home_url();
+		$redirect_url = $account_page_id ? wc_get_account_endpoint_url( 'edit-account' ) : home_url();
 	} else {
 		$redirect_url = $account_page_id ? get_permalink( $account_page_id ) : home_url();
 	}
-	
+
 	$redirect_url = add_query_arg(
 		array(
 			'hcotp_email_required' => '1',
@@ -1481,13 +1483,13 @@ function hcotp_show_email_required_notice() {
 	}
 
 	if ( ! hcotp_is_email_otp_enabled() ) {
-        return;
-    }
+		return;
+	}
 
-    $user_id = get_current_user_id();
-    if ( ! hcotp_user_requires_email_verification( $user_id ) ) {
-        return;
-    }
+	$user_id = get_current_user_id();
+	if ( ! hcotp_user_requires_email_verification( $user_id ) ) {
+		return;
+	}
 
 	if ( empty( $_GET['hcotp_email_required'] ) ) {
 		return;
@@ -1508,45 +1510,45 @@ add_action( 'woocommerce_save_account_details_errors', 'hcotp_check_email_change
 
 function hcotp_check_email_change_before_save( $errors, $user ) {
 
-    if ( empty( $_POST['account_email'] ) ) {
-        return;
-    }
+	if ( empty( $_POST['account_email'] ) ) {
+		return;
+	}
 
-    $new_email     = sanitize_email( wp_unslash( $_POST['account_email'] ) );
+	$new_email     = sanitize_email( wp_unslash( $_POST['account_email'] ) );
 	$current_email = get_userdata( $user->ID )->user_email;
 
 	// Email changed → reset verification
-    if ( strtolower( $current_email ) !== strtolower( $new_email ) ) {
+	if ( strtolower( $current_email ) !== strtolower( $new_email ) ) {
 		delete_user_meta( $user->ID, 'hcotp_email_otp_hash' );
-		delete_user_meta( $user->ID, 'hcotp_email_otp_expiry' );	
+		delete_user_meta( $user->ID, 'hcotp_email_otp_expiry' );
 		update_user_meta( $user->ID, 'hcotp_pending_email', $new_email );
-        update_user_meta( $user->ID, 'hcotp_email_verified', 0 );
+		update_user_meta( $user->ID, 'hcotp_email_verified', 0 );
 
 		$errors->add(
-            'hcotp_email_verification_required',
-            __( 'Please verify your new email address using OTP before saving.', 'happy-coders-otp-login' )
-        );
-    }
+			'hcotp_email_verification_required',
+			__( 'Please verify your new email address using OTP before saving.', 'happy-coders-otp-login' )
+		);
+	}
 }
 
 add_action( 'woocommerce_edit_account_form_fields', 'hcotp_add_email_otp_ui' );
 function hcotp_add_email_otp_ui() {
 
-    if ( ! is_user_logged_in() ) {
-        return;
-    }
+	if ( ! is_user_logged_in() ) {
+		return;
+	}
 
-    if ( ! hcotp_is_email_otp_enabled() ) {
-        return;
-    }
+	if ( ! hcotp_is_email_otp_enabled() ) {
+		return;
+	}
 
-    $user_id = get_current_user_id();
-    if ( ! hcotp_user_requires_email_verification( $user_id ) ) {
+	$user_id = get_current_user_id();
+	if ( ! hcotp_user_requires_email_verification( $user_id ) ) {
 		echo '<small class="hcotp-email-verified">' . esc_html__( 'Your email address is verified.', 'happy-coders-otp-login' ) . '</small>';
-        return;
-    }
-    ?>
-    <div id="send_otp_section" class="hcotp-email-otp-section wc-form-row">
+		return;
+	}
+	?>
+	<div id="send_otp_section" class="hcotp-email-otp-section wc-form-row">
 		<button type="button" class="button" id="hcotp_send_email_otp">
 			<?php esc_html_e( 'Send Email OTP', 'happy-coders-otp-login' ); ?>
 		</button>
@@ -1574,5 +1576,5 @@ function hcotp_add_email_otp_ui() {
 		</div>
 	</div>
 
-    <?php
+	<?php
 }

@@ -143,7 +143,7 @@ add_action(
 function hcotp_mark_email_verified( $user_id ) {
 	update_user_meta( $user_id, 'hcotp_email_verified', 1 );
 	delete_user_meta( $user_id, 'hcotp_email_otp_hash' );
-	delete_user_meta( $user_id, 'hcotp_email_otp_expiry' );	
+	delete_user_meta( $user_id, 'hcotp_email_otp_expiry' );
 	delete_user_meta( $user_id, 'hcotp_pending_email' );
 }
 
@@ -204,7 +204,7 @@ function hcotp_send_email_otp_ajax() {
 		}
 		$user_id = $user->ID;
 	}
-	
+
 	update_user_meta( $user_id, 'hcotp_pending_email', $email );
 	update_user_meta( $user_id, 'hcotp_email_verified', 0 );
 
@@ -380,7 +380,7 @@ function hcotp_increment_email_otp_count( $user_id ) {
 			'count' => 1,
 		);
 	} else {
-		$data['count']++;
+		++$data['count'];
 	}
 
 	update_user_meta( $user_id, 'hcotp_email_otp_daily', $data );
