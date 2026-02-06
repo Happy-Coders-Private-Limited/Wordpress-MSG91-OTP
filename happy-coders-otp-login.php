@@ -79,14 +79,7 @@ function hcotp_activate_plugin() {
 			'happy-coders-otp-login'
 		),
 		'hcotp_email_otp_body'                 => esc_html__(
-			"Hello,\n\n" .
-			"Your One-Time Password (OTP) for logging in to {{site_name}} is:\n\n" .
-			"OTP: {{otp}}\n\n" .
-			"This OTP is valid for {{expiry}} minutes.\n\n" .
-			"If you did not request this OTP, please ignore this email.\n\n" .
-			"Regards,\n" .
-			"{{site_name}}\n" .
-			'{{site_url}}',
+			"Hello,\n\nYour One-Time Password (OTP) for logging in to {{site_name}} is:\n\nOTP: {{otp}}\n\nThis OTP is valid for {{expiry}} minutes.\n\nIf you did not request this OTP, please ignore this email.\n\nRegards,\n{{site_name}}\n{{site_url}}",
 			'happy-coders-otp-login'
 		),
 	);
