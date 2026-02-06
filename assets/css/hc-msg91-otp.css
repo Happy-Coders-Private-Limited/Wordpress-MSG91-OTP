@@ -57,6 +57,9 @@
     padding: 10px;
     text-align: center;
 }
+.otp-verify-button {
+    margin-top: 15px;
+}
 #otp-form-wrap {
     margin: 0 auto;
     max-width: 300px;

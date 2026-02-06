@@ -1562,7 +1562,7 @@ function hcotp_add_email_otp_ui() {
 		<input type="hidden" id="otpprocess" value="email" />
 		<div id="otp-verify-status" class="otp-verify-status"></div>
 		<div class="otp-inputs" id="otp_input_fields"></div>
-		<button type="button" class="button" id="hcotp_verify_email_otp">
+		<button type="button" class="button otp-verify-button" id="hcotp_verify_email_otp">
 			<?php echo esc_html( $options['verify_otp_buttontext'] ?? __( 'Verify OTP', 'happy-coders-otp-login' ) ); ?>
 		</button>
 		<div class="otp-footer">
