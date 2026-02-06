@@ -387,6 +387,7 @@ function hcotp_get_options() {
 		'top_verify_image'              => hcotp_get_option_with_default( 'hcotp_msg91_top_verify_image', HCOTP_PLUGIN_URL . 'assets/images/verify-otp.png' ),
 		'email_verify_otp_lable'        => hcotp_get_option_with_default( 'hcotp_email_verifyotp_lable', 'Enter Email' ),
 		'email_verify_otp_lable_color'  => hcotp_get_option_with_default( 'hcotp_email_verifyotp_lable_color', '#000000' ),
+		// translators: %d is the number of digits in the OTP.
 		'email_verify_otp_desc'         => sprintf( esc_html__( 'Enter your %d-digit OTP', 'happy-coders-otp-login' ), (int) get_option( 'hcotp_email_otp_length', 4 ) ),
 		'email_verify_otp_desc_color'   => hcotp_get_option_with_default( 'hcotp_email_verifyotp_desc_color', '#000000' ),
 		'email_verify_otp_buttontext'   => hcotp_get_option_with_default( 'hcotp_email_verifyotp_button_text', 'Verify OTP' ),
