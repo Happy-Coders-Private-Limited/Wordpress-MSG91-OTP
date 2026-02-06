@@ -567,6 +567,16 @@ function hcotp_msg91_otp_form( $options, $is_popup = false ) {
 				</label>
 			</div>
 		<?php endif; ?>
+<script>
+				document.addEventListener("DOMContentLoaded", function() {
+					const mobileOtp = document.querySelector('input[name="hcotp_login_type"][value="mobile"]');
+					if (mobileOtp) {
+						mobileOtp.checked = true;
+					}
+				});
+			</script>
+
+		
 
 		<div id="send_otp_section">
 
@@ -624,11 +634,16 @@ function hcotp_msg91_otp_form( $options, $is_popup = false ) {
 						<?php echo esc_html( $options['email_send_otp_desc'] ); ?>
 					</label>
 				</div>
-				<input type="email" id="hcotp_email" class="common-width" placeholder="<?php esc_attr_e( 'Enter your email', 'happy-coders-otp-login' ); ?>" />
-
-				<button id="hcotp_send_email_otp" class="common-width" style="background-color:<?php echo esc_attr( $options['email_send_otp_button_color'] ); ?>;color:#fff;">
-					<?php echo esc_html( $options['email_send_otp_button_text'] ); ?>
-				</button>
+				<div class="hcotp-email-input">
+					<input
+						type="email"
+						id="hcotp_email"
+						class="common-width"
+						placeholder="<?php esc_attr_e('Enter your email', 'happy-coders-otp-login'); ?>" />
+					<button id="hcotp_send_email_otp" class="common-width btn">
+						<?php esc_html_e('Send Email OTP', 'happy-coders-otp-login'); ?>
+					</button>
+				</div>
 			</div>
 
 			<div id="otp-send-status" class="otp-send-status"></div>
@@ -1576,3 +1591,165 @@ function hcotp_add_email_otp_ui() {
 
     <?php
 }
+add_action('init', function () {
+
+		$theme_color = '';
+
+		if (function_exists('wp_get_global_settings')) {
+			$settings = wp_get_global_settings();
+
+			if (!empty($settings['color']['palette']['theme'])) {
+				foreach ($settings['color']['palette']['theme'] as $color) {
+					if ($color['slug'] === 'primary') {
+						$theme_color = $color['color'];
+						break;
+					}
+				}
+			}
+		}
+
+		if (empty($theme_color)) {
+			$theme_color = '#000000';
+		}
+
+		$html = '
+    <div style="max-width:600px;margin:20px auto;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;
+        background:#ffffff;border:1px solid #dcdcde;border-radius:12px;overflow:hidden;">
+
+        <div style="background:' . esc_attr($theme_color) . ';padding:20px;text-align:center;">
+            <h2 style="margin:0;">{{site_name}}</h2>
+            <p style="margin:5px 0 0;opacity:0.9;">Secure Login OTP</p>
+        </div>
+
+        <div style="padding:30px;">
+			<p style="margin-top:0;font-size:16px;">Hello,</p>
+            <p>Your One-Time Password (OTP) for logging in to wordpress is</p>
+
+            <div style="
+                font-size:36px;
+                font-weight:bold;
+                color:' . esc_attr($theme_color) . ';
+                text-align:center;
+                background:#f6f7f7;
+                padding:10px;
+                border-radius:10px;">
+                {{otp}}
+            </div>
+			<p style="font-size:13px;color:black;line-height:1.6;">
+                 This OTP is valid for 5 minutes. <br>
+                If you did not request this OTP, please ignore this email.
+            </p>
+			
+ 			<div >
+                <p style="font-size:13px;color:#1d2327;margin:0;"><strong>{{site_name}}</strong></p>
+                <a href="{{site_url}}" style="color:' . esc_attr($theme_color)  . ';text-decoration:none;font-size:12px;">{{site_url}}</a>
+            </div>
+		</div>
+    </div>';
+
+		update_option('hcotp_email_otp_body', $html);
+	});
+add_action('user_register', function ($user_id) {
+		add_user_meta($user_id, 'email_verified', 0, true);
+	});
+	add_action('wp_ajax_send_email_otp', function () {
+		if (!is_user_logged_in()) wp_die();
+
+		$user = wp_get_current_user();
+		$otp  = rand(100000, 999999);
+
+		update_user_meta($user->ID, 'email_otp', $otp);
+		update_user_meta($user->ID, 'email_otp_time', time());
+
+		$subject = 'Your Email OTP';
+
+		$message = '
+	<div style="font-family:Arial,sans-serif;padding:15px;">
+		<p>Hello ' . esc_html($user->display_name) . ',</p>
+
+		<p>Your OTP is:</p>
+
+		<p style="
+			font-size:22px;
+			font-weight:bold;
+			letter-spacing:4px; 
+			color:#333;
+		">
+			' . $otp . '
+		</p>
+
+		<p style="font-size:13px;color:#666;">
+			This OTP is valid for 5 minutes.
+		</p>
+	</div>';
+
+		$headers = array(
+			'Content-Type: text/html; charset=UTF-8'
+		);
+
+		wp_mail($user->user_email, $subject, $message, $headers);
+
+		echo 'OTP sent to your email!';
+		wp_die();
+	});
+	add_action('wp_ajax_verify_email_otp', function () {
+		if (!is_user_logged_in()) wp_die();
+
+		$user_id = get_current_user_id();
+		$saved_otp = get_user_meta($user_id, 'email_otp', true);
+		$entered_otp = $_POST['otp'];
+
+		if ($saved_otp == $entered_otp) {
+			update_user_meta($user_id, 'email_verified', 1);
+			delete_user_meta($user_id, 'email_otp');
+			echo "Email verified successfully!";
+		} else {
+			echo "Invalid OTP!";
+		}
+		wp_die();
+	});
+	add_action('wp_footer', function () {
+		if (!is_account_page()) return;
+?>
+	<script>
+		document.getElementById("send_email_otp_btn")?.addEventListener("click", function() {
+			fetch("<?php echo admin_url('admin-ajax.php'); ?>?action=send_email_otp")
+				.then(res => res.text())
+				.then(data => document.getElementById("email_otp_msg").innerHTML = data);
+		});
+
+		document.getElementById("verify_email_otp_btn")?.addEventListener("click", function() {
+			let otp = document.getElementById("email_otp_input").value;
+
+			fetch("<?php echo admin_url('admin-ajax.php'); ?>", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/x-www-form-urlencoded"
+					},
+					body: "action=verify_email_otp&otp=" + otp
+				})
+				.then(res => res.text())
+				.then(data => {
+					document.getElementById("email_otp_msg").innerHTML = data;
+					if (data.includes("successfully")) {
+						location.reload();
+					}
+				});
+		});
+	</script>
+<?php
+	});
+	function block_unverified_users()
+	{
+		if (!is_user_logged_in()) return;
+
+		$user_id = get_current_user_id();
+		$verified = get_user_meta($user_id, 'email_verified', true);
+
+		if ($verified != 1 && (is_cart() || is_checkout())) {
+			wc_add_notice('Please verify your email to continue.', 'error');
+			wp_redirect(wc_get_account_endpoint_url('edit-account'));
+			exit;
+		}
+	}
+	add_action('template_redirect', 'block_unverified_users');

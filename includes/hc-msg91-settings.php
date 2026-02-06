@@ -608,7 +608,7 @@ function hcotp_settings_page() {
 				<?php endforeach; ?>
 			</div>
 			
-			<div id="email_settings" class="tab-content <?php echo 'email_settings' === $active_tab ? 'active-tab' : ''; ?>">
+			<div id="email_settings" class="tab-content <?php echo 'hcotp-email-otp' === $active_tab ? 'active-tab' : ''; ?>">
 
 				<h2><?php esc_html_e( 'Email OTP Settings', 'happy-coders-otp-login' ); ?></h2>
 
