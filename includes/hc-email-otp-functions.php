@@ -434,8 +434,9 @@ function hcotp_send_email_otp_ajax() {
 	}
 
 	if ( ! hcotp_can_resend_email_otp( $user_id ) ) {
+		$timer = absint( get_option( 'hcotp_email_resend_timer', 30 ) );
 		wp_send_json_error(
-			array( 'message' => __( 'Please wait before requesting another OTP.', 'happy-coders-otp-login' ) )
+			array( 'message' => __( 'Please wait ' . $timer . ' seconds before requesting another OTP.', 'happy-coders-otp-login' ) )
 		);
 	}
 
