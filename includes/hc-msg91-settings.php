@@ -35,10 +35,51 @@ function hcotp_admin_enqueue_scripts( $hook ) {
 	if ( 'toplevel_page_msg91-otp-settings' !== $hook ) {
 		return;
 	}
-	wp_enqueue_script( 'hcotp-admin-js', HCOTP_PLUGIN_URL . 'assets/js/hc-msg91-otp.js', array( 'jquery' ), time(), true );
+	wp_enqueue_media();
+	wp_enqueue_script( 'hcotp-admin-js', HCOTP_PLUGIN_URL . 'assets/js/hcotp-admin.js', array( 'jquery' ), time(), true );
 	wp_enqueue_style( 'hcotp-admin-css', HCOTP_PLUGIN_URL . 'assets/css/hc-msg91-otp.css', array(), time() );
 }
 add_action( 'admin_enqueue_scripts', 'hcotp_admin_enqueue_scripts' );
+
+/**
+ * Sanitizes HTML email templates while allowing common email markup.
+ *
+ * @param string $input Raw HTML.
+ * @return string
+ */
+function hcotp_sanitize_email_template_html( $input ) {
+	$allowed = wp_kses_allowed_html( 'post' );
+
+	$allowed['html']  = array( 'lang' => true );
+	$allowed['head']  = array();
+	$allowed['body']  = array( 'style' => true );
+	$allowed['meta']  = array( 'charset' => true, 'name' => true, 'content' => true );
+	$allowed['title'] = array();
+
+	$allowed['table'] = array(
+		'role'        => true,
+		'width'       => true,
+		'cellspacing' => true,
+		'cellpadding' => true,
+		'border'      => true,
+		'align'       => true,
+		'style'       => true,
+	);
+	$allowed['tbody'] = array();
+	$allowed['thead'] = array();
+	$allowed['tfoot'] = array();
+	$allowed['tr']    = array( 'style' => true );
+	$allowed['td']    = array( 'width' => true, 'align' => true, 'valign' => true, 'style' => true );
+	$allowed['th']    = array( 'width' => true, 'align' => true, 'valign' => true, 'style' => true );
+
+	$allowed['div']['style']  = true;
+	$allowed['span']['style'] = true;
+	$allowed['p']['style']    = true;
+	$allowed['a']['style']    = true;
+	$allowed['img']['style']  = true;
+
+	return wp_kses( $input, $allowed );
+}
 
 add_action(
 	'admin_init',
@@ -180,6 +221,42 @@ add_action(
 			array(
 				'type'              => 'string',
 				'sanitize_callback' => 'wp_kses_post',
+				'default'           => '',
+			)
+		);
+		register_setting(
+			'hcotp_otp_settings_group',
+			'hcotp_email_template_choice',
+			array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+				'default'           => 'template_1',
+			)
+		);
+		register_setting(
+			'hcotp_otp_settings_group',
+			'hcotp_email_template_html_1',
+			array(
+				'type'              => 'string',
+				'sanitize_callback' => 'hcotp_sanitize_email_template_html',
+				'default'           => '',
+			)
+		);
+		register_setting(
+			'hcotp_otp_settings_group',
+			'hcotp_email_template_html_2',
+			array(
+				'type'              => 'string',
+				'sanitize_callback' => 'hcotp_sanitize_email_template_html',
+				'default'           => '',
+			)
+		);
+		register_setting(
+			'hcotp_otp_settings_group',
+			'hcotp_email_template_html_3',
+			array(
+				'type'              => 'string',
+				'sanitize_callback' => 'hcotp_sanitize_email_template_html',
 				'default'           => '',
 			)
 		);
@@ -816,7 +893,92 @@ function hcotp_settings_page() {
 
 				<h2><?php esc_html_e( 'Email Template', 'happy-coders-otp-login' ); ?></h2>
 
+				<?php
+				$template_1_default = function_exists( 'hcotp_get_default_email_template_html' )
+					? hcotp_get_default_email_template_html( 'template_1', array() )
+					: '';
+				$template_2_default = function_exists( 'hcotp_get_default_email_template_html' )
+					? hcotp_get_default_email_template_html( 'template_2', array() )
+					: '';
+				$template_3_default = function_exists( 'hcotp_get_default_email_template_html' )
+					? hcotp_get_default_email_template_html( 'template_3', array() )
+					: '';
+
+				$template_1_value = get_option( 'hcotp_email_template_html_1', '' );
+				$template_2_value = get_option( 'hcotp_email_template_html_2', '' );
+				$template_3_value = get_option( 'hcotp_email_template_html_3', '' );
+
+				if ( '' === $template_1_value ) {
+					$template_1_value = $template_1_default;
+				}
+				if ( '' === $template_2_value ) {
+					$template_2_value = $template_2_default;
+				}
+				if ( '' === $template_3_value ) {
+					$template_3_value = $template_3_default;
+				}
+				?>
+
 				<table class="form-table" role="presentation">
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Template Selection', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<select name="hcotp_email_template_choice">
+							<option value="template_1" <?php selected( get_option( 'hcotp_email_template_choice', 'template_1' ), 'template_1' ); ?>>
+								<?php esc_html_e( 'Template 1 (Default)', 'happy-coders-otp-login' ); ?>
+							</option>
+							<option value="template_2" <?php selected( get_option( 'hcotp_email_template_choice', 'template_1' ), 'template_2' ); ?>>
+								<?php esc_html_e( 'Template 2 (Dark)', 'happy-coders-otp-login' ); ?>
+							</option>
+							<option value="template_3" <?php selected( get_option( 'hcotp_email_template_choice', 'template_1' ), 'template_3' ); ?>>
+								<?php esc_html_e( 'Template 3 (Classic)', 'happy-coders-otp-login' ); ?>
+							</option>
+						</select>
+						<p class="description"><?php esc_html_e( 'The selected template will be used for all Email OTP messages.', 'happy-coders-otp-login' ); ?></p>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Template Preview', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<button class="button button-secondary" id="hcotp-email-template-preview">
+							<?php esc_html_e( 'Preview Selected Template', 'happy-coders-otp-login' ); ?>
+						</button>
+						<p class="description"><?php esc_html_e( 'Opens a preview using the current Email Body and Template HTML values.', 'happy-coders-otp-login' ); ?></p>
+						<div id="hcotp-email-preview-wrap" style="display:none;margin-top:16px;border:1px solid #c3c4c7;border-radius:8px;overflow:hidden;">
+							<div style="padding:8px 12px;background:#f6f7f7;border-bottom:1px solid #c3c4c7;display:flex;justify-content:space-between;align-items:center;">
+								<strong><?php esc_html_e( 'Email Preview', 'happy-coders-otp-login' ); ?></strong>
+								<button class="button button-link-delete" id="hcotp-email-preview-close">
+									<?php esc_html_e( 'Close', 'happy-coders-otp-login' ); ?>
+								</button>
+							</div>
+							<iframe id="hcotp-email-preview-iframe" title="<?php esc_attr_e( 'Email Preview', 'happy-coders-otp-login' ); ?>" style="width:100%;height:500px;border:0;"></iframe>
+						</div>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Header Image', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<input type="text" class="regular-text"
+							name="hcotp_email_otp_header_image"
+							value="<?php echo esc_attr( get_option( 'hcotp_email_otp_header_image' ) ); ?>" />
+						<button class="button hcotp-upload"><?php esc_html_e( 'Upload', 'happy-coders-otp-login' ); ?></button>
+						<p class="description"><?php esc_html_e( 'Optional logo/header image shown at the top of the email.', 'happy-coders-otp-login' ); ?></p>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Footer Image', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<input type="text" class="regular-text"
+							name="hcotp_email_otp_footer_image"
+							value="<?php echo esc_attr( get_option( 'hcotp_email_otp_footer_image' ) ); ?>" />
+						<button class="button hcotp-upload"><?php esc_html_e( 'Upload', 'happy-coders-otp-login' ); ?></button>
+						<p class="description"><?php esc_html_e( 'Optional image shown at the bottom of the email.', 'happy-coders-otp-login' ); ?></p>
+					</td>
+				</tr>
 
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Email Subject', 'happy-coders-otp-login' ); ?></th>
@@ -832,14 +994,40 @@ function hcotp_settings_page() {
 					<td>
 						<textarea rows="8" cols="60"
 							name="hcotp_email_otp_body"><?php echo esc_textarea( get_option( 'hcotp_email_otp_body' ) ); ?></textarea>
-						<p class="description"> Available variables:<br>
+						<p class="description"> <?php esc_html_e( 'This content will be injected into the selected template at {{content}}.', 'happy-coders-otp-login' ); ?><br>
+							<?php esc_html_e( 'Available variables:', 'happy-coders-otp-login' ); ?><br>
 							<code>{{otp}}</code>,
 							<code>{{expiry}}</code>,
 							<code>{{site_name}}</code>,							
 							<code>{{site_url}}</code>,
 							<code>{{user_mobile}}</code>,
 							<code>{{user_email}}</code>,
+							<code>{{date}}</code>
 						</p>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Template 1 HTML', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<textarea rows="10" cols="60" name="hcotp_email_template_html_1"><?php echo esc_textarea( $template_1_value ); ?></textarea>
+						<p class="description"><?php esc_html_e( 'Use {{content}} to place the Email Body content. Optional: {{header_image}}, {{footer_image}}, {{header_image_url}}, {{footer_image_url}}.', 'happy-coders-otp-login' ); ?></p>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Template 2 HTML', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<textarea rows="10" cols="60" name="hcotp_email_template_html_2"><?php echo esc_textarea( $template_2_value ); ?></textarea>
+						<p class="description"><?php esc_html_e( 'Use {{content}} to place the Email Body content. Optional: {{header_image}}, {{footer_image}}, {{header_image_url}}, {{footer_image_url}}.', 'happy-coders-otp-login' ); ?></p>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Template 3 HTML', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<textarea rows="10" cols="60" name="hcotp_email_template_html_3"><?php echo esc_textarea( $template_3_value ); ?></textarea>
+						<p class="description"><?php esc_html_e( 'Use {{content}} to place the Email Body content. Optional: {{header_image}}, {{footer_image}}, {{header_image_url}}, {{footer_image_url}}.', 'happy-coders-otp-login' ); ?></p>
 					</td>
 				</tr>
 

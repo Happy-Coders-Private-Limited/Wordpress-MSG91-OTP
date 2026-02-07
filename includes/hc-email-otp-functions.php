@@ -77,9 +77,226 @@ function hcotp_replace_email_placeholders( $content, $data ) {
 		'{{user_email}}'  => isset( $data['user_email'] ) ? $data['user_email'] : '',
 		'{{user_mobile}}' => isset( $data['user_mobile'] ) ? $data['user_mobile'] : '',
 		'{{date}}'        => gmdate( 'Y-m-d' ),
+		'{{content}}'     => isset( $data['content'] ) ? $data['content'] : '',
+		'{{header_image}}' => isset( $data['header_image'] ) ? $data['header_image'] : '',
+		'{{footer_image}}' => isset( $data['footer_image'] ) ? $data['footer_image'] : '',
+		'{{header_image_url}}' => isset( $data['header_image_url'] ) ? $data['header_image_url'] : '',
+		'{{footer_image_url}}' => isset( $data['footer_image_url'] ) ? $data['footer_image_url'] : '',
 	);
 
 	return str_replace( array_keys( $replacements ), array_values( $replacements ), $content );
+}
+
+/**
+ * Build image HTML for the email template.
+ *
+ * @param string $type header|footer
+ * @return string
+ */
+function hcotp_get_email_image_html( $type ) {
+	$site_name = get_bloginfo( 'name' );
+	$option    = ( 'footer' === $type ) ? 'hcotp_email_otp_footer_image' : 'hcotp_email_otp_header_image';
+	$image_url = esc_url( get_option( $option, '' ) );
+
+	if ( empty( $image_url ) ) {
+		return '';
+	}
+
+	$opacity = ( 'footer' === $type ) ? 'opacity:0.85;' : '';
+
+	return sprintf(
+		'<tr><td style="padding:%s;text-align:center;"><img src="%s" alt="%s" style="max-width:200px;height:auto;border:0;outline:none;text-decoration:none;%s"></td></tr>',
+		( 'footer' === $type ) ? '0 30px 20px' : '20px 30px 0',
+		esc_url( $image_url ),
+		esc_attr( $site_name ),
+		$opacity
+	);
+}
+
+/**
+ * Get default HTML email templates.
+ *
+ * @param string $template_id Template identifier.
+ * @param array  $data    Replacement data.
+ * @return string Default HTML template.
+ */
+function hcotp_get_default_email_template_html( $template_id, $data ) {
+	$site_name   = get_bloginfo( 'name' );
+	$site_url    = home_url();
+	$year        = gmdate( 'Y' );
+
+	if ( 'template_2' === $template_id ) {
+		return sprintf(
+			'<!DOCTYPE html>
+			<html>
+			<head>
+				<meta charset="UTF-8">
+				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+				<title>%s</title>
+			</head>
+			<body style="margin:0;padding:0;background-color:#0f172a;">
+				<table role="presentation" width="100%%" cellspacing="0" cellpadding="0" border="0" style="background-color:#0f172a;padding:30px 0;">
+					<tr>
+						<td align="center">
+							<table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="width:600px;max-width:600px;background-color:#111827;border-radius:16px;overflow:hidden;font-family:Arial,Helvetica,sans-serif;">
+								{{header_image}}
+								<tr>
+									<td style="padding:30px;color:#f8fafc;font-size:16px;line-height:1.7;">
+										{{content}}
+									</td>
+								</tr>
+								<tr>
+									<td style="padding:0 30px 30px;color:#cbd5f5;font-size:12px;text-align:center;">
+										<span style="display:block;">%s</span>
+										<a href="%s" style="color:#93c5fd;text-decoration:none;">%s</a>
+										<span style="display:block;margin-top:6px;">&copy; %s %s</span>
+									</td>
+								</tr>
+								{{footer_image}}
+							</table>
+						</td>
+					</tr>
+				</table>
+			</body>
+			</html>',
+			esc_html( $site_name ),
+			esc_html__( 'Sent by', 'happy-coders-otp-login' ),
+			esc_url( $site_url ),
+			esc_html( $site_url ),
+			esc_html( $year ),
+			esc_html( $site_name ),
+			''
+		);
+	}
+
+	if ( 'template_3' === $template_id ) {
+		return sprintf(
+			'<!DOCTYPE html>
+			<html>
+			<head>
+				<meta charset="UTF-8">
+				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+				<title>%s</title>
+			</head>
+			<body style="margin:0;padding:0;background-color:#fef3c7;">
+				<table role="presentation" width="100%%" cellspacing="0" cellpadding="0" border="0" style="background-color:#fef3c7;padding:24px 0;">
+					<tr>
+						<td align="center">
+							<table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="width:600px;max-width:600px;background-color:#ffffff;border:2px solid #f59e0b;border-radius:10px;overflow:hidden;font-family:Georgia,&quot;Times New Roman&quot;,serif;">
+								{{header_image}}
+								<tr>
+									<td style="padding:28px 30px;color:#3f2a00;font-size:16px;line-height:1.7;">
+										{{content}}
+									</td>
+								</tr>
+								<tr>
+									<td style="padding:0 30px 24px;color:#7c5e10;font-size:13px;text-align:center;">
+										<span style="display:block;">%s</span>
+										<a href="%s" style="color:#b45309;text-decoration:none;">%s</a>
+										<span style="display:block;margin-top:6px;">&copy; %s %s</span>
+									</td>
+								</tr>
+								{{footer_image}}
+							</table>
+						</td>
+					</tr>
+				</table>
+			</body>
+			</html>',
+			esc_html( $site_name ),
+			esc_html__( 'Sent by', 'happy-coders-otp-login' ),
+			esc_url( $site_url ),
+			esc_html( $site_url ),
+			esc_html( $year ),
+			esc_html( $site_name ),
+			''
+		);
+	}
+
+	return sprintf(
+		'<!DOCTYPE html>
+		<html>
+		<head>
+			<meta charset="UTF-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			<title>%s</title>
+		</head>
+		<body style="margin:0;padding:0;background-color:#f5f7fb;">
+			<table role="presentation" width="100%%" cellspacing="0" cellpadding="0" border="0" style="background-color:#f5f7fb;padding:20px 0;">
+				<tr>
+					<td align="center">
+						<table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="width:600px;max-width:600px;background-color:#ffffff;border-radius:12px;overflow:hidden;font-family:Arial,Helvetica,sans-serif;">
+							{{header_image}}
+							<tr>
+								<td style="padding:30px 30px 10px;color:#111827;font-size:16px;line-height:1.6;">
+									{{content}}
+								</td>
+							</tr>
+							<tr>
+								<td style="padding:0 30px 30px;color:#6b7280;font-size:13px;text-align:center;">
+									<span style="display:block;">%s</span>
+									<a href="%s" style="color:#2563eb;text-decoration:none;">%s</a>
+									<span style="display:block;margin-top:6px;">&copy; %s %s</span>
+								</td>
+							</tr>
+							{{footer_image}}
+						</table>
+					</td>
+				</tr>
+			</table>
+		</body>
+		</html>',
+		esc_html( $site_name ),
+		esc_html__( 'Sent by', 'happy-coders-otp-login' ),
+		esc_url( $site_url ),
+		esc_html( $site_url ),
+		esc_html( $year ),
+		esc_html( $site_name ),
+		''
+	);
+}
+
+/**
+ * Apply the selected HTML email template.
+ *
+ * @param string $content Email body after placeholder replacement.
+ * @param array  $data    Replacement data.
+ * @return string
+ */
+function hcotp_apply_email_template( $content, $data ) {
+	$template_id = get_option( 'hcotp_email_template_choice', 'template_1' );
+
+	$option_key = 'hcotp_email_template_html_1';
+	if ( 'template_2' === $template_id ) {
+		$option_key = 'hcotp_email_template_html_2';
+	} elseif ( 'template_3' === $template_id ) {
+		$option_key = 'hcotp_email_template_html_3';
+	}
+
+	$template_html = get_option( $option_key, '' );
+	if ( empty( $template_html ) ) {
+		$template_html = hcotp_get_default_email_template_html( $template_id, $data );
+	}
+
+	$has_html = (bool) preg_match( '/<[^>]+>/', $content );
+	if ( $has_html ) {
+		$data['content'] = wpautop( wp_kses_post( $content ) );
+	} else {
+		$data['content'] = nl2br( esc_html( $content ) );
+	}
+
+	$data['header_image']     = hcotp_get_email_image_html( 'header' );
+	$data['footer_image']     = hcotp_get_email_image_html( 'footer' );
+	$data['header_image_url'] = esc_url( get_option( 'hcotp_email_otp_header_image', '' ) );
+	$data['footer_image_url'] = esc_url( get_option( 'hcotp_email_otp_footer_image', '' ) );
+
+	$template_html = hcotp_replace_email_placeholders( $template_html, $data );
+
+	if ( false === stripos( $template_html, '<html' ) && false === stripos( $template_html, '<body' ) ) {
+		return $template_html;
+	}
+
+	return $template_html;
 }
 
 /**
@@ -121,6 +338,7 @@ function hcotp_send_email_otp( $user_id, $email, $mobile ) {
 
 	$subject = hcotp_replace_email_placeholders( $subject, $data );
 	$body    = hcotp_replace_email_placeholders( $body, $data );
+	$body    = hcotp_apply_email_template( $body, $data );
 
 	$headers = array( 'Content-Type: text/html; charset=UTF-8' );
 
