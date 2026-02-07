@@ -31,10 +31,22 @@ jQuery(document).ready(function ($) {
 		}
 
 		var templateHtml = $(templateField).val() || '';
+		if (!templateHtml.trim()) {
+			if (choice === 'template_2') {
+				templateHtml = $('#hcotp-email-template-default-2').val() || '';
+			} else if (choice === 'template_3') {
+				templateHtml = $('#hcotp-email-template-default-3').val() || '';
+			} else {
+				templateHtml = $('#hcotp-email-template-default-1').val() || '';
+			}
+		}
 		var bodyContent = $('textarea[name="hcotp_email_otp_body"]').val() || '';
 		var headerUrl = $('input[name="hcotp_email_otp_header_image"]').val() || '';
 		var footerUrl = $('input[name="hcotp_email_otp_footer_image"]').val() || '';
-
+		var headerWidth = parseInt($('input[name="hcotp_email_otp_header_image_width"]').val(), 10);
+		var headerHeight = parseInt($('input[name="hcotp_email_otp_header_image_height"]').val(), 10);
+		var footerWidth = parseInt($('input[name="hcotp_email_otp_footer_image_width"]').val(), 10);
+		var footerHeight = parseInt($('input[name="hcotp_email_otp_footer_image_height"]').val(), 10);
 		if (!bodyContent.trim()) {
 			bodyContent = "Hello,\n\nYour one-time password (OTP) is {{otp}}.\n\nThis OTP is valid for {{expiry}} minutes.\n\nThanks,\n{{site_name}}";
 		}
@@ -44,12 +56,31 @@ jQuery(document).ready(function ($) {
 
 		var headerImage = '';
 		if (headerUrl) {
-			headerImage = '<tr><td style="padding:20px 30px 0;text-align:center;"><img src="' + headerUrl + '" alt="Header" style="max-width:200px;height:auto;border:0;outline:none;text-decoration:none;"></td></tr>';
+			var headerStyle = 'border:0;outline:none;text-decoration:none;height:auto;';
+			if (!isNaN(headerWidth) && headerWidth > 0) {
+				headerStyle += 'width:' + headerWidth + 'px;max-width:' + headerWidth + 'px;';
+			} else {
+				headerStyle += 'max-width:200px;';
+			}
+			if (!isNaN(headerHeight) && headerHeight > 0) {
+				headerStyle += 'height:' + headerHeight + 'px;';
+			}
+			headerImage = '<tr><td style="padding:20px 30px 0;text-align:center;"><img src="' + headerUrl + '" alt="Header" style="' + headerStyle + '"></td></tr>';
+			console.log("headerImage", headerImage);
 		}
 
 		var footerImage = '';
 		if (footerUrl) {
-			footerImage = '<tr><td style="padding:0 30px 20px;text-align:center;"><img src="' + footerUrl + '" alt="Footer" style="max-width:200px;height:auto;border:0;outline:none;text-decoration:none;opacity:0.85;"></td></tr>';
+			var footerStyle = 'border:0;outline:none;text-decoration:none;height:auto;opacity:0.85;';
+			if (!isNaN(footerWidth) && footerWidth > 0) {
+				footerStyle += 'width:' + footerWidth + 'px;max-width:' + footerWidth + 'px;';
+			} else {
+				footerStyle += 'max-width:200px;';
+			}
+			if (!isNaN(footerHeight) && footerHeight > 0) {
+				footerStyle += 'height:' + footerHeight + 'px;';
+			}
+			footerImage = '<tr><td style="padding:0 30px 20px;text-align:center;"><img src="' + footerUrl + '" alt="Footer" style="' + footerStyle + '"></td></tr>';
 		}
 
 		var replacements = {
@@ -76,7 +107,17 @@ jQuery(document).ready(function ($) {
 			templateHtml = '<div style="padding:20px;font-family:Arial,Helvetica,sans-serif;">' + contentHtml + '</div>';
 		}
 
-		$('#hcotp-email-preview-iframe').attr('srcdoc', templateHtml);
+		var iframe = document.getElementById('hcotp-email-preview-iframe');
+		if (iframe) {
+			if ('srcdoc' in iframe) {
+				iframe.srcdoc = templateHtml;
+			} else if (iframe.contentWindow && iframe.contentWindow.document) {
+				var doc = iframe.contentWindow.document;
+				doc.open();
+				doc.write(templateHtml);
+				doc.close();
+			}
+		}
 		$('#hcotp-email-preview-wrap').show();
 	});
 
