@@ -407,18 +407,6 @@ function hcotp_send_email_otp_ajax() {
 		);
 	}
 
-	if ( ! hcotp_can_send_email_otp_today( $user_id ) ) {
-		wp_send_json_error(
-			array( 'message' => __( 'Daily OTP limit reached. Try again tomorrow.', 'happy-coders-otp-login' ) )
-		);
-	}
-
-	if ( ! hcotp_can_resend_email_otp( $user_id ) ) {
-		wp_send_json_error(
-			array( 'message' => __( 'Please wait before requesting another OTP.', 'happy-coders-otp-login' ) )
-		);
-	}
-
 	$email = sanitize_email( wp_unslash( $_POST['email'] ?? '' ) );
 
 	if ( ! is_email( $email ) ) {
@@ -437,6 +425,18 @@ function hcotp_send_email_otp_ajax() {
 			);
 		}
 		$user_id = $user->ID;
+	}
+
+	if ( ! hcotp_can_send_email_otp_today( $user_id ) ) {
+		wp_send_json_error(
+			array( 'message' => __( 'Daily OTP limit reached. Try again tomorrow.', 'happy-coders-otp-login' ) )
+		);
+	}
+
+	if ( ! hcotp_can_resend_email_otp( $user_id ) ) {
+		wp_send_json_error(
+			array( 'message' => __( 'Please wait before requesting another OTP.', 'happy-coders-otp-login' ) )
+		);
 	}
 
 	update_user_meta( $user_id, 'hcotp_pending_email', $email );
@@ -586,7 +586,7 @@ function hcotp_validate_email_login( $email ) {
 }
 
 function hcotp_can_send_email_otp_today( $user_id ) {
-	$limit = absint( get_option( 'hcotp_email_otp_daily_limit', 5 ) );
+	$limit = absint( get_option( 'hcotp_email_perday_otplimit', 0 ) );
 	if ( $limit < 1 ) {
 		return true; // unlimited
 	}
