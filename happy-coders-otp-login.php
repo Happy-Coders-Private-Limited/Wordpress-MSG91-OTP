@@ -172,7 +172,7 @@ function hcotp_enqueue_scripts() {
 	wp_enqueue_script(
 		'hcotp-main-js',
 		HCOTP_PLUGIN_URL . 'assets/js/hc-msg91-otp.js',
-		array( 'jquery' ),
+		array( 'jquery', 'wp-i18n' ),
 		HCOTP_VERSION,
 		true
 	);
@@ -210,6 +210,9 @@ function hcotp_enqueue_scripts() {
 			'current_user_id'          => get_current_user_id(),
 			'email_otp_length'         => absint( get_option( 'hcotp_email_otp_length', 6 ) ),
 			'sms_otp_length'           => absint( get_option( 'hcotp_msg91_otp_length', 4 ) ),
+			'invalid_email_format'     => __( 'Please enter a valid email address format.', 'happy-coders-otp-login' ),
+			'use_valid_email'          => __( 'Please use a valid email address.', 'happy-coders-otp-login' ),
+			'enter_valid_email'        => __( 'Please enter a valid email.', 'happy-coders-otp-login' ),
 		)
 	);
 }
@@ -568,11 +571,11 @@ function hcotp_msg91_otp_form( $options, $is_popup = false ) {
 
 			<div class="hcotp-mobile-login">
 				<div style="display:flex;justify-content:center;">
-				<?php if ( ! empty( $options['top_image'] ) ) : ?>
-					<div style="text-align:center;">
-						<img src="<?php echo esc_url( $options['top_image'] ); ?>" class="popup-image" alt="Send OTP" />
-					</div>
-				<?php endif; ?>
+					<?php if ( ! empty( $options['top_image'] ) ) : ?>
+						<div style="text-align:center;">
+							<img src="<?php echo esc_url( $options['top_image'] ); ?>" class="popup-image" alt="Send OTP" />
+						</div>
+					<?php endif; ?>
 				</div>
 
 				<div style="text-align:center;">
@@ -604,11 +607,11 @@ function hcotp_msg91_otp_form( $options, $is_popup = false ) {
 
 			<div class="hcotp-email-login" style="display:none;">
 				<div style="display:flex;justify-content:center;">
-				<?php if ( ! empty( $options['email_top_image'] ) ) : ?>
-					<div style="text-align:center;">
-						<img src="<?php echo esc_url( $options['email_top_image'] ); ?>" class="popup-image" alt="Send OTP" />
-					</div>
-				<?php endif; ?>
+					<?php if ( ! empty( $options['email_top_image'] ) ) : ?>
+						<div style="text-align:center;">
+							<img src="<?php echo esc_url( $options['email_top_image'] ); ?>" class="popup-image" alt="Send OTP" />
+						</div>
+					<?php endif; ?>
 				</div>
 
 				<div style="text-align:center;">
@@ -635,11 +638,11 @@ function hcotp_msg91_otp_form( $options, $is_popup = false ) {
 		<div id="otp_input_wrap" style="display:none;">
 			<div class="hcotp-mobile-login">
 				<div style="display:flex;justify-content:center;">
-				<?php if ( ! empty( $options['top_verify_image'] ) ) : ?>
-					<div style="text-align:center;">
-						<img src="<?php echo esc_url( $options['top_verify_image'] ); ?>" class="popup-image" />
-					</div>
-				<?php endif; ?>
+					<?php if ( ! empty( $options['top_verify_image'] ) ) : ?>
+						<div style="text-align:center;">
+							<img src="<?php echo esc_url( $options['top_verify_image'] ); ?>" class="popup-image" />
+						</div>
+					<?php endif; ?>
 				</div>
 
 				<div style="text-align:center;">
@@ -657,11 +660,11 @@ function hcotp_msg91_otp_form( $options, $is_popup = false ) {
 
 			<div class="hcotp-email-login" style="display:none;">
 				<div style="display:flex;justify-content:center;">
-				<?php if ( ! empty( $options['email_top_verify_image'] ) ) : ?>
-					<div style="text-align:center;">
-						<img src="<?php echo esc_url( $options['email_top_verify_image'] ); ?>" class="popup-image" />
-					</div>
-				<?php endif; ?>
+					<?php if ( ! empty( $options['email_top_verify_image'] ) ) : ?>
+						<div style="text-align:center;">
+							<img src="<?php echo esc_url( $options['email_top_verify_image'] ); ?>" class="popup-image" />
+						</div>
+					<?php endif; ?>
 				</div>
 
 				<div style="text-align:center;">

@@ -522,7 +522,22 @@ jQuery(document).on('click', '#hcotp_send_email_otp', function () {
     }
     if (!email) {
 		$container.find('#otp-send-status')
-			.html('<span style="color:red;">Please enter a valid email.</span>');
+			.html('<span style="color:red;">' + hcotp_params.enter_valid_email + '</span>');
+		return;
+	}
+
+    // Email format validation
+    if (email.indexOf('@example.com') > -1) {
+        $container.find('#otp-send-status')
+            .html('<span style="color:red;">' + hcotp_params.use_valid_email + '</span>');
+        jQuery(this).prop('disabled', false).text('Send Email OTP'); // Re-enable button
+        return;
+    }
+    const emailRegex = new RegExp(/^[a-zA-Z0-9]([a-zA-Z0-9-_.]{1,})?@[a-zA-Z0-9]([a-zA-Z0-9-]{1,})?\.[a-zA-Z]{2,}$/);
+    if (!emailRegex.test(email)) {
+        $container.find('#otp-send-status')
+            .html('<span style="color:red;">' + hcotp_params.invalid_email_format + '</span>');
+        jQuery(this).prop('disabled', false).text('Send Email OTP'); // Re-enable button
 		return;
 	}
 
