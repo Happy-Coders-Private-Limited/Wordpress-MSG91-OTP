@@ -965,7 +965,7 @@ function hcotp_settings_page() {
 							name="hcotp_email_otp_header_image"
 							value="<?php echo esc_attr( get_option( 'hcotp_email_otp_header_image' ) ); ?>" />
 						<button class="button hcotp-upload"><?php esc_html_e( 'Upload', 'happy-coders-otp-login' ); ?></button>
-						<p class="description"><?php esc_html_e( 'Optional logo/header image shown at the top of the email.', 'happy-coders-otp-login' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Optional image URL for header.', 'happy-coders-otp-login' ); ?></p>
 					</td>
 				</tr>
 
@@ -976,7 +976,7 @@ function hcotp_settings_page() {
 							name="hcotp_email_otp_footer_image"
 							value="<?php echo esc_attr( get_option( 'hcotp_email_otp_footer_image' ) ); ?>" />
 						<button class="button hcotp-upload"><?php esc_html_e( 'Upload', 'happy-coders-otp-login' ); ?></button>
-						<p class="description"><?php esc_html_e( 'Optional image shown at the bottom of the email.', 'happy-coders-otp-login' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Optional image URL for footer.', 'happy-coders-otp-login' ); ?></p>
 					</td>
 				</tr>
 
@@ -1011,7 +1011,9 @@ function hcotp_settings_page() {
 					<th scope="row"><?php esc_html_e( 'Template 1 HTML', 'happy-coders-otp-login' ); ?></th>
 					<td>
 						<textarea rows="10" cols="60" name="hcotp_email_template_html_1"><?php echo esc_textarea( $template_1_value ); ?></textarea>
-						<p class="description"><?php esc_html_e( 'Use {{content}} to place the Email Body content. Optional: {{header_image}}, {{footer_image}}, {{header_image_url}}, {{footer_image_url}}.', 'happy-coders-otp-login' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Use {{content}} to show the Email Body.', 'happy-coders-otp-login' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Add {{header_image}} or {{footer_image}} where you want the images to appear.', 'happy-coders-otp-login' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Use {{header_image_url}} or {{footer_image_url}} only if you want to place the image manually.', 'happy-coders-otp-login' ); ?></p>
 					</td>
 				</tr>
 
@@ -1019,7 +1021,9 @@ function hcotp_settings_page() {
 					<th scope="row"><?php esc_html_e( 'Template 2 HTML', 'happy-coders-otp-login' ); ?></th>
 					<td>
 						<textarea rows="10" cols="60" name="hcotp_email_template_html_2"><?php echo esc_textarea( $template_2_value ); ?></textarea>
-						<p class="description"><?php esc_html_e( 'Use {{content}} to place the Email Body content. Optional: {{header_image}}, {{footer_image}}, {{header_image_url}}, {{footer_image_url}}.', 'happy-coders-otp-login' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Use {{content}} to show the Email Body.', 'happy-coders-otp-login' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Add {{header_image}} or {{footer_image}} where you want the images to appear.', 'happy-coders-otp-login' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Use {{header_image_url}} or {{footer_image_url}} only if you want to place the image manually.', 'happy-coders-otp-login' ); ?></p>
 					</td>
 				</tr>
 
@@ -1027,7 +1031,9 @@ function hcotp_settings_page() {
 					<th scope="row"><?php esc_html_e( 'Template 3 HTML', 'happy-coders-otp-login' ); ?></th>
 					<td>
 						<textarea rows="10" cols="60" name="hcotp_email_template_html_3"><?php echo esc_textarea( $template_3_value ); ?></textarea>
-						<p class="description"><?php esc_html_e( 'Use {{content}} to place the Email Body content. Optional: {{header_image}}, {{footer_image}}, {{header_image_url}}, {{footer_image_url}}.', 'happy-coders-otp-login' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Use {{content}} to show the Email Body.', 'happy-coders-otp-login' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Add {{header_image}} or {{footer_image}} where you want the images to appear.', 'happy-coders-otp-login' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Use {{header_image_url}} or {{footer_image_url}} only if you want to place the image manually.', 'happy-coders-otp-login' ); ?></p>
 					</td>
 				</tr>
 
