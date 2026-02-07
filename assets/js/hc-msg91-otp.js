@@ -512,8 +512,9 @@ jQuery(document).on('change', 'input[name="hcotp_login_type"]', function () {
 
 jQuery(document).on('click', '#hcotp_send_email_otp', function () {
     
-	const $container = jQuery(this).closest('#otp-form-wrap, .edit-account');
-    jQuery(this).prop('disabled', true).text('Sending...');
+	const $button = jQuery(this);
+	const $container = $button.closest('#otp-form-wrap, .edit-account');
+    $button.prop('disabled', true).text('Sending...');
 	const $emailInput = $container.find('#hcotp_email, #account_email');
     const email = $emailInput.val() ? $emailInput.val().trim() : '';
 
@@ -523,6 +524,7 @@ jQuery(document).on('click', '#hcotp_send_email_otp', function () {
     if (!email) {
 		$container.find('#otp-send-status')
 			.html('<span style="color:red;">' + hcotp_params.enter_valid_email + '</span>');
+		$button.prop('disabled', false).text('Send Email OTP');
 		return;
 	}
 
@@ -530,14 +532,14 @@ jQuery(document).on('click', '#hcotp_send_email_otp', function () {
     if (email.indexOf('@example.com') > -1) {
         $container.find('#otp-send-status')
             .html('<span style="color:red;">' + hcotp_params.use_valid_email + '</span>');
-        jQuery(this).prop('disabled', false).text('Send Email OTP'); // Re-enable button
+        $button.prop('disabled', false).text('Send Email OTP');
         return;
     }
     const emailRegex = new RegExp(/^[a-zA-Z0-9]([a-zA-Z0-9-_.]{1,})?@[a-zA-Z0-9]([a-zA-Z0-9-]{1,})?\.[a-zA-Z]{2,}$/);
     if (!emailRegex.test(email)) {
         $container.find('#otp-send-status')
             .html('<span style="color:red;">' + hcotp_params.invalid_email_format + '</span>');
-        jQuery(this).prop('disabled', false).text('Send Email OTP'); // Re-enable button
+        $button.prop('disabled', false).text('Send Email OTP');
 		return;
 	}
 
@@ -554,10 +556,16 @@ jQuery(document).on('click', '#hcotp_send_email_otp', function () {
             );
             $container.find('#send_otp_section').slideUp();
 			$container.find('#otp_input_wrap').slideDown();
+			$button.prop('disabled', false).text('Send Email OTP');
 		} else {
 			$container.find('#otp-send-status')
 				.html('<span style="color:red;">' + res.data.message + '</span>');
+			$button.prop('disabled', false).text('Send Email OTP');
 		}
+	}).fail(function () {
+		$container.find('#otp-send-status')
+			.html('<span style="color:red;">' + hcotp_params.server_error_text + '</span>');
+		$button.prop('disabled', false).text('Send Email OTP');
 	});
 });
 
