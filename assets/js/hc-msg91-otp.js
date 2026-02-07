@@ -16,7 +16,7 @@ jQuery(document).ready(function ($) {
             if (!email) {
                 $container.find('#otp-send-status')
                     .html('<span class="woocommerce-error">Invalid email.</span>');
-                $btn.prop('disabled', false);
+                $button.prop('disabled', false);
                 return;
             }
 
@@ -31,7 +31,7 @@ jQuery(document).ready(function ($) {
                 } else {
                     $container.find('#otp-send-status')
                         .html('<span class="woocommerce-error">' + res.data.message + '</span>');
-                    $btn.prop('disabled', false);
+                    $button.prop('disabled', false);
                 }
             });
 
@@ -188,7 +188,6 @@ jQuery(document).ready(function ($) {
         let mobileWithCode = countryCode + mobile;
         
         let otpLength = $container.find('.otp-field').length;
-        console.log(otpLength);
     
         let otp = '';
         
