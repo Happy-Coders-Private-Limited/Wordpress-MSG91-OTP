@@ -36,7 +36,8 @@ function hcotp_admin_enqueue_scripts( $hook ) {
 		return;
 	}
 	wp_enqueue_media();
-	wp_enqueue_script( 'hcotp-admin-js', HCOTP_PLUGIN_URL . 'assets/js/hcotp-admin.js', array( 'jquery' ), time(), true );
+	wp_enqueue_script( 'hcotp-admin-tabs', HCOTP_PLUGIN_URL . 'assets/js/hc-msg91-otp.js', array( 'jquery' ), time(), true );
+	wp_enqueue_script( 'hcotp-admin-js', HCOTP_PLUGIN_URL . 'assets/js/hcotp-admin.js', array( 'jquery', 'hcotp-admin-tabs' ), time(), true );
 	wp_enqueue_style( 'hcotp-admin-css', HCOTP_PLUGIN_URL . 'assets/css/hc-msg91-otp.css', array(), time() );
 }
 add_action( 'admin_enqueue_scripts', 'hcotp_admin_enqueue_scripts' );
@@ -208,11 +209,47 @@ add_action(
 		);
 		register_setting(
 			'hcotp_otp_settings_group',
+			'hcotp_email_otp_header_image_width',
+			array(
+				'type'              => 'integer',
+				'sanitize_callback' => 'absint',
+				'default'           => 200,
+			)
+		);
+		register_setting(
+			'hcotp_otp_settings_group',
+			'hcotp_email_otp_header_image_height',
+			array(
+				'type'              => 'integer',
+				'sanitize_callback' => 'absint',
+				'default'           => 0,
+			)
+		);
+		register_setting(
+			'hcotp_otp_settings_group',
 			'hcotp_email_otp_footer_image',
 			array(
 				'type'              => 'string',
 				'sanitize_callback' => 'esc_url_raw',
 				'default'           => '',
+			)
+		);
+		register_setting(
+			'hcotp_otp_settings_group',
+			'hcotp_email_otp_footer_image_width',
+			array(
+				'type'              => 'integer',
+				'sanitize_callback' => 'absint',
+				'default'           => 200,
+			)
+		);
+		register_setting(
+			'hcotp_otp_settings_group',
+			'hcotp_email_otp_footer_image_height',
+			array(
+				'type'              => 'integer',
+				'sanitize_callback' => 'absint',
+				'default'           => 0,
 			)
 		);
 		register_setting(
@@ -918,8 +955,128 @@ function hcotp_settings_page() {
 					$template_3_value = $template_3_default;
 				}
 				?>
+				<textarea id="hcotp-email-template-default-1" style="display:none;"><?php echo esc_textarea( $template_1_default ); ?></textarea>
+				<textarea id="hcotp-email-template-default-2" style="display:none;"><?php echo esc_textarea( $template_2_default ); ?></textarea>
+				<textarea id="hcotp-email-template-default-3" style="display:none;"><?php echo esc_textarea( $template_3_default ); ?></textarea>
 
 				<table class="form-table" role="presentation">
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Header Image', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<input type="text" class="regular-text"
+							name="hcotp_email_otp_header_image"
+							value="<?php echo esc_attr( get_option( 'hcotp_email_otp_header_image' ) ); ?>" />
+						<button class="button hcotp-upload"><?php esc_html_e( 'Upload', 'happy-coders-otp-login' ); ?></button>
+						<p class="description"><?php esc_html_e( 'Optional image URL for header.', 'happy-coders-otp-login' ); ?></p>
+						<p class="description">
+							<?php esc_html_e( 'Width/Height in pixels. Leave height blank (0) to auto scale.', 'happy-coders-otp-login' ); ?>
+						</p>
+						<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+							<label>
+								<?php esc_html_e( 'Width', 'happy-coders-otp-login' ); ?>
+								<input type="number" min="0" max="1000" step="1"
+									name="hcotp_email_otp_header_image_width"
+									value="<?php echo esc_attr( get_option( 'hcotp_email_otp_header_image_width', 200 ) ); ?>"
+									style="width:100px;">
+							</label>
+							<label>
+								<?php esc_html_e( 'Height', 'happy-coders-otp-login' ); ?>
+								<input type="number" min="0" max="1000" step="1"
+									name="hcotp_email_otp_header_image_height"
+									value="<?php echo esc_attr( get_option( 'hcotp_email_otp_header_image_height', 0 ) ); ?>"
+									style="width:100px;">
+							</label>
+						</div>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Footer Image', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<input type="text" class="regular-text"
+							name="hcotp_email_otp_footer_image"
+							value="<?php echo esc_attr( get_option( 'hcotp_email_otp_footer_image' ) ); ?>" />
+						<button class="button hcotp-upload"><?php esc_html_e( 'Upload', 'happy-coders-otp-login' ); ?></button>
+						<p class="description"><?php esc_html_e( 'Optional image URL for footer.', 'happy-coders-otp-login' ); ?></p>
+						<p class="description">
+							<?php esc_html_e( 'Width/Height in pixels. Leave height blank (0) to auto scale.', 'happy-coders-otp-login' ); ?>
+						</p>
+						<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+							<label>
+								<?php esc_html_e( 'Width', 'happy-coders-otp-login' ); ?>
+								<input type="number" min="0" max="1000" step="1"
+									name="hcotp_email_otp_footer_image_width"
+									value="<?php echo esc_attr( get_option( 'hcotp_email_otp_footer_image_width', 200 ) ); ?>"
+									style="width:100px;">
+							</label>
+							<label>
+								<?php esc_html_e( 'Height', 'happy-coders-otp-login' ); ?>
+								<input type="number" min="0" max="1000" step="1"
+									name="hcotp_email_otp_footer_image_height"
+									value="<?php echo esc_attr( get_option( 'hcotp_email_otp_footer_image_height', 0 ) ); ?>"
+									style="width:100px;">
+							</label>
+						</div>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Email Subject', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<input type="text" class="regular-text"
+							name="hcotp_email_otp_subject"
+							value="<?php echo esc_attr( get_option( 'hcotp_email_otp_subject' ) ); ?>" />
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Email Body', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<textarea rows="8" cols="60"
+							name="hcotp_email_otp_body"><?php echo esc_textarea( get_option( 'hcotp_email_otp_body' ) ); ?></textarea>
+						<p class="description"> <?php esc_html_e( 'This content will be injected into the selected template at {{content}}.', 'happy-coders-otp-login' ); ?><br>
+							<?php esc_html_e( 'Available variables:', 'happy-coders-otp-login' ); ?><br>
+							<code>{{otp}}</code>,
+							<code>{{expiry}}</code>,
+							<code>{{site_name}}</code>,							
+							<code>{{site_url}}</code>,
+							<code>{{user_mobile}}</code>,
+							<code>{{user_email}}</code>,
+							<code>{{date}}</code>
+						</p>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Template 1 HTML', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<textarea rows="10" cols="60" name="hcotp_email_template_html_1" data-default-template="<?php echo esc_attr( $template_1_default ); ?>"><?php echo esc_textarea( $template_1_value ); ?></textarea>
+						<p class="description"><?php esc_html_e( 'Use {{content}} to show the Email Body.', 'happy-coders-otp-login' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Add {{header_image}} or {{footer_image}} where you want the images to appear.', 'happy-coders-otp-login' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Use {{header_image_url}} or {{footer_image_url}} only if you want to place the image manually.', 'happy-coders-otp-login' ); ?></p>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Template 2 HTML', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<textarea rows="10" cols="60" name="hcotp_email_template_html_2" data-default-template="<?php echo esc_attr( $template_2_default ); ?>"><?php echo esc_textarea( $template_2_value ); ?></textarea>
+						<p class="description"><?php esc_html_e( 'Use {{content}} to show the Email Body.', 'happy-coders-otp-login' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Add {{header_image}} or {{footer_image}} where you want the images to appear.', 'happy-coders-otp-login' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Use {{header_image_url}} or {{footer_image_url}} only if you want to place the image manually.', 'happy-coders-otp-login' ); ?></p>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Template 3 HTML', 'happy-coders-otp-login' ); ?></th>
+					<td>
+						<textarea rows="10" cols="60" name="hcotp_email_template_html_3" data-default-template="<?php echo esc_attr( $template_3_default ); ?>"><?php echo esc_textarea( $template_3_value ); ?></textarea>
+						<p class="description"><?php esc_html_e( 'Use {{content}} to show the Email Body.', 'happy-coders-otp-login' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Add {{header_image}} or {{footer_image}} where you want the images to appear.', 'happy-coders-otp-login' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Use {{header_image_url}} or {{footer_image_url}} only if you want to place the image manually.', 'happy-coders-otp-login' ); ?></p>
+					</td>
+				</tr>
 
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Template Selection', 'happy-coders-otp-login' ); ?></th>
@@ -955,85 +1112,6 @@ function hcotp_settings_page() {
 							</div>
 							<iframe id="hcotp-email-preview-iframe" title="<?php esc_attr_e( 'Email Preview', 'happy-coders-otp-login' ); ?>" style="width:100%;height:500px;border:0;"></iframe>
 						</div>
-					</td>
-				</tr>
-
-				<tr>
-					<th scope="row"><?php esc_html_e( 'Header Image', 'happy-coders-otp-login' ); ?></th>
-					<td>
-						<input type="text" class="regular-text"
-							name="hcotp_email_otp_header_image"
-							value="<?php echo esc_attr( get_option( 'hcotp_email_otp_header_image' ) ); ?>" />
-						<button class="button hcotp-upload"><?php esc_html_e( 'Upload', 'happy-coders-otp-login' ); ?></button>
-						<p class="description"><?php esc_html_e( 'Optional image URL for header.', 'happy-coders-otp-login' ); ?></p>
-					</td>
-				</tr>
-
-				<tr>
-					<th scope="row"><?php esc_html_e( 'Footer Image', 'happy-coders-otp-login' ); ?></th>
-					<td>
-						<input type="text" class="regular-text"
-							name="hcotp_email_otp_footer_image"
-							value="<?php echo esc_attr( get_option( 'hcotp_email_otp_footer_image' ) ); ?>" />
-						<button class="button hcotp-upload"><?php esc_html_e( 'Upload', 'happy-coders-otp-login' ); ?></button>
-						<p class="description"><?php esc_html_e( 'Optional image URL for footer.', 'happy-coders-otp-login' ); ?></p>
-					</td>
-				</tr>
-
-				<tr>
-					<th scope="row"><?php esc_html_e( 'Email Subject', 'happy-coders-otp-login' ); ?></th>
-					<td>
-						<input type="text" class="regular-text"
-							name="hcotp_email_otp_subject"
-							value="<?php echo esc_attr( get_option( 'hcotp_email_otp_subject' ) ); ?>" />
-					</td>
-				</tr>
-
-				<tr>
-					<th scope="row"><?php esc_html_e( 'Email Body', 'happy-coders-otp-login' ); ?></th>
-					<td>
-						<textarea rows="8" cols="60"
-							name="hcotp_email_otp_body"><?php echo esc_textarea( get_option( 'hcotp_email_otp_body' ) ); ?></textarea>
-						<p class="description"> <?php esc_html_e( 'This content will be injected into the selected template at {{content}}.', 'happy-coders-otp-login' ); ?><br>
-							<?php esc_html_e( 'Available variables:', 'happy-coders-otp-login' ); ?><br>
-							<code>{{otp}}</code>,
-							<code>{{expiry}}</code>,
-							<code>{{site_name}}</code>,							
-							<code>{{site_url}}</code>,
-							<code>{{user_mobile}}</code>,
-							<code>{{user_email}}</code>,
-							<code>{{date}}</code>
-						</p>
-					</td>
-				</tr>
-
-				<tr>
-					<th scope="row"><?php esc_html_e( 'Template 1 HTML', 'happy-coders-otp-login' ); ?></th>
-					<td>
-						<textarea rows="10" cols="60" name="hcotp_email_template_html_1"><?php echo esc_textarea( $template_1_value ); ?></textarea>
-						<p class="description"><?php esc_html_e( 'Use {{content}} to show the Email Body.', 'happy-coders-otp-login' ); ?></p>
-						<p class="description"><?php esc_html_e( 'Add {{header_image}} or {{footer_image}} where you want the images to appear.', 'happy-coders-otp-login' ); ?></p>
-						<p class="description"><?php esc_html_e( 'Use {{header_image_url}} or {{footer_image_url}} only if you want to place the image manually.', 'happy-coders-otp-login' ); ?></p>
-					</td>
-				</tr>
-
-				<tr>
-					<th scope="row"><?php esc_html_e( 'Template 2 HTML', 'happy-coders-otp-login' ); ?></th>
-					<td>
-						<textarea rows="10" cols="60" name="hcotp_email_template_html_2"><?php echo esc_textarea( $template_2_value ); ?></textarea>
-						<p class="description"><?php esc_html_e( 'Use {{content}} to show the Email Body.', 'happy-coders-otp-login' ); ?></p>
-						<p class="description"><?php esc_html_e( 'Add {{header_image}} or {{footer_image}} where you want the images to appear.', 'happy-coders-otp-login' ); ?></p>
-						<p class="description"><?php esc_html_e( 'Use {{header_image_url}} or {{footer_image_url}} only if you want to place the image manually.', 'happy-coders-otp-login' ); ?></p>
-					</td>
-				</tr>
-
-				<tr>
-					<th scope="row"><?php esc_html_e( 'Template 3 HTML', 'happy-coders-otp-login' ); ?></th>
-					<td>
-						<textarea rows="10" cols="60" name="hcotp_email_template_html_3"><?php echo esc_textarea( $template_3_value ); ?></textarea>
-						<p class="description"><?php esc_html_e( 'Use {{content}} to show the Email Body.', 'happy-coders-otp-login' ); ?></p>
-						<p class="description"><?php esc_html_e( 'Add {{header_image}} or {{footer_image}} where you want the images to appear.', 'happy-coders-otp-login' ); ?></p>
-						<p class="description"><?php esc_html_e( 'Use {{header_image_url}} or {{footer_image_url}} only if you want to place the image manually.', 'happy-coders-otp-login' ); ?></p>
 					</td>
 				</tr>
 

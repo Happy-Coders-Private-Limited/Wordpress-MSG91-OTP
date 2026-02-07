@@ -96,19 +96,35 @@ function hcotp_replace_email_placeholders( $content, $data ) {
 function hcotp_get_email_image_html( $type ) {
 	$site_name = get_bloginfo( 'name' );
 	$option    = ( 'footer' === $type ) ? 'hcotp_email_otp_footer_image' : 'hcotp_email_otp_header_image';
+	$width_key = ( 'footer' === $type ) ? 'hcotp_email_otp_footer_image_width' : 'hcotp_email_otp_header_image_width';
+	$height_key = ( 'footer' === $type ) ? 'hcotp_email_otp_footer_image_height' : 'hcotp_email_otp_header_image_height';
 	$image_url = esc_url( get_option( $option, '' ) );
+	$width     = absint( get_option( $width_key, 200 ) );
+	$height    = absint( get_option( $height_key, 0 ) );
 
 	if ( empty( $image_url ) ) {
 		return '';
 	}
 
+	$style_parts = array( 'height:auto', 'border:0', 'outline:none', 'text-decoration:none' );
+	if ( $width > 0 ) {
+		$style_parts[] = 'width:' . $width . 'px';
+		$style_parts[] = 'max-width:' . $width . 'px';
+	} else {
+		$style_parts[] = 'max-width:200px';
+	}
+	if ( $height > 0 ) {
+		$style_parts[] = 'height:' . $height . 'px';
+	}
+
 	$opacity = ( 'footer' === $type ) ? 'opacity:0.85;' : '';
 
 	return sprintf(
-		'<tr><td style="padding:%s;text-align:center;"><img src="%s" alt="%s" style="max-width:200px;height:auto;border:0;outline:none;text-decoration:none;%s"></td></tr>',
+		'<tr><td style="padding:%s;text-align:center;"><img src="%s" alt="%s" style="%s;%s"></td></tr>',
 		( 'footer' === $type ) ? '0 30px 20px' : '20px 30px 0',
 		esc_url( $image_url ),
 		esc_attr( $site_name ),
+		esc_attr( implode( ';', $style_parts ) ),
 		$opacity
 	);
 }
