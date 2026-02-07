@@ -567,11 +567,13 @@ function hcotp_msg91_otp_form( $options, $is_popup = false ) {
 			<input type="hidden" id="otpprocess" value="" />
 
 			<div class="hcotp-mobile-login">
+				<div style="display:flex;justify-content:center;">
 				<?php if ( ! empty( $options['top_image'] ) ) : ?>
 					<div style="text-align:center;">
 						<img src="<?php echo esc_url( $options['top_image'] ); ?>" class="popup-image" alt="Send OTP" />
 					</div>
 				<?php endif; ?>
+				</div>
 
 				<div style="text-align:center;">
 					<label class="lable-style" style="color:<?php echo esc_attr( $options['send_otp_label_color'] ); ?>">
@@ -601,11 +603,13 @@ function hcotp_msg91_otp_form( $options, $is_popup = false ) {
 			</div>
 
 			<div class="hcotp-email-login" style="display:none;">
+				<div style="display:flex;justify-content:center;">
 				<?php if ( ! empty( $options['email_top_image'] ) ) : ?>
 					<div style="text-align:center;">
 						<img src="<?php echo esc_url( $options['email_top_image'] ); ?>" class="popup-image" alt="Send OTP" />
 					</div>
 				<?php endif; ?>
+				</div>
 
 				<div style="text-align:center;">
 					<label class="lable-style" style="color:<?php echo esc_attr( $options['email_send_otp_label_color'] ); ?>">
@@ -630,11 +634,13 @@ function hcotp_msg91_otp_form( $options, $is_popup = false ) {
 
 		<div id="otp_input_wrap" style="display:none;">
 			<div class="hcotp-mobile-login">
+				<div style="display:flex;justify-content:center;">
 				<?php if ( ! empty( $options['top_verify_image'] ) ) : ?>
 					<div style="text-align:center;">
 						<img src="<?php echo esc_url( $options['top_verify_image'] ); ?>" class="popup-image" />
 					</div>
 				<?php endif; ?>
+				</div>
 
 				<div style="text-align:center;">
 					<label class="lable-style" style="color:<?php echo esc_attr( $options['verify_otp_lable_color'] ); ?>">
@@ -650,11 +656,13 @@ function hcotp_msg91_otp_form( $options, $is_popup = false ) {
 			</div>
 
 			<div class="hcotp-email-login" style="display:none;">
+				<div style="display:flex;justify-content:center;">
 				<?php if ( ! empty( $options['email_top_verify_image'] ) ) : ?>
 					<div style="text-align:center;">
 						<img src="<?php echo esc_url( $options['email_top_verify_image'] ); ?>" class="popup-image" />
 					</div>
 				<?php endif; ?>
+				</div>
 
 				<div style="text-align:center;">
 					<label class="lable-style" style="color:<?php echo esc_attr( $options['email_verify_otp_lable_color'] ); ?>">
