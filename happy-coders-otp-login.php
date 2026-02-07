@@ -698,7 +698,6 @@ function hcotp_msg91_otp_form( $options, $is_popup = false ) {
 				</h4>
 
 				<div class="row" id="otp_method_buttons">
-					<a id="msg91_send_otp" class="send-button email-button" disabled><?php esc_html_e( 'Resend OTP', 'happy-coders-otp-login' ); ?></a>
 					<a id="msg91_send_otp" class="send-button sms-button" disabled>
 						<?php esc_html_e( 'SMS', 'happy-coders-otp-login' ); ?>
 					</a>
