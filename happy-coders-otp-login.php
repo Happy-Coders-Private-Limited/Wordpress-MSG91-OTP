@@ -138,6 +138,8 @@ register_deactivation_hook( __FILE__, 'hcotp_deactivate_plugin' );
  * @return array The modified links with the settings link added.
  */
 function hcotp_plugin_action_links( $links ) {
+	$site_url_link = '<a href="' . esc_url( 'https://www.happycoders.in' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Visit Us', 'happy-coders-otp-login' ) . '</a>';
+	array_unshift( $links, $site_url_link );
 	$settings_link = '<a href="' . esc_url( admin_url( 'admin.php?page=msg91-otp-settings' ) ) . '">' . esc_html__( 'Settings', 'happy-coders-otp-login' ) . '</a>';
 	array_unshift( $links, $settings_link );
 	return $links;
