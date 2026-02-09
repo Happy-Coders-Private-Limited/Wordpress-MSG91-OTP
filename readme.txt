@@ -1,10 +1,10 @@
 === Happy Coders OTP Login for WooCommerce ===
 * Contributors: happycoders, kombiahrk, muthupandi2002, imgopi2002, sureshkumar22
-* Tags: otp, woocommerce, msg91, passwordless, whatsapp otp, email otp
+* Tags: otp, woocommerce, msg91, whatsapp otp, email otp
 * Requires at least: 5.0
 * Tested up to: 6.9
 * Requires PHP: 7.4
-* Stable tag: 2.4
+* Stable tag: 2.5
 * License: GPLv2 or later
 * License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
