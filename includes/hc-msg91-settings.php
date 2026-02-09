@@ -762,7 +762,10 @@ function hcotp_settings_page() {
 
 				<tr valign="top">
 					<th scope="row"><?php esc_html_e( 'User OTP Limit per day', 'happy-coders-otp-login' ); ?></th>
-					<td><input type="number" name="hcotp_email_perday_otplimit" value="<?php echo esc_attr( get_option( 'hcotp_email_perday_otplimit' ) ); ?>" size="30" /></td>
+					<td>
+						<input type="number" name="hcotp_email_perday_otplimit" value="<?php echo esc_attr( get_option( 'hcotp_email_perday_otplimit' ) ); ?>" size="30" />
+						<p class="description"><?php esc_html_e( 'Set to 0 for unlimited OTP requests.', 'happy-coders-otp-login' ); ?></p>
+					</td>
 				</tr>
 
 				<tr valign="top">
