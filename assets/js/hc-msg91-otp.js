@@ -559,7 +559,7 @@ jQuery(document).on('change', 'input[name="hcotp_login_type"]', function () {
 	if (type === 'email') {
         jQuery('.hcotp-mobile-login').hide();
 		jQuery('.hcotp-email-login').show();
-        jQuery('#msg91_send_otp').text('Send Email OTP');
+        jQuery('#hcotp_send_email_otp').text('Send Email OTP');
         jQuery('#otp_method_buttons .sms-button, #otp_method_buttons .whatsapp-button').hide();
         jQuery('#otp_method_buttons .email-button').show();
 		buildOtpInputs(
