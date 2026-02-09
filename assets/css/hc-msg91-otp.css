@@ -21,7 +21,7 @@
 .otp-inputs {
     display: inline-flex;
     justify-content: center;
-    gap: 15px;
+    gap: 5px;
     width: 100%;
 }
 .otp-field {
@@ -33,7 +33,7 @@
     border: 1px solid #ccc;
     border-radius: 4px;
 }
-#msg91_send_otp, #msg91_verify_otp {
+#msg91_send_otp, #hcotp_send_email_otp, #msg91_verify_otp {
     padding: 10px 15px;
     font-size: 16px;
     margin-top: 10px;
@@ -44,7 +44,7 @@
     cursor: pointer;
     width: 100%;
 }
-#msg91_send_otp:disabled, #msg91_verify_otp:disabled {
+#msg91_send_otp:disabled, #hcotp_send_email_otp:disabled, #msg91_verify_otp:disabled {
     background-color: #ccc;
     cursor: not-allowed;
 }
@@ -56,6 +56,9 @@
 .otp-verify-status{
     padding: 10px;
     text-align: center;
+}
+.otp-verify-button {
+    margin-top: 15px;
 }
 #otp-form-wrap {
     margin: 0 auto;
@@ -107,7 +110,6 @@
     background: none;
     color: #00000094;
     border: none;
-    cursor: not-allowed;
     margin-top: 10px;
 }
 #hcotp_msg91_selected_countries option:checked {
@@ -133,16 +135,19 @@
     border-right: none;
     background-color: #fff;
 }
-#msg91_mobile {
+#msg91_mobile, #hcotp_email {
     padding: 10px 10px 10px 100px; 
     font-size: 18px;
     border: 1px solid #ccc;
     border-radius: 4px;
     width: 100%;
     box-sizing: border-box;
- height: 45px; 
- border-top-left-radius: 5px;
+    height: 45px; 
+    border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
+}
+#hcotp_email {
+    padding-left: 10px;
 }
 .input-wrapper select, .input-wrapper input {
     height: 45px;
@@ -225,6 +230,16 @@ width: 100%;
 .send-button {
         background: white !important;
     color: black !important;
+}
+
+.hcotp-login-method {
+	margin-bottom: 15px;
+	text-align: center;
+}
+
+.hcotp-email-verified{
+    color: green;
+    font-size: 12px;
 }
 
 

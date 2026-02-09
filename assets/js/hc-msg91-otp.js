@@ -1,9 +1,75 @@
+function updateOtpMethodButtons($container, otpprocess) {
+    const $buttons = $container.find('#otp_method_buttons');
+    const $emailBtn = $buttons.find('.email-button');
+    const $smsBtn = $buttons.find('.sms-button');
+    const $whatsappBtn = $buttons.find('.whatsapp-button');
+
+    if (otpprocess === 'email') {
+        $emailBtn.show();
+        $smsBtn.hide();
+        $whatsappBtn.hide();
+        return;
+    }
+
+    if (otpprocess === 'sms') {
+        $emailBtn.hide();
+        $smsBtn.show();
+        $whatsappBtn.show();
+        return;
+    }
+
+    if (otpprocess === 'whatsapp') {
+        $emailBtn.hide();
+        $smsBtn.show();
+        $whatsappBtn.show();
+        return;
+    }
+
+    $emailBtn.show();
+    $smsBtn.show();
+    $whatsappBtn.show();
+}
+
 jQuery(document).ready(function ($) {
           
     $(document).on('click', '#msg91_send_otp', function () {
 
         let $button = $(this); 
-        let $container = $button.closest('#otp-form-wrap'); 
+        let $container = $button.closest('#otp-form-wrap, .edit-account'); 
+        const otpprocess = $container.find('#otpprocess').val();
+
+        $button.prop('disabled', true).text('Sending...');
+
+        // EMAIL RESEND
+        if (otpprocess === 'email') {
+
+            const email = $container.find('#hcotp_email, #account_email').val()?.trim();
+
+            if (!email) {
+                $container.find('#otp-send-status')
+                    .html('<span class="woocommerce-error">Invalid email.</span>');
+                $button.prop('disabled', false);
+                return;
+            }
+
+            $.post(hcotp_params.ajax_url, {
+                action: 'hcotp_send_email_otp',
+                email: email,
+                security_nonce: hcotp_params.nonce
+            }, function (res) {
+
+                if (res.success) {
+                    updateOtpMethodButtons($container, 'email');
+                    startOTPTimer($container);
+                } else {
+                    $container.find('#otp-send-status')
+                        .html('<span class="woocommerce-error">' + res.data.message + '</span>');
+                    $button.prop('disabled', false);
+                }
+            });
+
+            return;
+        }
     
         let mobile = $container.find('#msg91_mobile').val().trim();
         let countryCode = $container.find('#msg91_country_code').val();
@@ -14,10 +80,7 @@ jQuery(document).ready(function ($) {
             return;
         }
     
-
         let mobileWithCode = countryCode + mobile;
-    
-        $button.prop('disabled', true).text('Sending...');
 
         $.post(hcotp_params.ajax_url, {
             action: 'hcotp_send_otp_ajax',
@@ -26,17 +89,19 @@ jQuery(document).ready(function ($) {
              security_nonce: hcotp_params.nonce 
             
         }, function (res) {
-             $container.find('.sms-button').prop('disabled', false).text('SMS');
-               $container.find('.whatsapp-button').prop('disabled', false).text('Whatsapp');
-           
-             console.log('OTP sent successfully, starting timer...');
+            $container.find('.sms-button').prop('disabled', false).text('SMS');
+            $container.find('.whatsapp-button').prop('disabled', false).text('Whatsapp');
             if (res) {
-                 console.log('OTP sent');
                 if (res.success && res.success === true) {
-                     $container.find('#otpprocess').val('sms');
+                    $container.find('#otpprocess').val('sms');
+                    buildOtpInputs(
+                        $container,
+                        hcotp_params.sms_otp_length || 4
+                    );
                     $container.find('#send_otp_section').hide();
                     $container.find('#otp_input_wrap').show();
-                    startOTPTimer($container); 
+                    updateOtpMethodButtons($container, 'sms');
+                    startOTPTimer($container);
                 } else {
                     $container.find('#otp-send-status').html('<span style="color:red;">' + res.data.message + '</span>');
                     $container.find('#otp-verify-status').html('<span style="color:red;">' + res.data.message + '</span>');
@@ -78,17 +143,20 @@ jQuery(document).ready(function ($) {
         }, function (res) {
               $container.find('.sms-button').prop('disabled', false).text('SMS');
               $container.find('.whatsapp-button').prop('disabled', false).text('Whatsapp');
-             console.log('OTP sent successfully, starting timer...');
             if (res) {
-                 console.log('OTP sent');
                 if (res.success && res.success === true) {
-                      $container.find('#otpprocess').val('whatsapp');
+                    $container.find('#otpprocess').val('whatsapp');
+                    buildOtpInputs(
+                        $container,
+                        hcotp_params.sms_otp_length || 4
+                    );
                     $container.find('#send_otp_section').hide();
                     $container.find('#otp_input_wrap').show();
+                    updateOtpMethodButtons($container, 'whatsapp');
                     startOTPTimer($container); 
                 } else {
                     $container.find('#otp-send-status').html('<span style="color:red;">' + res.data.message + '</span>');
-                     $container.find('#otp-verify-status').html('<span style="color:red;">' + res.data.message + '</span>');
+                    $container.find('#otp-verify-status').html('<span style="color:red;">' + res.data.message + '</span>');
                     $button.prop('disabled', false).text('Send OTP');
                     
                 }
@@ -101,13 +169,43 @@ jQuery(document).ready(function ($) {
         });
     });
     
-    $('.otp-field').on('input', function () {
-        let currentInput = $(this);
-        if (currentInput.val().length === 1) {
-            let nextInput = currentInput.next('.otp-field');
-            if (nextInput.length) {
-                nextInput.focus();
+    $(document).on('paste', '#otp_input_fields .otp-field', function (e) {
+        e.preventDefault();
+
+        const pasteData = (e.originalEvent.clipboardData || window.clipboardData)
+            .getData('text')
+            .replace(/\D/g, '');
+
+        if (!pasteData) return;
+
+        const $fields = $(this).closest('#otp_input_fields').find('.otp-field');
+        const startIndex = $fields.index(this);
+
+        pasteData.split('').forEach(function (digit, i) {
+            const $field = $fields.eq(startIndex + i);
+            if ($field.length) {
+                $field.val(digit);
             }
+        });
+
+        const focusIndex = Math.min(startIndex + pasteData.length, $fields.length) - 1;
+        $fields.eq(focusIndex).focus();
+    });
+
+    // TYPING SUPPORT
+    $(document).on('input', '#otp_input_fields .otp-field', function () {
+        const $this = $(this);
+        $this.val($this.val().replace(/\D/g, ''));
+
+        if ($this.val().length === 1) {
+            $this.next('.otp-field').focus();
+        }
+    });
+
+    // BACKSPACE SUPPORT
+    $(document).on('keydown', '#otp_input_fields .otp-field', function (e) {
+        if (e.key === 'Backspace' && !$(this).val()) {
+            $(this).prev('.otp-field').focus();
         }
     });
 
@@ -120,11 +218,10 @@ jQuery(document).ready(function ($) {
         let mobileWithCode = countryCode + mobile;
         
         let otpLength = $container.find('.otp-field').length;
-        console.log(otpLength);
     
         let otp = '';
         
-         $container.find('.otp-field').each(function () {
+        $container.find('.otp-field').each(function () {
             otp += $(this).val().trim();
         });
 
@@ -143,18 +240,25 @@ jQuery(document).ready(function ($) {
         $button.prop('disabled', true).text('Verifying...');
         let otpprocess = $container.find('#otpprocess').val(); 
     
-        $.post(hcotp_params.ajax_url, {
+       const payload = {
             action: 'hcotp_verify_otp_ajax',
-            mobile: mobileWithCode,
-            otpprocess : otpprocess,
+            otpprocess: otpprocess,
             otp: otp,
-              security_nonce: hcotp_params.nonce 
-        }, function (res) {
+            security_nonce: hcotp_params.nonce
+        };
+
+        if (otpprocess === 'email') {
+            payload.email = $container.find('#hcotp_email').val().trim();
+        } else {
+            payload.mobile = mobileWithCode;
+        }
+
+        $.post(hcotp_params.ajax_url, payload, function (res) {
               
             if (res && res.success) {
                 $container.find('#otp-verify-status').html('<span style="color:green;">OTP Verified!</span>');
                     // Hide the SMS & WhatsApp buttons
-            otpButtons.hide();
+                otpButtons.hide();
 
                 let redirectUrl = hcotp_params.redirect_page;
     
@@ -194,13 +298,119 @@ jQuery(document).ready(function ($) {
                 otpButtons.show();
         });
     });
+
+    $(document).on('click', '#hcotp_verify_email_otp', function () {
+
+        let $button = $(this);
+
+        // Scope only to account OTP wrapper
+        let $container = $button.closest('#otp_input_wrap');
+
+        let otpLength = $container.find('.otp-field').length;
+        let otp = '';
+
+        $container.find('.otp-field').each(function () {
+            otp += $(this).val().trim();
+        });
+
+        let msg = hcotp_params.verifyotp_validation_msg || 'Please enter the OTP.';
+
+        if (otp.length !== otpLength) {
+            $container.find('#otp-verify-status')
+                .html('<span style="color:red;font-size:14px;">' + msg + '</span>');
+            return;
+        }
+
+        $container.find('#otp-verify-status').html('Verifying...');
+        $button.prop('disabled', true).text('Verifying...');
+        const email = $('#account_email').val().trim();
+        const payload = {
+            action: 'hcotp_verify_otp_ajax',
+            otpprocess: 'email',
+            otp: otp,
+            email: email, // account email field
+            security_nonce: hcotp_params.nonce
+        };
+
+        $.post(hcotp_params.ajax_url, payload, function (res) {
+
+            if (res && res.success) {
+
+                $container.find('#otp-verify-status')
+                    .html('<span style="color:green;">Email verified successfully!</span>');
+
+                // Hide OTP UI after success
+                setTimeout(() => {
+                    $container.slideUp();
+                }, 800);
+
+                // Reload account page to unlock features
+                setTimeout(() => {
+                    const url = new URL(window.location.href);
+                    url.searchParams.delete('hcotp_email_required');
+                    window.location.replace(url.toString());
+                }, 1200);
+
+            } else {
+
+                $container.find('#otp-verify-status')
+                    .html('<span style="color:red;">Invalid OTP.</span>');
+            }
+
+            $button.prop('disabled', false).text('Verify OTP');
+
+        }).fail(function () {
+
+            $container.find('#otp-verify-status')
+                .html('<span style="color:red;">Server error. Try again.</span>');
+
+            $button.prop('disabled', false).text('Verify OTP');
+        });
+
+    });
     
     $(document).on('click', '#resend_otp', function () {
         let $button = $(this);
         let $container = $button.closest('#otp-form-wrap');
+        const otpprocess = $container.find('#otpprocess').val();
+        $container.find('#otp-verify-status').html('');
+
+        if (otpprocess === 'email') {
+            const email = $container.find('#hcotp_email, #account_email').val()?.trim();
+
+            if (!email) {
+                $container.find('#otp-verify-status')
+                    .html('<span style="color:red;">' + hcotp_params.enter_valid_email + '</span>');
+                $button.prop('disabled', false).text('Resend OTP');
+                return;
+            }
+
+            $button.prop('disabled', true).text('Sending...');
+
+            $.post(hcotp_params.ajax_url, {
+                action: 'hcotp_send_email_otp',
+                email: email,
+                security_nonce: hcotp_params.nonce
+            }, function (res) {
+                if (res && res.success) {
+                    updateOtpMethodButtons($container, 'email');
+                    startOTPTimer($container);
+                } else {
+                    $container.find('#otp-verify-status')
+                        .html('<span style="color:red;">' + res.data.message + '</span>');
+                    $button.prop('disabled', false).text('Resend OTP');
+                }
+            }).fail(function () {
+                $container.find('#otp-verify-status')
+                    .html('<span style="color:red;">' + hcotp_params.server_error_text + '</span>');
+                $button.prop('disabled', false).text('Resend OTP');
+            });
+
+            return;
+        }
     
         let mobile = $container.find('#msg91_mobile').val().trim();
-         let countryCode = $container.find('#msg91_country_code').val();
+        let countryCode = $container.find('#msg91_country_code').val();
     
         let msg = hcotp_params.sendotp_validation_msg || 'Please enter a valid mobile number (between 5 and 12 digits).';
         if (!mobile || mobile.length < 5 || mobile.length > 12) {
@@ -232,27 +442,31 @@ jQuery(document).ready(function ($) {
         let timer = hcotp_params.resend_timer || 30;
         const resendBtn = $container.find('#resend_otp');
 
-         const otpButtons = $container.find('#otp_method_buttons');
+        const otpButtons = $container.find('#otp_method_buttons');
 
-            // Hide the SMS & WhatsApp buttons
-            otpButtons.hide();
+        // Hide the SMS & WhatsApp buttons
+        otpButtons.hide();
             
         resendBtn.prop('disabled', true).text('Resend OTP (' + timer + 's)');
+         $container.find('#otp-verify-status').html('');
     
         const interval = setInterval(() => {
             timer--;
             resendBtn.text('Resend OTP (' + timer + 's)');
             if (timer <= 0) {
                 clearInterval(interval);
-                resendBtn.prop('disabled', true)
+                resendBtn.prop('disabled', false)
                     .html("Didn't receive an OTP?<strong> Resend OTP</strong>")
+                     $container.find('#otp-verify-status').html('');
                     
                      otpButtons.show();
+                updateOtpMethodButtons($container, $container.find('#otpprocess').val());
             }
         }, 1000);
     }
     
 });
+
 document.addEventListener('DOMContentLoaded', function () {
     const radios = document.querySelectorAll('input[name="msg91_login_form_type"]');
     const shortcodePreview = document.getElementById('msg91-shortcode-preview');
@@ -264,21 +478,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 });
-
-document.querySelectorAll('.otp-field').forEach((input, index, inputs) => {
-    input.addEventListener('input', (event) => {
-        if (input.value.length === 1 && index < inputs.length - 1) {
-            inputs[index + 1].focus();
-        }
-    });
-    input.addEventListener('keydown', (event) => {
-        if (event.key === 'Backspace' && input.value.length === 0 && index > 0) {
-            inputs[index - 1].focus();
-        }
-    });
-});
-
-
 
 document.addEventListener('DOMContentLoaded', function () {
     const countryCodeSelect = document.getElementById('msg91_country_code');
@@ -319,7 +518,6 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 });
 
-
 jQuery(document).ready(function($) {
 	$('#hcotp-settings-wrap .nav-tab-wrapper a.nav-tab').on('click', function(e){
 				e.preventDefault();
@@ -333,6 +531,7 @@ jQuery(document).ready(function($) {
 				$('#hcotp_msg91_active_tab_input').val(tab_id);
 	});
 });
+
 jQuery(document).ready(function($) {
     const $checkbox = $('#hcotp_whatsapp_auth_checkbox');
     const $inputsDiv = $('#hcotp_whatsapp_auth_inputs');
@@ -340,4 +539,122 @@ jQuery(document).ready(function($) {
     $checkbox.on('change', function() {
         $inputsDiv.toggle(this.checked);
     });
+});
+
+function buildOtpInputs($container, length) {
+    const $wrap = $container.find('#otp_input_fields');
+    $wrap.empty();
+
+    for (let i = 0; i < length; i++) {
+        $wrap.append(
+            '<input type="text" maxlength="1" class="otp-field" inputmode="numeric" />'
+        );
+    }
+}
+
+jQuery(document).on('change', 'input[name="hcotp_login_type"]', function () {
+	const type = jQuery(this).val();
+    const $container = jQuery('#otp-form-wrap');
+
+    // Reset to "send OTP" step when switching login type.
+    $container.find('#otp_input_wrap').hide();
+    $container.find('#send_otp_section').show();
+    $container.find('#otp-send-status, #otp-verify-status').html('');
+    $container.find('#otpprocess').val('');
+    $container.find('#msg91_send_otp').prop('disabled', false).text('Send OTP');
+    $container.find('#hcotp_send_email_otp').prop('disabled', false).text('Send Email OTP');
+
+	if (type === 'email') {
+        jQuery('.hcotp-mobile-login').hide();
+		jQuery('.hcotp-email-login').show();
+        jQuery('#hcotp_send_email_otp').text('Send Email OTP');
+        jQuery('#otp_method_buttons .sms-button, #otp_method_buttons .whatsapp-button').hide();
+        jQuery('#otp_method_buttons .email-button').show();
+		buildOtpInputs(
+			$container,
+			hcotp_params.email_otp_length || 6
+		);
+	} else {
+        jQuery('.hcotp-email-login').hide();
+		jQuery('.hcotp-mobile-login').show();
+        jQuery('#otp_method_buttons .email-button').hide();
+        jQuery('#otp_method_buttons .sms-button, #otp_method_buttons .whatsapp-button').show();
+		buildOtpInputs(
+			$container,
+			hcotp_params.sms_otp_length || 4
+		);
+	}
+});
+
+jQuery(document).on('click', '#hcotp_send_email_otp', function () {
+    
+	const $button = jQuery(this);
+	const $container = $button.closest('#otp-form-wrap, .edit-account');
+    $button.prop('disabled', true).text('Sending...');
+	const $emailInput = $container.find('#hcotp_email, #account_email');
+    const email = $emailInput.val() ? $emailInput.val().trim() : '';
+
+    if($container.hasClass('edit-account')) {
+        $container.find('#otp_input_wrap').slideUp();
+    }
+    if (!email) {
+		$container.find('#otp-send-status')
+			.html('<span style="color:red;">' + hcotp_params.enter_valid_email + '</span>');
+		$button.prop('disabled', false).text('Send Email OTP');
+		return;
+	}
+
+    // Email format validation
+    if (email.indexOf('@example.com') > -1) {
+        $container.find('#otp-send-status')
+            .html('<span style="color:red;">' + hcotp_params.use_valid_email + '</span>');
+        $button.prop('disabled', false).text('Send Email OTP');
+        return;
+    }
+    const emailRegex = new RegExp(/^[a-zA-Z0-9]([a-zA-Z0-9-_.]{1,})?@[a-zA-Z0-9]([a-zA-Z0-9-]{1,})?\.[a-zA-Z]{2,}$/);
+    if (!emailRegex.test(email)) {
+        $container.find('#otp-send-status')
+            .html('<span style="color:red;">' + hcotp_params.invalid_email_format + '</span>');
+        $button.prop('disabled', false).text('Send Email OTP');
+		return;
+	}
+
+	jQuery.post(hcotp_params.ajax_url, {
+		action: 'hcotp_send_email_otp',
+		email: email,
+		security_nonce: hcotp_params.nonce
+	}, function (res) {
+		if (res.success) {
+			$container.find('#otpprocess').val('email');
+            buildOtpInputs(
+                $container,
+                hcotp_params.email_otp_length || 6
+            );
+            $container.find('#send_otp_section').slideUp();
+			$container.find('#otp_input_wrap').slideDown();
+            updateOtpMethodButtons($container, 'email');
+			$button.prop('disabled', false).text('Send Email OTP');
+		} else {
+			$container.find('#otp-send-status')
+				.html('<span style="color:red;">' + res.data.message + '</span>');
+			$button.prop('disabled', false).text('Send Email OTP');
+		}
+	}).fail(function () {
+		$container.find('#otp-send-status')
+			.html('<span style="color:red;">' + hcotp_params.server_error_text + '</span>');
+		$button.prop('disabled', false).text('Send Email OTP');
+	});
+});
+
+jQuery(document).ready(function () {
+	if (hcotp_params.email_otp_enabled && hcotp_params.user_requires_email) {
+        console.log(hcotp_params);
+		jQuery('.hcotp-mobile-login').hide();
+		jQuery('.hcotp-login-method').hide();
+		jQuery('.hcotp-email-login').show();
+
+		// jQuery('#otp-send-status').html(
+		// 	'<span style="color:#d63638;">Please add and verify your email to continue.</span>'
+		// );
+	}
 });
