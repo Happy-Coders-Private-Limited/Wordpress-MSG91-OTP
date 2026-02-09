@@ -785,13 +785,12 @@ function hcotp_send_otp_ajax() {
 
 		$otp_length = (int) get_option( 'hcotp_msg91_otp_length', 4 );
 
-		// $url = "https://control.msg91.com/api/v5/otp?authkey=$authkey&otp_expiry=5&template_id=$template_id&mobile=$mobile&realTimeResponse&otp_length=$otp_length";
+		$url = "https://control.msg91.com/api/v5/otp?authkey=$authkey&otp_expiry=5&template_id=$template_id&mobile=$mobile&realTimeResponse&otp_length=$otp_length";
 
-		// $response = wp_remote_get( $url );
-		// $body     = wp_remote_retrieve_body( $response );
-		// $result   = json_decode( $body, true );
-		// if ( isset( $result['type'] ) && 'success' === $result['type'] ) {
-		if ( true ) {
+		$response = wp_remote_get( $url );
+		$body     = wp_remote_retrieve_body( $response );
+		$result   = json_decode( $body, true );
+		if ( isset( $result['type'] ) && 'success' === $result['type'] ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 			$wpdb->query(
 				$wpdb->prepare(
@@ -1025,14 +1024,13 @@ function hcotp_verify_otp_ajax() {
 	}
 
 	if ( 'sms' === $otpprocess ) {
-		// $url = 'https://api.msg91.com/api/verifyRequestOTP.php?authkey=' . get_option( 'hcotp_msg91_auth_key' ) . "&mobile={$mobile}&otp={$otp}";
+		$url = 'https://api.msg91.com/api/verifyRequestOTP.php?authkey=' . get_option( 'hcotp_msg91_auth_key' ) . "&mobile={$mobile}&otp={$otp}";
 
-		// $response = wp_remote_get( $url );
-		// $body     = wp_remote_retrieve_body( $response );
-		// $result   = json_decode( $body, true );
+		$response = wp_remote_get( $url );
+		$body     = wp_remote_retrieve_body( $response );
+		$result   = json_decode( $body, true );
 
-		// if ( isset( $result['type'] ) && 'success' === $result['type'] ) {
-		if ( true ) {
+		if ( isset( $result['type'] ) && 'success' === $result['type'] ) {
 			$user = get_user_by( 'login', $mobile );
 
 			$created = strtotime( $user->user_registered );
