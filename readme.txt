@@ -4,7 +4,7 @@
 * Requires at least: 5.0
 * Tested up to: 6.9
 * Requires PHP: 7.4
-* Stable tag: 2.5
+* Stable tag: 2.6
 * License: GPLv2 or later
 * License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -127,6 +127,9 @@ Users must first register using Mobile OTP. On the first login after registratio
 
 == Changelog ==
 
+= 2.6 =
+* Tweak: Added default Email OTP subject/body in settings when fields are empty.
+
 = 2.4 =
 * Feature: Added Email OTP login option.
 * Tweak: Updated plugin version to 2.4.
@@ -172,6 +175,9 @@ Users must first register using Mobile OTP. On the first login after registratio
 * Initial release with OTP login features (full-screen and popup) and core MSG91 integration.
 
 == Upgrade Notice ==
+
+= 2.6 =
+Adds default Email OTP subject/body in settings when fields are empty.
 
 = 2.4 =
 This version adds Email OTP login. Review your OTP settings after updating.

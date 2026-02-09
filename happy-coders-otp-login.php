@@ -3,7 +3,7 @@
  * Plugin Name: Happy Coders OTP Login for WooCommerce
  * Text Domain: happy-coders-otp-login
  * Description: Seamless OTP-based login for WordPress/WooCommerce using MSG91. Supports mobile and email OTP login, and automatic SMS alerts for user registration, order placed, order shipped, order completed, and cart reminder via cronjob.
- * Version: 2.5
+ * Version: 2.6
  * Author: Happy Coders
  * Author URI: https://www.happycoders.in/
  * License: GPL-2.0-or-later
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'HCOTP_PLUGIN_FILE', __FILE__ );
 define( 'HCOTP_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HCOTP_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-define( 'HCOTP_VERSION', '2.5' );
+define( 'HCOTP_VERSION', '2.6' );
 
 require_once HCOTP_PLUGIN_DIR . 'includes/hc-msg91-settings.php';
 require_once HCOTP_PLUGIN_DIR . 'includes/hc-countries.php';
@@ -79,7 +79,7 @@ function hcotp_activate_plugin() {
 			'happy-coders-otp-login'
 		),
 		'hcotp_email_otp_body'                 => esc_html__(
-			"Hello,\n\nYour One-Time Password (OTP) for logging in to {{site_name}} is:\n\nOTP: {{otp}}\n\nThis OTP is valid for {{expiry}} minutes.\n\nIf you did not request this OTP, please ignore this email.\n\nRegards,\n{{site_name}}\n{{site_url}}",
+			"Hello,\n\nYour one-time password (OTP) for logging in to {{site_name}} is:\n\nOTP: {{otp}}\n\nThis OTP is valid for {{expiry}} minutes.\nRequested on {{date}}.\n\nIf you did not request this, please ignore this email.\n\nRegards,\n{{site_name}}\n{{site_url}}",
 			'happy-coders-otp-login'
 		),
 	);

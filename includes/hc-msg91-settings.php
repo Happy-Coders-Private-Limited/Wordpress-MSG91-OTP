@@ -1050,17 +1050,32 @@ function hcotp_settings_page() {
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Email Subject', 'happy-coders-otp-login' ); ?></th>
 					<td>
+						<?php
+						$email_subject = get_option( 'hcotp_email_otp_subject' );
+						if ( '' === $email_subject ) {
+							$email_subject = esc_html__( 'Your {{site_name}} Login OTP – {{otp}}', 'happy-coders-otp-login' );
+						}
+						?>
 						<input type="text" class="regular-text"
 							name="hcotp_email_otp_subject"
-							value="<?php echo esc_attr( get_option( 'hcotp_email_otp_subject' ) ); ?>" />
+							value="<?php echo esc_attr( $email_subject ); ?>" />
 					</td>
 				</tr>
 
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Email Body', 'happy-coders-otp-login' ); ?></th>
 					<td>
+						<?php
+						$email_body = get_option( 'hcotp_email_otp_body' );
+						if ( '' === $email_body ) {
+							$email_body = esc_html__(
+								"Hello,\n\nYour one-time password (OTP) for logging in to {{site_name}} is:\n\nOTP: {{otp}}\n\nThis OTP is valid for {{expiry}} minutes.\nRequested on {{date}}.\n\nIf you did not request this, please ignore this email.\n\nRegards,\n{{site_name}}\n{{site_url}}",
+								'happy-coders-otp-login'
+							);
+						}
+						?>
 						<textarea rows="8" cols="60"
-							name="hcotp_email_otp_body"><?php echo esc_textarea( get_option( 'hcotp_email_otp_body' ) ); ?></textarea>
+							name="hcotp_email_otp_body"><?php echo esc_textarea( $email_body ); ?></textarea>
 						<p class="description"> <?php esc_html_e( 'This content will be injected into the selected template at {{content}}.', 'happy-coders-otp-login' ); ?><br>
 							<?php esc_html_e( 'Available variables:', 'happy-coders-otp-login' ); ?><br>
 							<code>{{otp}}</code>,
