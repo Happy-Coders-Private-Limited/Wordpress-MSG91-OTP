@@ -136,7 +136,7 @@ function hcotp_get_email_image_html( $type ) {
  * @param array  $data    Replacement data.
  * @return string Default HTML template.
  */
-function hcotp_get_default_email_template_html( $template_id, $data ) {
+function hcotp_get_default_email_template_html( $template_id ) {
 	$site_name = get_bloginfo( 'name' );
 	$site_url  = home_url();
 	$year      = gmdate( 'Y' );
@@ -291,7 +291,7 @@ function hcotp_apply_email_template( $content, $data ) {
 
 	$template_html = get_option( $option_key, '' );
 	if ( empty( $template_html ) ) {
-		$template_html = hcotp_get_default_email_template_html( $template_id, $data );
+		$template_html = hcotp_get_default_email_template_html( $template_id );
 	}
 
 	$has_html = (bool) preg_match( '/<[^>]+>/', $content );
@@ -364,7 +364,8 @@ function hcotp_send_email_otp( $user_id, $email, $mobile ) {
 add_action(
 	'wp_mail_failed',
 	function ( $error ) {
-		error_log( 'HCOTP MAIL ERROR: ' . print_r( $error, true ) );
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+		error_log( 'HCOTP MAIL ERROR: ' . wp_json_encode( $error, JSON_PRETTY_PRINT ) );
 	}
 );
 
@@ -436,7 +437,13 @@ function hcotp_send_email_otp_ajax() {
 	if ( ! hcotp_can_resend_email_otp( $user_id ) ) {
 		$timer = absint( get_option( 'hcotp_email_resend_timer', 30 ) );
 		wp_send_json_error(
-			array( 'message' => __( 'Please wait ' . $timer . ' seconds before requesting another OTP.', 'happy-coders-otp-login' ) )
+			array(
+				'message' => sprintf(
+					/* translators: %d: The number of seconds to wait. */
+					__( 'Please wait %d seconds before requesting another OTP.', 'happy-coders-otp-login' ),
+					$timer
+				),
+			)
 		);
 	}
 

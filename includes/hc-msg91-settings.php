@@ -621,13 +621,13 @@ function hcotp_settings_page() {
 									$default_country    = get_option( 'hcotp_msg91_default_country', '+91' );
 									$countries          = hcotp_get_countries_with_iso();
 
-									if ( ! is_array( $selected_countries ) ) {
-										$selected_countries = array( '+91' );
-									}
+								if ( ! is_array( $selected_countries ) ) {
+									$selected_countries = array( '+91' );
+								}
 
-									if ( ! in_array( $default_country, $selected_countries, true ) ) {
-										$selected_countries[] = $default_country;
-									}
+								if ( ! in_array( $default_country, $selected_countries, true ) ) {
+									$selected_countries[] = $default_country;
+								}
 								foreach ( $countries as $country ) {
 									printf(
 										'<option value="%s" %s>%s %s (%s)</option>',
@@ -958,13 +958,13 @@ function hcotp_settings_page() {
 
 				<?php
 				$template_1_default = function_exists( 'hcotp_get_default_email_template_html' )
-					? hcotp_get_default_email_template_html( 'template_1', array() )
+					? hcotp_get_default_email_template_html( 'template_1' )
 					: '';
 				$template_2_default = function_exists( 'hcotp_get_default_email_template_html' )
-					? hcotp_get_default_email_template_html( 'template_2', array() )
+					? hcotp_get_default_email_template_html( 'template_2' )
 					: '';
 				$template_3_default = function_exists( 'hcotp_get_default_email_template_html' )
-					? hcotp_get_default_email_template_html( 'template_3', array() )
+					? hcotp_get_default_email_template_html( 'template_3' )
 					: '';
 
 				$template_1_value = get_option( 'hcotp_email_template_html_1', '' );

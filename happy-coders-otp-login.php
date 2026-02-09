@@ -1456,16 +1456,12 @@ function hcotp_enforce_email_verification() {
 
 	$user_id = get_current_user_id();
 
-	// wp debug logs
-	error_log( "hcotp_enforce_email_verification: user_id = $user_id" );
-	error_log( 'hcotp_enforce_email_verification: email verified = ' . get_user_meta( $user_id, 'hcotp_email_verified', true ) );
-
 	if ( ! hcotp_user_requires_email_verification( $user_id ) ) {
 		return;
 	}
 
 	// Allow AJAX and logout
-	if ( wp_doing_ajax() || is_user_logged_in() && isset( $_GET['action'] ) && 'logout' === $_GET['action'] ) {
+	if ( wp_doing_ajax() || ( is_user_logged_in() && isset( $_GET['action'] ) && 'logout' === $_GET['action'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		return;
 	}
 
@@ -1484,7 +1480,8 @@ function hcotp_enforce_email_verification() {
 
 	$redirect_url = add_query_arg(
 		array(
-			'hcotp_email_required' => '1',
+			'hcotp_email_required'       => '1',
+			'hcotp_email_required_nonce' => wp_create_nonce( 'hcotp_email_required_notice' ),
 		),
 		$redirect_url
 	);
@@ -1518,6 +1515,19 @@ function hcotp_show_email_required_notice() {
 		return;
 	}
 
+	if ( empty( $_GET['hcotp_email_required_nonce'] ) ) {
+		return;
+	}
+
+	if (
+		! wp_verify_nonce(
+			sanitize_text_field( wp_unslash( $_GET['hcotp_email_required_nonce'] ) ),
+			'hcotp_email_required_notice'
+		)
+	) {
+		return;
+	}
+
 	if ( ! function_exists( 'wc_add_notice' ) ) {
 		return;
 	}
@@ -1532,6 +1542,27 @@ add_action( 'woocommerce_before_account_navigation', 'hcotp_show_email_required_
 add_action( 'woocommerce_save_account_details_errors', 'hcotp_check_email_change_before_save', 10, 2 );
 
 function hcotp_check_email_change_before_save( $errors, $user ) {
+
+	$nonce_field = '';
+	if ( ! empty( $_POST['save-account-details-nonce'] ) ) {
+		$nonce_field = 'save-account-details-nonce';
+	} elseif ( ! empty( $_POST['woocommerce-save-account-details-nonce'] ) ) {
+		// Back-compat if a custom template used this name.
+		$nonce_field = 'woocommerce-save-account-details-nonce';
+	}
+
+	if ( '' === $nonce_field ) {
+		return;
+	}
+
+	if (
+		! wp_verify_nonce(
+			sanitize_text_field( wp_unslash( $_POST[ $nonce_field ] ) ),
+			'save_account_details'
+		)
+	) {
+		return;
+	}
 
 	if ( empty( $_POST['account_email'] ) ) {
 		return;
