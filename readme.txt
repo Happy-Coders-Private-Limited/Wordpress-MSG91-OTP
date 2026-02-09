@@ -1,18 +1,18 @@
 === Happy Coders OTP Login for WooCommerce ===
 * Contributors: happycoders, kombiahrk, muthupandi2002, imgopi2002, sureshkumar22
-* Tags: otp, woocommerce, msg91, passwordless, whatsapp otp
+* Tags: otp, woocommerce, msg91, passwordless, whatsapp otp, email otp
 * Requires at least: 5.0
 * Tested up to: 6.9
 * Requires PHP: 7.4
-* Stable tag: 2.3
+* Stable tag: 2.4
 * License: GPLv2 or later
 * License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Secure OTP login for WordPress & WooCommerce using SMS and WhatsApp. Send automated order alerts with the MSG91 API. Be passwordless!
+Secure OTP login for WordPress & WooCommerce using SMS, WhatsApp, and Email. Send automated order alerts with the MSG91 API. Be passwordless!
 
 == Description ==
 
-Happy Coders OTP Login is a simple, secure, and customizable OTP login plugin for WordPress and WooCommerce sites. It enables users to log in using their mobile number via one-time password (OTP) verification, using the MSG91 SMS API.
+Happy Coders OTP Login is a simple, secure, and customizable OTP login plugin for WordPress and WooCommerce sites. It enables users to log in using their mobile number via one-time password (OTP) verification, using the MSG91 SMS API, and also supports email-based OTP login.
 
 The plugin supports full-screen and popup login forms, integrates smoothly with WooCommerce, and improves user experience by replacing traditional email/password logins with secure phone-based authentication.
 
@@ -39,6 +39,7 @@ Visit [MSG91's Terms of Service](https://msg91.com/legal/terms) and [Privacy Pol
 - Full-screen or popup OTP login form
 - WooCommerce login compatibility
 - OTP verification via MSG91 (SMS & WhatsApp)
+- Email OTP login option
 - WhatsApp Send OTP support
 - Automatic SMS/WhatsApp alerts for:
   - New user registration
@@ -106,17 +107,27 @@ Yes, it works with WooCommerce login and sends order status notifications via SM
 = Can I disable certain SMS notifications? =
 Yes. In the "Transactional SMS Settings" tab, each notification type (new order, shipped, etc.) can be individually enabled or disabled with a simple toggle.
 
+= How does Email OTP work? =
+Users must first register using Mobile OTP. On the first login after registration, they must verify their email address with an Email OTP. After this one-time email verification, they can use Email OTP for future logins.
+
 == Screenshots ==
 
-1. Admin settings screen (1/4)
-2. Admin settings screen (2/4)
-3. Admin settings screen (3/4)
-4. Admin settings screen (4/4)
-5. OTP popup login
-6. OTP full-screen login
-7. OTP verification screen
+1. Admin settings screen (1/5)
+2. Admin settings screen (2/5)
+3. Admin settings screen (3/5)
+4. Admin settings screen (4/5)
+5. Admin settings screen (5/5)
+6. OTP popup login
+7. OTP full-screen login
+8. OTP verification screen
+9. Email OTP Verfication Screen
+
 
 == Changelog ==
+
+= 2.4 =
+* Feature: Added Email OTP login option.
+* Tweak: Updated plugin version to 2.4.
 
 = 2.3 =
 * Feature: Added 'otp_length' parameter to the MSG91 API call for dynamic OTP length.
@@ -159,6 +170,9 @@ Yes. In the "Transactional SMS Settings" tab, each notification type (new order,
 * Initial release with OTP login features (full-screen and popup) and core MSG91 integration.
 
 == Upgrade Notice ==
+
+= 2.4 =
+This version adds Email OTP login. Review your OTP settings after updating.
 
 = 2.3 =
 This version adds the 'otp_length' parameter to the MSG91 API call. If you have customized the OTP length, ensure your settings are correct.
