@@ -556,6 +556,14 @@ jQuery(document).on('change', 'input[name="hcotp_login_type"]', function () {
 	const type = jQuery(this).val();
     const $container = jQuery('#otp-form-wrap');
 
+    // Reset to "send OTP" step when switching login type.
+    $container.find('#otp_input_wrap').hide();
+    $container.find('#send_otp_section').show();
+    $container.find('#otp-send-status, #otp-verify-status').html('');
+    $container.find('#otpprocess').val('');
+    $container.find('#msg91_send_otp').prop('disabled', false).text('Send OTP');
+    $container.find('#hcotp_send_email_otp').prop('disabled', false).text('Send Email OTP');
+
 	if (type === 'email') {
         jQuery('.hcotp-mobile-login').hide();
 		jQuery('.hcotp-email-login').show();
