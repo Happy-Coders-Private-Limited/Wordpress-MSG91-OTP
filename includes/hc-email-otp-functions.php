@@ -70,16 +70,16 @@ function hcotp_verify_email_otp( $user_id, $otp ) {
  */
 function hcotp_replace_email_placeholders( $content, $data ) {
 	$replacements = array(
-		'{{otp}}'         => isset( $data['otp'] ) ? $data['otp'] : '',
-		'{{expiry}}'      => isset( $data['expiry'] ) ? $data['expiry'] : '',
-		'{{site_name}}'   => get_bloginfo( 'name' ),
-		'{{site_url}}'    => home_url(),
-		'{{user_email}}'  => isset( $data['user_email'] ) ? $data['user_email'] : '',
-		'{{user_mobile}}' => isset( $data['user_mobile'] ) ? $data['user_mobile'] : '',
-		'{{date}}'        => gmdate( 'Y-m-d' ),
-		'{{content}}'     => isset( $data['content'] ) ? $data['content'] : '',
-		'{{header_image}}' => isset( $data['header_image'] ) ? $data['header_image'] : '',
-		'{{footer_image}}' => isset( $data['footer_image'] ) ? $data['footer_image'] : '',
+		'{{otp}}'              => isset( $data['otp'] ) ? $data['otp'] : '',
+		'{{expiry}}'           => isset( $data['expiry'] ) ? $data['expiry'] : '',
+		'{{site_name}}'        => get_bloginfo( 'name' ),
+		'{{site_url}}'         => home_url(),
+		'{{user_email}}'       => isset( $data['user_email'] ) ? $data['user_email'] : '',
+		'{{user_mobile}}'      => isset( $data['user_mobile'] ) ? $data['user_mobile'] : '',
+		'{{date}}'             => gmdate( 'Y-m-d' ),
+		'{{content}}'          => isset( $data['content'] ) ? $data['content'] : '',
+		'{{header_image}}'     => isset( $data['header_image'] ) ? $data['header_image'] : '',
+		'{{footer_image}}'     => isset( $data['footer_image'] ) ? $data['footer_image'] : '',
 		'{{header_image_url}}' => isset( $data['header_image_url'] ) ? $data['header_image_url'] : '',
 		'{{footer_image_url}}' => isset( $data['footer_image_url'] ) ? $data['footer_image_url'] : '',
 	);
@@ -94,13 +94,13 @@ function hcotp_replace_email_placeholders( $content, $data ) {
  * @return string
  */
 function hcotp_get_email_image_html( $type ) {
-	$site_name = get_bloginfo( 'name' );
-	$option    = ( 'footer' === $type ) ? 'hcotp_email_otp_footer_image' : 'hcotp_email_otp_header_image';
-	$width_key = ( 'footer' === $type ) ? 'hcotp_email_otp_footer_image_width' : 'hcotp_email_otp_header_image_width';
+	$site_name  = get_bloginfo( 'name' );
+	$option     = ( 'footer' === $type ) ? 'hcotp_email_otp_footer_image' : 'hcotp_email_otp_header_image';
+	$width_key  = ( 'footer' === $type ) ? 'hcotp_email_otp_footer_image_width' : 'hcotp_email_otp_header_image_width';
 	$height_key = ( 'footer' === $type ) ? 'hcotp_email_otp_footer_image_height' : 'hcotp_email_otp_header_image_height';
-	$image_url = esc_url( get_option( $option, '' ) );
-	$width     = absint( get_option( $width_key, 200 ) );
-	$height    = absint( get_option( $height_key, 0 ) );
+	$image_url  = esc_url( get_option( $option, '' ) );
+	$width      = absint( get_option( $width_key, 200 ) );
+	$height     = absint( get_option( $height_key, 0 ) );
 
 	if ( empty( $image_url ) ) {
 		return '';
@@ -137,9 +137,9 @@ function hcotp_get_email_image_html( $type ) {
  * @return string Default HTML template.
  */
 function hcotp_get_default_email_template_html( $template_id, $data ) {
-	$site_name   = get_bloginfo( 'name' );
-	$site_url    = home_url();
-	$year        = gmdate( 'Y' );
+	$site_name = get_bloginfo( 'name' );
+	$site_url  = home_url();
+	$year      = gmdate( 'Y' );
 
 	if ( 'template_2' === $template_id ) {
 		return sprintf(

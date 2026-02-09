@@ -54,7 +54,11 @@ function hcotp_sanitize_email_template_html( $input ) {
 	$allowed['html']  = array( 'lang' => true );
 	$allowed['head']  = array();
 	$allowed['body']  = array( 'style' => true );
-	$allowed['meta']  = array( 'charset' => true, 'name' => true, 'content' => true );
+	$allowed['meta']  = array(
+		'charset' => true,
+		'name'    => true,
+		'content' => true,
+	);
 	$allowed['title'] = array();
 
 	$allowed['table'] = array(
@@ -70,8 +74,18 @@ function hcotp_sanitize_email_template_html( $input ) {
 	$allowed['thead'] = array();
 	$allowed['tfoot'] = array();
 	$allowed['tr']    = array( 'style' => true );
-	$allowed['td']    = array( 'width' => true, 'align' => true, 'valign' => true, 'style' => true );
-	$allowed['th']    = array( 'width' => true, 'align' => true, 'valign' => true, 'style' => true );
+	$allowed['td']    = array(
+		'width'  => true,
+		'align'  => true,
+		'valign' => true,
+		'style'  => true,
+	);
+	$allowed['th']    = array(
+		'width'  => true,
+		'align'  => true,
+		'valign' => true,
+		'style'  => true,
+	);
 
 	$allowed['div']['style']  = true;
 	$allowed['span']['style'] = true;
