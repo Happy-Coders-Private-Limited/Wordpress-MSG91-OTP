@@ -542,13 +542,13 @@ function hcotp_msg91_otp_form( $options, $is_popup = false ) {
 	<div id="otp-popup-modal" style="display:none;">
 	<?php endif; ?>
 
-	<div id="otp-form-wrap">
+	<div id="otp-form-wrap" data-is-popup="<?php echo $is_popup ? '1' : '0'; ?>">
 
 		<?php if ( $is_popup ) : ?>
 			<div style="width:100%; text-align:right; height:0;">
 				<button
 					onclick="document.getElementById('otp-popup-modal').style.display='none';"
-					style="background:none;border:none;font-size:24px;cursor:pointer;"
+					style="background:none;border:none;font-size:24px;cursor:pointer;padding:0px 10px 0 10px;"
 				>&times;</button>
 			</div>
 		<?php endif; ?>
