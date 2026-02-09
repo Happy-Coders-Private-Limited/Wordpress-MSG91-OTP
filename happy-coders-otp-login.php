@@ -426,9 +426,14 @@ function hcotp_country_select() {
 	$all_countries = hcotp_get_countries_with_iso();
 
 	$selected_countries = get_option( 'hcotp_msg91_selected_countries', array( '+91' ) );
+	$default_country    = get_option( 'hcotp_msg91_default_country', '+91' );
 
 	if ( ! is_array( $selected_countries ) ) {
 		$selected_countries = array( '+91' );
+	}
+
+	if ( ! in_array( $default_country, $selected_countries, true ) ) {
+		$selected_countries[] = $default_country;
 	}
 	$show_flag = get_option( 'hcotp_msg91_flag_show', 0 );
 
@@ -440,7 +445,7 @@ function hcotp_country_select() {
 	);
 
 	foreach ( $filtered_countries as $country ) {
-		$selected  = 'selected';
+		$selected  = selected( $default_country, $country['code'], false );
 		$flag      = hcotp_iso_to_flag( $country['iso'] );
 		$flag_html = $show_flag ? $flag : '';
 		$html     .= sprintf(
@@ -592,7 +597,21 @@ function hcotp_msg91_otp_form( $options, $is_popup = false ) {
 					</label>
 				</div>
 				<div class="mobile-input-wrap">
-					<?php echo hcotp_country_select(); ?>
+					<?php
+						$allowed_html = array(
+							'select' => array(
+								'name'  => true,
+								'id'    => true,
+								'class' => true,
+							),
+							'option' => array(
+								'value'     => true,
+								'data-flag' => true,
+								'selected'  => true,
+							),
+						);
+						echo wp_kses( hcotp_country_select(), $allowed_html );
+						?>
 					<input type="tel" id="msg91_mobile" maxlength="10" pattern="\d*" placeholder="Mobile Number" oninput="this.value=this.value.replace(/[^0-9]/g,'');" />
 				</div>
 

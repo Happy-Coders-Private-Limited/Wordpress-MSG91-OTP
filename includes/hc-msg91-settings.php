@@ -608,7 +608,7 @@ function hcotp_settings_page() {
 						<th scope="row"></th>
 						<td>
 							<input type="checkbox" name="hcotp_msg91_flag_show" value="1" <?php checked( 1, get_option( 'hcotp_msg91_flag_show' ), true ); ?> />
-							<span class="description"><?php esc_html_e( 'Show country flag in dropdown?', 'happy-coders-otp-login' ); ?></span>
+							<span class="description"><?php esc_html_e( 'Show country code in dropdown?', 'happy-coders-otp-login' ); ?></span>
 
 						</td>
 					</tr>
@@ -618,7 +618,16 @@ function hcotp_settings_page() {
 							<select name="hcotp_msg91_selected_countries[]" id="hcotp_msg91_selected_countries" multiple="multiple" style="width: 100%; height: 150px;">
 								<?php
 									$selected_countries = get_option( 'hcotp_msg91_selected_countries', array( '+91' ) );
+									$default_country    = get_option( 'hcotp_msg91_default_country', '+91' );
 									$countries          = hcotp_get_countries_with_iso();
+
+									if ( ! is_array( $selected_countries ) ) {
+										$selected_countries = array( '+91' );
+									}
+
+									if ( ! in_array( $default_country, $selected_countries, true ) ) {
+										$selected_countries[] = $default_country;
+									}
 								foreach ( $countries as $country ) {
 									printf(
 										'<option value="%s" %s>%s %s (%s)</option>',
