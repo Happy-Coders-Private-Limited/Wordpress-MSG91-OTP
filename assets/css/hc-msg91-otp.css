@@ -32,6 +32,7 @@
     margin-right: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
+    padding: 3px 3px !important;
 }
 #msg91_send_otp, #hcotp_send_email_otp, #msg91_verify_otp {
     padding: 10px 15px;
