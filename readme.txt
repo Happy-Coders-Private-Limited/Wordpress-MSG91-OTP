@@ -121,6 +121,8 @@ Users must first register using Mobile OTP. On the first login after registratio
 7. OTP full-screen login
 8. OTP verification screen
 9. Email OTP Verfication Screen
+10. Email OTP Verfication Screen
+11. Email OTP Verfication Screen
 
 
 == Changelog ==
