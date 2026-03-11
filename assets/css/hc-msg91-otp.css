@@ -1,15 +1,15 @@
 
-.mobile-input-wrap span {
+.hcotp-mobile-input-wrap span {
     font-size: 15px;
 }
-.mobile-input-wrap input {
+.hcotp-mobile-input-wrap input {
     padding-left: 70px; 
     width: 100%;
     height: 40px;
     font-size: 16px;
     box-sizing: border-box;
 }
-.mobile-input-prefix {
+.hcotp-mobile-input-prefix {
     position: absolute;
     left: 10px;
     top: 50%;
@@ -18,13 +18,13 @@
     pointer-events: none;
     color: #333;
 }
-.otp-inputs {
+.hcotp-otp-inputs {
     display: inline-flex;
     justify-content: center;
     gap: 5px;
     width: 100%;
 }
-.otp-field {
+.hcotp-otp-field {
     width: 60px;
     height: 40px;
     font-size: 18px;
@@ -49,19 +49,19 @@
     background-color: #ccc;
     cursor: not-allowed;
 }
-.otp-send-status{
+.hcotp-otp-send-status{
     margin-top: 10px;
     font-size: 14px;
     text-align: center;
 }
-.otp-verify-status{
+.hcotp-otp-verify-status{
     padding: 10px;
     text-align: center;
 }
-.otp-verify-button {
+.hcotp-otp-verify-button {
     margin-top: 15px;
 }
-#otp-form-wrap {
+#hcotp-otp-form-wrap {
     margin: 0 auto;
     max-width: 300px;
     width: 100%;
@@ -69,25 +69,25 @@
     flex-direction: column;
     align-items: center;
 }
-.images {
+.hcotp-image {
     max-width:100%;
      max-height:150px; 
      margin-bottom: 15px;
 }
-.popup-image {
+.hcotp-popup-image {
     max-width:100%;
      max-height:200px; 
      margin-bottom: 15px;
      object-fit: contain;
 }
-.lable {
+.hcotp-label {
     text-align: center;
      margin-bottom: 10px;
 }
-.lable-style {
+.hcotp-label-style {
     font-size: 23px; font-weight: 900;
 }
-.descripition {
+.hcotp-description {
     font-size: 16px; font-weight: 400; color: #00000069;
     margin-top: 10px;
     margin-bottom: 10px;
@@ -96,18 +96,18 @@
 #country_code {
     position: absolute; top: 50%; left: 10px; transform: translateY(-50%); color: #555
 }
-.common-width {
+.hcotp-common-width {
     width: 100%;
     margin-top: 10px;
 }
-#otp_input_wrap {
+#hcotp_otp_input_wrap {
     display:none; margin-top:15px;
 }
-.verify-otp {
+.hcotp-verify-otp {
     text-align:center;
     width: 100%;
 }
-#resend_otp {
+#hcotp_resend_otp {
     background: none;
     color: #00000094;
     border: none;
@@ -117,15 +117,15 @@
     background-color: #007bff; 
     color: white;
 }
-.mobile-input-wrap {
+.hcotp-mobile-input-wrap {
     position: relative;
     width: 100%;
 }
-.input-wrapper {
+.hcotp-input-wrapper {
     position: relative;
     width: 100%;
 }
-.country-select {
+.hcotp-country-select {
     max-height: 300px;
     height: 45px;
     position: absolute;
@@ -150,10 +150,10 @@
 #hcotp_email {
     padding-left: 10px;
 }
-.input-wrapper select, .input-wrapper input {
+.hcotp-input-wrapper select, .hcotp-input-wrapper input {
     height: 45px;
 }
-#otp-popup-modal {
+#hcotp-otp-popup-modal {
     position: fixed;
     top: 0;
     left: 0;
@@ -166,7 +166,7 @@
     align-items: center;
     z-index: 9999;
 }
-#otp-popup-modal #otp-form-wrap {
+#hcotp-otp-popup-modal #hcotp-otp-form-wrap {
     background-color: white;
     padding: 40px;
     margin: 20px;
@@ -179,20 +179,20 @@
     left: 50%;
     transform: translate(-50%, -50%);
 }
-#otp-popup-modal #otp-form-wrap {
+#hcotp-otp-popup-modal #hcotp-otp-form-wrap {
 background-color: white;
 padding: 20px;
 border-radius: 10px;
 width: 100%; 
 box-sizing: border-box;
 }
-#otp-popup-modal #otp-form-wrap img {
+#hcotp-otp-popup-modal #hcotp-otp-form-wrap img {
 width: 100%;
 }
-#otp-popup-modal button {
+#hcotp-otp-popup-modal button {
     cursor: pointer;
 }
-.msg-close-icon {
+.hcotp-close-icon {
     height: 0;
     background: none; 
     border: none; 
@@ -200,18 +200,22 @@ width: 100%;
     cursor: pointer;
      outline: none;
 }
-.msg91-common-align {
+.hcotp-common-align {
     text-align: center;
 }
 
-.tab-content { display: none; }
-		.tab-content.active-tab { display: block; }
+.hcotp-tab-content { 
+    display: none; 
+}
+.hcotp-tab-content.active-tab { 
+    display: block; 
+}
 
-.lable-input-between {
+.hcotp-label-input-between {
     margin-bottom: 12px;
 }
 
-.input-top {
+.hcotp-input-top {
     margin-top: 12px;
 }
 
@@ -228,7 +232,7 @@ width: 100%;
     width: 100%;
 }
 
-.send-button {
+.hcotp-send-button {
         background: white !important;
     color: black !important;
 }

@@ -459,7 +459,7 @@ function hcotp_country_select() {
 		);
 	}
 
-	return "<select name='msg91_country_code' id='msg91_country_code' class='country-select'>{$html}</select>";
+	return "<select name='msg91_country_code' id='msg91_country_code' class='hcotp-country-select'>{$html}</select>";
 }
 
 
@@ -544,15 +544,15 @@ function hcotp_msg91_otp_form( $options, $is_popup = false ) {
 	?>
 
 	<?php if ( $is_popup ) : ?>
-	<div id="otp-popup-modal" style="display:none;">
+	<div id="hcotp-otp-popup-modal" style="display:none;">
 	<?php endif; ?>
 
-	<div id="otp-form-wrap" data-is-popup="<?php echo $is_popup ? '1' : '0'; ?>">
+	<div id="hcotp-otp-form-wrap" data-is-popup="<?php echo $is_popup ? '1' : '0'; ?>">
 
 		<?php if ( $is_popup ) : ?>
 			<div style="width:100%; text-align:right; height:0;">
 				<button
-					onclick="document.getElementById('otp-popup-modal').style.display='none';"
+					onclick="document.getElementById('hcotp-otp-popup-modal').style.display='none';"
 					style="background:none;border:none;font-size:24px;cursor:pointer;padding:0px 10px 0 10px;"
 				>&times;</button>
 			</div>
@@ -580,23 +580,23 @@ function hcotp_msg91_otp_form( $options, $is_popup = false ) {
 				<div style="display:flex;justify-content:center;">
 					<?php if ( ! empty( $options['top_image'] ) ) : ?>
 						<div style="text-align:center;">
-							<img src="<?php echo esc_url( $options['top_image'] ); ?>" class="popup-image" alt="Send OTP" />
+							<img src="<?php echo esc_url( $options['top_image'] ); ?>" class="hcotp-popup-image" alt="Send OTP" />
 						</div>
 					<?php endif; ?>
 				</div>
 
 				<div style="text-align:center;">
-					<label class="lable-style" style="color:<?php echo esc_attr( $options['send_otp_label_color'] ); ?>">
+					<label class="hcotp-label-style" style="color:<?php echo esc_attr( $options['send_otp_label_color'] ); ?>">
 						<?php echo esc_html( $options['send_otp_label'] ); ?>
 					</label>
 				</div>
 
 				<div style="text-align:center;">
-					<label class="descripition" style="color:<?php echo esc_attr( $options['send_otp_desc_color'] ); ?>">
+					<label class="hcotp-description" style="color:<?php echo esc_attr( $options['send_otp_desc_color'] ); ?>">
 						<?php echo esc_html( $options['send_otp_desc'] ); ?>
 					</label>
 				</div>
-				<div class="mobile-input-wrap">
+				<div class="hcotp-mobile-input-wrap">
 					<?php
 						$allowed_html = array(
 							'select' => array(
@@ -615,12 +615,12 @@ function hcotp_msg91_otp_form( $options, $is_popup = false ) {
 					<input type="tel" id="msg91_mobile" maxlength="10" pattern="\d*" placeholder="Mobile Number" oninput="this.value=this.value.replace(/[^0-9]/g,'');" />
 				</div>
 
-				<button id="msg91_send_otp" class="common-width" style="background-color:<?php echo esc_attr( $options['send_otp_button_color'] ); ?>;color:#fff;">
+				<button id="msg91_send_otp" class="hcotp-common-width" style="background-color:<?php echo esc_attr( $options['send_otp_button_color'] ); ?>;color:#fff;">
 					<?php echo esc_html( $options['send_otp_button_text'] ); ?>
 				</button>
 
 				<?php if ( ! empty( $options['hcotp_whatsapp_auth_enabled'] ) ) : ?>
-					<button id="msg91_send_otp_whatsapp" class="common-width">
+					<button id="msg91_send_otp_whatsapp" class="hcotp-common-width">
 						<?php echo esc_html( $options['hcotp_whatsapp_button_text'] ); ?>
 					</button>
 				<?php endif; ?>
@@ -630,50 +630,50 @@ function hcotp_msg91_otp_form( $options, $is_popup = false ) {
 				<div style="display:flex;justify-content:center;">
 					<?php if ( ! empty( $options['email_top_image'] ) ) : ?>
 						<div style="text-align:center;">
-							<img src="<?php echo esc_url( $options['email_top_image'] ); ?>" class="popup-image" alt="Send OTP" />
+							<img src="<?php echo esc_url( $options['email_top_image'] ); ?>" class="hcotp-popup-image" alt="Send OTP" />
 						</div>
 					<?php endif; ?>
 				</div>
 
 				<div style="text-align:center;">
-					<label class="lable-style" style="color:<?php echo esc_attr( $options['email_send_otp_label_color'] ); ?>">
+					<label class="hcotp-label-style" style="color:<?php echo esc_attr( $options['email_send_otp_label_color'] ); ?>">
 						<?php echo esc_html( $options['email_send_otp_label'] ); ?>
 					</label>
 				</div>
 
 				<div style="text-align:center;">
-					<label class="descripition" style="color:<?php echo esc_attr( $options['email_send_otp_desc_color'] ); ?>">
+					<label class="hcotp-description" style="color:<?php echo esc_attr( $options['email_send_otp_desc_color'] ); ?>">
 						<?php echo esc_html( $options['email_send_otp_desc'] ); ?>
 					</label>
 				</div>
-				<input type="email" id="hcotp_email" class="common-width" placeholder="<?php esc_attr_e( 'Enter your email', 'happy-coders-otp-login' ); ?>" />
+				<input type="email" id="hcotp_email" class="hcotp-common-width" placeholder="<?php esc_attr_e( 'Enter your email', 'happy-coders-otp-login' ); ?>" />
 
-				<button id="hcotp_send_email_otp" class="common-width" style="background-color:<?php echo esc_attr( $options['email_send_otp_button_color'] ); ?>;color:#fff;">
+				<button id="hcotp_send_email_otp" class="hcotp-common-width" style="background-color:<?php echo esc_attr( $options['email_send_otp_button_color'] ); ?>;color:#fff;">
 					<?php echo esc_html( $options['email_send_otp_button_text'] ); ?>
 				</button>
 			</div>
 
-			<div id="otp-send-status" class="otp-send-status"></div>
+			<div id="hcotp-otp-send-status" class="hcotp-otp-send-status"></div>
 		</div>
 
-		<div id="otp_input_wrap" style="display:none;">
+		<div id="hcotp_otp_input_wrap" style="display:none;">
 			<div class="hcotp-mobile-login">
 				<div style="display:flex;justify-content:center;">
 					<?php if ( ! empty( $options['top_verify_image'] ) ) : ?>
 						<div style="text-align:center;">
-							<img src="<?php echo esc_url( $options['top_verify_image'] ); ?>" class="popup-image" />
+							<img src="<?php echo esc_url( $options['top_verify_image'] ); ?>" class="hcotp-popup-image" />
 						</div>
 					<?php endif; ?>
 				</div>
 
 				<div style="text-align:center;">
-					<label class="lable-style" style="color:<?php echo esc_attr( $options['verify_otp_lable_color'] ); ?>">
+					<label class="hcotp-label-style" style="color:<?php echo esc_attr( $options['verify_otp_lable_color'] ); ?>">
 						<?php echo esc_html( $options['verify_otp_lable'] ); ?>
 					</label>
 				</div>
 
 				<div style="text-align:center;">
-					<label class="descripition" style="color:<?php echo esc_attr( $options['verify_otp_dec_color'] ); ?>">
+					<label class="hcotp-description" style="color:<?php echo esc_attr( $options['verify_otp_dec_color'] ); ?>">
 						<?php echo esc_html( $options['verify_otp_dec'] ); ?>
 					</label>
 				</div>
@@ -683,28 +683,28 @@ function hcotp_msg91_otp_form( $options, $is_popup = false ) {
 				<div style="display:flex;justify-content:center;">
 					<?php if ( ! empty( $options['email_top_verify_image'] ) ) : ?>
 						<div style="text-align:center;">
-							<img src="<?php echo esc_url( $options['email_top_verify_image'] ); ?>" class="popup-image" />
+							<img src="<?php echo esc_url( $options['email_top_verify_image'] ); ?>" class="hcotp-popup-image" />
 						</div>
 					<?php endif; ?>
 				</div>
 
 				<div style="text-align:center;">
-					<label class="lable-style" style="color:<?php echo esc_attr( $options['email_verify_otp_lable_color'] ); ?>">
+					<label class="hcotp-label-style" style="color:<?php echo esc_attr( $options['email_verify_otp_lable_color'] ); ?>">
 						<?php echo esc_html( $options['email_verify_otp_lable'] ); ?>
 					</label>
 				</div>
 
 				<div style="text-align:center;">
-					<label class="descripition" style="color:<?php echo esc_attr( $options['email_verify_otp_desc_color'] ); ?>">
+					<label class="hcotp-description" style="color:<?php echo esc_attr( $options['email_verify_otp_desc_color'] ); ?>">
 						<?php echo esc_html( $options['email_verify_otp_desc'] ); ?>
 					</label>
 				</div>
 			</div>
 
-			<div class="otp-inputs" id="otp_input_fields"></div>
-			<div id="otp-verify-status" class="otp-verify-status"></div>
+			<div class="hcotp-otp-inputs" id="hcotp_otp_input_fields"></div>
+			<div id="hcotp-otp-verify-status" class="hcotp-otp-verify-status"></div>
 
-			<div class="verify-otp">
+			<div class="hcotp-verify-otp">
 				<button
 					id="msg91_verify_otp"
 					style="background-color:<?php echo esc_attr( $options['verify_otp_button_color'] ); ?>;color:#fff;"
@@ -714,15 +714,15 @@ function hcotp_msg91_otp_form( $options, $is_popup = false ) {
 			</div>
 
 			<div style="text-align:center;">
-				<h4 id="resend_otp">
+				<h4 id="hcotp_resend_otp">
 					<?php esc_html_e( 'Didn\'t receive an OTP? Resend OTP', 'happy-coders-otp-login' ); ?>
 				</h4>
 
-				<div class="row" id="otp_method_buttons">
-					<a id="msg91_send_otp" class="send-button sms-button" disabled>
+				<div class="row" id="hcotp_otp_method_buttons">
+					<a id="msg91_send_otp" class="hcotp-send-button sms-button" disabled>
 						<?php esc_html_e( 'SMS', 'happy-coders-otp-login' ); ?>
 					</a>
-					<a id="msg91_send_otp_whatsapp" class="send-button whatsapp-button" disabled>
+					<a id="msg91_send_otp_whatsapp" class="hcotp-send-button whatsapp-button" disabled>
 						<?php esc_html_e( 'Whatsapp', 'happy-coders-otp-login' ); ?>
 					</a>
 				</div>
@@ -1606,24 +1606,24 @@ function hcotp_add_email_otp_ui() {
 		<button type="button" class="button" id="hcotp_send_email_otp">
 			<?php esc_html_e( 'Send Email OTP', 'happy-coders-otp-login' ); ?>
 		</button>
-		<span class="hcotp-email-otp-status" id="otp-send-status"></span>
+		<span class="hcotp-email-otp-status" id="hcotp-otp-send-status"></span>
 	</div>
 
-	<div class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide hcotp-email-otp-wrap" id="otp_input_wrap">
+	<div class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide hcotp-email-otp-wrap" id="hcotp_otp_input_wrap">
 		<label for="hcotp_email_otp">
 			<?php echo esc_html( $options['verify_otp_lable'] ?? __( 'Enter OTP', 'happy-coders-otp-login' ) ); ?>
 		</label>
 		<input type="hidden" id="otpprocess" value="email" />
-		<div id="otp-verify-status" class="otp-verify-status"></div>
-		<div class="otp-inputs" id="otp_input_fields"></div>
-		<button type="button" class="button otp-verify-button" id="hcotp_verify_email_otp">
+		<div id="hcotp-otp-verify-status" class="hcotp-otp-verify-status"></div>
+		<div class="hcotp-otp-inputs" id="hcotp_otp_input_fields"></div>
+		<button type="button" class="button hcotp-otp-verify-button" id="hcotp_verify_email_otp">
 			<?php echo esc_html( $options['verify_otp_buttontext'] ?? __( 'Verify OTP', 'happy-coders-otp-login' ) ); ?>
 		</button>
 		<div class="otp-footer">
-			<span id="resend_otp">
+			<span id="hcotp_resend_otp">
 				<?php esc_html_e( 'Didn\'t receive an OTP? Resend OTP', 'happy-coders-otp-login' ); ?>
-				<span class="row" id="otp_method_buttons">
-					<a id="msg91_send_otp" class="send-button email-button" disabled><?php esc_html_e( 'Resend OTP', 'happy-coders-otp-login' ); ?></a>
+				<span class="row" id="hcotp_otp_method_buttons">
+					<a id="msg91_send_otp" class="hcotp-send-button email-button" disabled><?php esc_html_e( 'Resend OTP', 'happy-coders-otp-login' ); ?></a>
 				</span>
 			</span>
 			<div id="resend_timer_text"></div>

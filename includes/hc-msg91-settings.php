@@ -367,7 +367,7 @@ function hcotp_settings_page() {
 
 			<input type="hidden" name="hcotp_msg91_active_tab" id="hcotp_msg91_active_tab_input" value="<?php echo esc_attr( $active_tab ); ?>">
 
-			<div id="general_settings" class="tab-content <?php echo 'general_settings' === $active_tab ? 'active-tab' : ''; ?>">
+			<div id="general_settings" class="hcotp-tab-content <?php echo 'general_settings' === $active_tab ? 'active-tab' : ''; ?>">
 				<h2><?php esc_html_e( 'MSG91 API Credentials', 'happy-coders-otp-login' ); ?></h2>
 				<table class="form-table">
 					<tr valign="top">
@@ -394,30 +394,30 @@ function hcotp_settings_page() {
 								<?php esc_html_e( 'Yes, send OTP to users through WhatsApp.', 'happy-coders-otp-login' ); ?>
 							</label>
 							<div id="hcotp_whatsapp_auth_inputs" style="margin-top: 10px; <?php echo get_option( 'hcotp_whatsapp_auth_enabled' ) ? '' : 'display:none;'; ?>">
-								<p class="lable-input-between">
+								<p class="hcotp-label-input-between">
 									<label ><strong >Integrated Number:</strong><br>
-										<input type="text" class="input-top" size="50" name="hcotp_whatsapp_integrated_number" value="<?php echo esc_attr( get_option( 'hcotp_whatsapp_integrated_number' ) ); ?>" class="regular-text" />
+										<input type="text" class="hcotp-input-top" size="50" name="hcotp_whatsapp_integrated_number" value="<?php echo esc_attr( get_option( 'hcotp_whatsapp_integrated_number' ) ); ?>" class="regular-text" />
 									</label>
 								</p>
-								<p class="lable-input-between"> 
+								<p class="hcotp-label-input-between"> 
 									<label style="margin-bottom: 12px;"><strong>Template Name:</strong><br>
-										<input type="text" class="input-top"  size="50" name="hcotp_whatsapp_template_name" value="<?php echo esc_attr( get_option( 'hcotp_whatsapp_template_name' ) ); ?>" class="regular-text" />
+										<input type="text" class="hcotp-input-top"  size="50" name="hcotp_whatsapp_template_name" value="<?php echo esc_attr( get_option( 'hcotp_whatsapp_template_name' ) ); ?>" class="regular-text" />
 									</label>
 								</p> 
-								<p class="lable-input-between">
+								<p class="hcotp-label-input-between">
 									<label style="margin-bottom: 12px;"><strong>Template Namespace:</strong><br>
-										<input type="text" class="input-top"  size="50" name="hcotp_whatsapp_template_namespace" value="<?php echo esc_attr( get_option( 'hcotp_whatsapp_template_namespace' ) ); ?>" class="regular-text" />
+										<input type="text" class="hcotp-input-top"  size="50" name="hcotp_whatsapp_template_namespace" value="<?php echo esc_attr( get_option( 'hcotp_whatsapp_template_namespace' ) ); ?>" class="regular-text" />
 									</label>
 								</p>
-								<p class="lable-input-between">
+								<p class="hcotp-label-input-between">
 									<label style="margin-bottom: 12px;"><strong>Language Code:</strong><br>
-										<input type="text"class="input-top"  size="50" name="hcotp_whatsapp_language_code" value="<?php echo esc_attr( get_option( 'hcotp_whatsapp_language_code' ) ); ?>" class="regular-text" />
+										<input type="text"class="hcotp-input-top"  size="50" name="hcotp_whatsapp_language_code" value="<?php echo esc_attr( get_option( 'hcotp_whatsapp_language_code' ) ); ?>" class="regular-text" />
 									</label>
 								</p>
 
-								<p class="lable-input-between">
+								<p class="hcotp-label-input-between">
 									<label style="margin-bottom: 12px;"><strong>Button Text (Example : Send OTP via Whatsapp)</strong><br>
-										<input type="text"class="input-top"  size="50" name="hcotp_whatsapp_button_text" value="<?php echo esc_attr( get_option( 'hcotp_whatsapp_button_text' ) ); ?>" class="regular-text" />
+										<input type="text"class="hcotp-input-top"  size="50" name="hcotp_whatsapp_button_text" value="<?php echo esc_attr( get_option( 'hcotp_whatsapp_button_text' ) ); ?>" class="regular-text" />
 									</label>
 								</p>
 							</div>
@@ -427,7 +427,7 @@ function hcotp_settings_page() {
 			</div>
 
 
-			<div id="otp_settings" class="tab-content <?php echo 'otp_settings' === $active_tab ? 'active-tab' : ''; ?>">
+			<div id="otp_settings" class="hcotp-tab-content <?php echo 'otp_settings' === $active_tab ? 'active-tab' : ''; ?>">
 				<h2><?php esc_html_e( 'OTP Login Settings', 'happy-coders-otp-login' ); ?></h2>
 				<table class="form-table">
 					<tr valign="top">
@@ -645,7 +645,7 @@ function hcotp_settings_page() {
 				</table>
 			</div>
 
-			<div id="sms_settings" class="tab-content <?php echo 'sms_settings' === $active_tab ? 'active-tab' : ''; ?>">
+			<div id="sms_settings" class="hcotp-tab-content <?php echo 'sms_settings' === $active_tab ? 'active-tab' : ''; ?>">
 
 				<!-- Code for Transactional SMS Notifications by Kombiah -->
 				<h2><?php esc_html_e( 'Transactional SMS Notifications (WooCommerce)', 'happy-coders-otp-login' ); ?></h2>
@@ -745,7 +745,7 @@ function hcotp_settings_page() {
 				<?php endforeach; ?>
 			</div>
 			
-			<div id="email_settings" class="tab-content <?php echo 'email_settings' === $active_tab ? 'active-tab' : ''; ?>">
+			<div id="email_settings" class="hcotp-tab-content <?php echo 'email_settings' === $active_tab ? 'active-tab' : ''; ?>">
 
 				<h2><?php esc_html_e( 'Email OTP Settings', 'happy-coders-otp-login' ); ?></h2>
 
