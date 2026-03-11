@@ -130,6 +130,11 @@ Users must first register using Mobile OTP. On the first login after registratio
 = 2.6 =
 * Tweak: Added default Email OTP subject/body in settings when fields are empty.
 
+= 2.5 =
+* Feature: Added customizable HTML email templates for Email OTP messages.
+* Feature: Added header/footer image support and preview for Email OTP templates.
+* Tweak: Improved Email OTP settings UI and template controls.
+
 = 2.4 =
 * Feature: Added Email OTP login option.
 * Tweak: Updated plugin version to 2.4.
@@ -178,6 +183,9 @@ Users must first register using Mobile OTP. On the first login after registratio
 
 = 2.6 =
 Adds default Email OTP subject/body in settings when fields are empty.
+
+= 2.5 =
+Adds customizable Email OTP templates, image support, and preview tools.
 
 = 2.4 =
 This version adds Email OTP login. Review your OTP settings after updating.
