@@ -4,7 +4,7 @@
 * Requires at least: 5.0
 * Tested up to: 6.9
 * Requires PHP: 7.4
-* Stable tag: 2.6
+* Stable tag: 2.7
 * License: GPLv2 or later
 * License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -127,6 +127,9 @@ Users must first register using Mobile OTP. On the first login after registratio
 
 == Changelog ==
 
+= 2.7 =
+* Fix: Updated blocked numbers table queries to use the active WordPress database prefix instead of hardcoded `wp_hcotp_blocked_numbers`.
+
 = 2.6 =
 * Tweak: Added default Email OTP subject/body in settings when fields are empty.
 
@@ -180,6 +183,9 @@ Users must first register using Mobile OTP. On the first login after registratio
 * Initial release with OTP login features (full-screen and popup) and core MSG91 integration.
 
 == Upgrade Notice ==
+
+= 2.7 =
+This version fixes blocked numbers table queries for sites using custom WordPress database prefixes.
 
 = 2.6 =
 Adds default Email OTP subject/body in settings when fields are empty.
