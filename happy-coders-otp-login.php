@@ -778,7 +778,7 @@ function hcotp_send_otp_ajax() {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 		$otp_count_today = $wpdb->get_var(
 			$wpdb->prepare(
-				'SELECT COUNT(*) FROM wp_hcotp_blocked_numbers WHERE mobile_number = %s AND DATE(created_at) = %s',
+					"SELECT COUNT(*) FROM {$table_name} WHERE mobile_number = %s AND DATE(created_at) = %s",
 				$mobile,
 				$today
 			)
@@ -813,7 +813,7 @@ function hcotp_send_otp_ajax() {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 			$wpdb->query(
 				$wpdb->prepare(
-					'INSERT INTO  wp_hcotp_blocked_numbers (mobile_number, ip_address, created_at) VALUES (%s, %s, %s)',
+						"INSERT INTO {$table_name} (mobile_number, ip_address, created_at) VALUES (%s, %s, %s)",
 					$mobile,
 					$ip_address,
 					current_time( 'mysql' )
@@ -889,7 +889,7 @@ function hcotp_send_otp_ajax() {
 				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 				$wpdb->query(
 					$wpdb->prepare(
-						'INSERT INTO wp_hcotp_blocked_numbers (mobile_number, ip_address, created_at) VALUES (%s, %s, %s)',
+						"INSERT INTO {$table_name} (mobile_number, ip_address, created_at) VALUES (%s, %s, %s)",
 						$mobile,
 						$ip_address,
 						current_time( 'mysql' )
