@@ -905,13 +905,15 @@ function hcotp_send_otp_ajax() {
 			// Store the OTP temporarily in a transient keyed by mobile number.
 			// User account creation is deferred to verification time (hcotp_verify_otp_ajax).
 			// This prevents phantom account creation for numbers that never verify.
-			$clean_mobile = preg_replace( '/\D/', '', $mobile );
-			set_transient( 'hcotp_wa_otp_' . $clean_mobile, $otp_code, 10 * MINUTE_IN_SECONDS );
+			// OTP is hashed before storage to prevent plaintext exposure if DB is compromised.
+			$clean_mobile    = preg_replace( '/\D/', '', $mobile );
+			$otp_code_string = (string) $otp_code;
+			set_transient( 'hcotp_wa_otp_' . $clean_mobile, wp_hash_password( $otp_code_string ), 10 * MINUTE_IN_SECONDS );
 
 			// If a user already exists for this mobile, also update their meta for lookup convenience.
 			$existing_user = get_user_by( 'login', $clean_mobile );
 			if ( $existing_user ) {
-				update_user_meta( $existing_user->ID, 'otp_code', $otp_code );
+				update_user_meta( $existing_user->ID, 'otp_code', wp_hash_password( $otp_code_string ) );
 				update_user_meta( $existing_user->ID, 'mobile_number', $clean_mobile );
 			}
 
@@ -1066,17 +1068,17 @@ function hcotp_verify_otp_ajax() {
 	} elseif ( 'whatsapp' === $otpprocess ) {
 
 		// Verify OTP from transient (set at send time) or from user meta for existing accounts.
-		$saved_otp = get_transient( 'hcotp_wa_otp_' . $mobile );
+		$saved_otp_hash = get_transient( 'hcotp_wa_otp_' . $mobile );
 
-		if ( false === $saved_otp ) {
+		if ( false === $saved_otp_hash ) {
 			// Fallback: check user meta for existing users.
 			$existing_user = get_user_by( 'login', $mobile );
 			if ( $existing_user ) {
-				$saved_otp = get_user_meta( $existing_user->ID, 'otp_code', true );
+				$saved_otp_hash = get_user_meta( $existing_user->ID, 'otp_code', true );
 			}
 		}
 
-		if ( empty( $saved_otp ) || $otp !== (string) $saved_otp ) {
+		if ( empty( $saved_otp_hash ) || ! wp_check_password( $otp, $saved_otp_hash ) ) {
 			wp_send_json_error( array( 'message' => 'Invalid OTP for WhatsApp.' ) );
 		}
 
