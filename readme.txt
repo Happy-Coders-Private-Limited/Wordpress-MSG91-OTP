@@ -134,6 +134,18 @@ Users must first register using Mobile OTP. On the first login after registratio
 * Security: Resolved a logical flaw in the SMS OTP verification path where the fallback code path could bypass the user-existence check.
 * Fix: Send OTP button no longer changes to "Sending..." state when the mobile number field is empty. Validation now runs before the button state changes, so the form correctly shows the error message without disabling the button.
 * Fix: WhatsApp option no longer appears in the Resend OTP section when WhatsApp OTP is disabled in settings. The resend buttons now correctly reflect the admin configuration.
+* Security: OTP rate-limit counter now initializes to 0 before the database check, preventing a bypass when the rate-limit table is unavailable.
+* Security: MSG91 API key and parameters are now properly URL-encoded in the OTP send request, preventing potential injection via special characters in credentials.
+* Security: Verification cookies (msg91_verified_mobile, msg91_verified_user_id) are now set with HttpOnly, Secure, and SameSite=Strict flags to prevent JavaScript access and cross-site transmission.
+* Security: Duplicate AJAX hook registration for hcotp_send_otp_ajax removed — previously caused each OTP send to be processed twice, including double rate-limit counting and double API calls.
+* Security: WhatsApp OTPs are now stored as bcrypt hashes (via wp_hash_password) in both transients and user meta, preventing plaintext OTP exposure if the database is compromised.
+* Security: Email account enumeration prevented — sending OTP to an unregistered email now returns a generic success response instead of a distinct error message.
+* Security: Settings migration function now requires manage_options capability, preventing lower-privilege admin users from triggering the migration.
+* Security: Checkout login notice now uses wc_get_page_permalink() for the account URL instead of a hardcoded path, and output is properly escaped.
+* Security: Transactional SMS message templates now saved with sanitize_textarea_field instead of wp_kses_post, preventing HTML tags from being stored and sent inside SMS messages.
+* Security: Admin asset versions changed from time() to HCOTP_VERSION, enabling proper browser caching.
+* Fix: Server error messages in the OTP form are now rendered with .text() instead of .html() to prevent potential XSS from untrusted response content.
+* Fix: Removed console.log statements that were exposing the nonce and plugin configuration in the browser developer console.
 
 = 2.7 =
 * Fix: Updated blocked numbers table queries to use the active WordPress database prefix instead of hardcoded `wp_hcotp_blocked_numbers`.
