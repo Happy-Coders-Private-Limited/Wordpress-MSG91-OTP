@@ -332,10 +332,6 @@ function hcotp_delete_blocked_numbers_table() {
 		dbDelta( $sql );
 	}
 }
-add_action( 'wp_ajax_hcotp_send_otp_ajax', 'hcotp_send_otp_ajax' );
-add_action( 'wp_ajax_nopriv_hcotp_send_otp_ajax', 'hcotp_send_otp_ajax' );
-
-
 /**
  * Retrieves the MSG91 OTP plugin options.
  *
@@ -774,10 +770,10 @@ function hcotp_send_otp_ajax() {
 		wp_cache_set( $cache_key, $table_exists );
 	}
 
+	$otp_count_today = 0;
 	if ( $table_exists ) {
-		$otp_count_today = 0;
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
-		$otp_count_today = $wpdb->get_var(
+		$otp_count_today = (int) $wpdb->get_var(
 			$wpdb->prepare(
 					"SELECT COUNT(*) FROM {$table_name} WHERE mobile_number = %s AND DATE(created_at) = %s",
 				$mobile,
@@ -805,7 +801,16 @@ function hcotp_send_otp_ajax() {
 
 		$otp_length = (int) get_option( 'hcotp_msg91_otp_length', 4 );
 
-		$url = "https://control.msg91.com/api/v5/otp?authkey=$authkey&otp_expiry=5&template_id=$template_id&mobile=$mobile&realTimeResponse&otp_length=$otp_length";
+		$url = 'https://control.msg91.com/api/v5/otp?' . http_build_query(
+			array(
+				'authkey'          => $authkey,
+				'otp_expiry'       => 5,
+				'template_id'      => $template_id,
+				'mobile'           => $mobile,
+				'realTimeResponse' => 1,
+				'otp_length'       => $otp_length,
+			)
+		);
 
 		$response = wp_remote_get( $url );
 		$body     = wp_remote_retrieve_body( $response );
@@ -966,8 +971,17 @@ function hcotp_login_verified_mobile_user( $mobile ) {
 	wp_set_current_user( $user->ID );
 	wp_set_auth_cookie( $user->ID, true );
 
-	setcookie( 'msg91_verified_mobile', $mobile, time() + ( 30 * 24 * 60 * 60 ), COOKIEPATH, COOKIE_DOMAIN );
-	setcookie( 'msg91_verified_user_id', $user->ID, time() + ( 30 * 24 * 60 * 60 ), COOKIEPATH, COOKIE_DOMAIN );
+	$cookie_expiry = time() + ( 30 * 24 * 60 * 60 );
+	$cookie_opts   = array(
+		'expires'  => $cookie_expiry,
+		'path'     => COOKIEPATH,
+		'domain'   => COOKIE_DOMAIN,
+		'secure'   => is_ssl(),
+		'httponly' => true,
+		'samesite' => 'Strict',
+	);
+	setcookie( 'msg91_verified_mobile', $mobile, $cookie_opts );
+	setcookie( 'msg91_verified_user_id', (string) $user->ID, $cookie_opts );
 
 	if ( $is_new_user ) {
 		hcotp_sms_on_new_customer_registration( $user->ID );
@@ -1222,10 +1236,19 @@ function hcotp_replace_wc_login_with_otp() {
  */
 function hcotp_message_before_checkout() {
 	if ( ! is_user_logged_in() ) {
+		$account_url = function_exists( 'wc_get_page_permalink' )
+			? wc_get_page_permalink( 'myaccount' )
+			: home_url( '/my-account' );
 		echo '<div class="woocommerce-info custom-login-notice">';
-		echo 'Please <a href="/my-account">click here</a> to login.';
+		echo wp_kses(
+			sprintf(
+				/* translators: %s: URL of the my account page. */
+				__( 'Please <a href="%s">click here</a> to login.', 'happy-coders-otp-login' ),
+				esc_url( $account_url )
+			),
+			array( 'a' => array( 'href' => array() ) )
+		);
 		echo '</div>';
-
 	}
 }
 
@@ -1383,6 +1406,10 @@ if ( false === get_option( 'hcotp_activation_time' ) ) {
  * @since 2.0
  */
 function hcotp_migrate_old_settings() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+
 	if ( get_option( 'hcotp_settings_migrated' ) ) {
 		return;
 	}
