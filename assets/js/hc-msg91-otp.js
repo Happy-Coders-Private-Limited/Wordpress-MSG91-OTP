@@ -111,7 +111,6 @@ jQuery(document).ready(function ($) {
                     $button.prop('disabled', false).text('Send OTP');
                 }
             } else {
-                 console.log('OTP');
                 $container.find('#hcotp-otp-send-status').html('<span style="color:red;">Something went wrong. Try again.</span>');
                 $container.find('#hcotp-otp-verify-status').html('<span style="color:red;">Something went wrong. Try again.</span>');
                 $button.prop('disabled', false).text('Send OTP');
@@ -164,14 +163,13 @@ jQuery(document).ready(function ($) {
                     
                 }
             } else {
-                 console.log('OTP');
                 $container.find('#hcotp-otp-send-status').html('<span style="color:red;">Something went wrong. Try again.</span>');
                 $container.find('#hcotp-otp-verify-status').html('<span style="color:red;">Something went wrong. Try again.</span>');
                 $button.prop('disabled', false).text('Send OTP');
             }
         });
     });
-    
+
     $(document).on('paste', '#hcotp_otp_input_fields .hcotp-otp-field', function (e) {
         e.preventDefault();
 
