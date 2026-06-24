@@ -36,9 +36,9 @@ function hcotp_admin_enqueue_scripts( $hook ) {
 		return;
 	}
 	wp_enqueue_media();
-	wp_enqueue_script( 'hcotp-admin-tabs', HCOTP_PLUGIN_URL . 'assets/js/hc-msg91-otp.js', array( 'jquery' ), time(), true );
-	wp_enqueue_script( 'hcotp-admin-js', HCOTP_PLUGIN_URL . 'assets/js/hcotp-admin.js', array( 'jquery', 'hcotp-admin-tabs' ), time(), true );
-	wp_enqueue_style( 'hcotp-admin-css', HCOTP_PLUGIN_URL . 'assets/css/hc-msg91-otp.css', array(), time() );
+	wp_enqueue_script( 'hcotp-admin-tabs', HCOTP_PLUGIN_URL . 'assets/js/hc-msg91-otp.js', array( 'jquery' ), HCOTP_VERSION, true );
+	wp_enqueue_script( 'hcotp-admin-js', HCOTP_PLUGIN_URL . 'assets/js/hcotp-admin.js', array( 'jquery', 'hcotp-admin-tabs' ), HCOTP_VERSION, true );
+	wp_enqueue_style( 'hcotp-admin-css', HCOTP_PLUGIN_URL . 'assets/css/hc-msg91-otp.css', array(), HCOTP_VERSION );
 }
 add_action( 'admin_enqueue_scripts', 'hcotp_admin_enqueue_scripts' );
 
@@ -323,7 +323,7 @@ add_action(
 		foreach ( $sms_event_types as $key => $label ) {
 			register_setting( 'hcotp_otp_settings_group', "hcotp_msg91_sms_{$key}_enable", 'absint' );
 			register_setting( 'hcotp_otp_settings_group', "hcotp_msg91_sms_{$key}_template_id", 'sanitize_text_field' );
-			register_setting( 'hcotp_otp_settings_group', "hcotp_msg91_sms_{$key}_notes", 'wp_kses_post' );
+			register_setting( 'hcotp_otp_settings_group', "hcotp_msg91_sms_{$key}_notes", 'sanitize_textarea_field' );
 			if ( 'osh' === $key || 'odl' === $key ) {
 				register_setting( 'hcotp_otp_settings_group', "hcotp_msg91_sms_{$key}_status_slug", 'sanitize_text_field' );
 			}

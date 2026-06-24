@@ -421,8 +421,9 @@ function hcotp_send_email_otp_ajax() {
 	} else {
 		$user = get_user_by( 'email', $email );
 		if ( ! $user ) {
-			wp_send_json_error(
-				array( 'message' => __( 'No account found with this email.', 'happy-coders-otp-login' ) )
+			// Generic response to prevent email enumeration.
+			wp_send_json_success(
+				array( 'message' => __( 'If an account exists for this email, an OTP has been sent.', 'happy-coders-otp-login' ) )
 			);
 		}
 		$user_id = $user->ID;
