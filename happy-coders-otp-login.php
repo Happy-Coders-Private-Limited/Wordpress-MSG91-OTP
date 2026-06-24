@@ -3,7 +3,7 @@
  * Plugin Name: Happy Coders OTP Login for WooCommerce
  * Text Domain: happy-coders-otp-login
  * Description: Seamless OTP-based login for WordPress/WooCommerce using MSG91. Supports mobile and email OTP login, and automatic SMS alerts for user registration, order placed, order shipped, order completed, and cart reminder via cronjob.
- * Version: 2.7
+ * Version: 2.8
  * Author: Happy Coders
  * Author URI: https://www.happycoders.in/
  * License: GPL-2.0-or-later
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'HCOTP_PLUGIN_FILE', __FILE__ );
 define( 'HCOTP_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HCOTP_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-define( 'HCOTP_VERSION', '2.7' );
+define( 'HCOTP_VERSION', '2.8' );
 
 require_once HCOTP_PLUGIN_DIR . 'includes/hc-msg91-settings.php';
 require_once HCOTP_PLUGIN_DIR . 'includes/hc-countries.php';
@@ -215,6 +215,7 @@ function hcotp_enqueue_scripts() {
 			'invalid_email_format'     => __( 'Please enter a valid email address format.', 'happy-coders-otp-login' ),
 			'use_valid_email'          => __( 'Please use a valid email address.', 'happy-coders-otp-login' ),
 			'enter_valid_email'        => __( 'Please enter a valid email.', 'happy-coders-otp-login' ),
+			'whatsapp_enabled'         => (bool) get_option( 'hcotp_whatsapp_auth_enabled', 0 ),
 		)
 	);
 }
@@ -895,34 +896,18 @@ function hcotp_send_otp_ajax() {
 						current_time( 'mysql' )
 					)
 				);
-				$clean_mobile = preg_replace( '/\D/', '', $mobile );
-				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
-				$user = $wpdb->get_row(
-					$wpdb->prepare(
-						"SELECT * FROM {$wpdb->users} WHERE user_login = %s",
-						$clean_mobile
-					)
-				);
-			if ( $user ) {
 
-				update_user_meta( $user->ID, 'otp_code', $otp_code );
-				update_user_meta( $user->ID, 'mobile_number', $clean_mobile );
+			// Store the OTP temporarily in a transient keyed by mobile number.
+			// User account creation is deferred to verification time (hcotp_verify_otp_ajax).
+			// This prevents phantom account creation for numbers that never verify.
+			$clean_mobile = preg_replace( '/\D/', '', $mobile );
+			set_transient( 'hcotp_wa_otp_' . $clean_mobile, $otp_code, 10 * MINUTE_IN_SECONDS );
 
-			} else {
-				$password = wp_generate_password( 8, false );
-				$user_id  = wp_insert_user(
-					array(
-						'user_login' => $clean_mobile,
-						'user_pass'  => $password,
-						'user_email' => $clean_mobile . '@example.com',
-						'role'       => 'subscriber',
-					)
-				);
-
-				if ( ! is_wp_error( $user_id ) ) {
-						update_user_meta( $user_id, 'otp_code', $otp_code );
-						update_user_meta( $user_id, 'mobile_number', $clean_mobile );
-				}
+			// If a user already exists for this mobile, also update their meta for lookup convenience.
+			$existing_user = get_user_by( 'login', $clean_mobile );
+			if ( $existing_user ) {
+				update_user_meta( $existing_user->ID, 'otp_code', $otp_code );
+				update_user_meta( $existing_user->ID, 'mobile_number', $clean_mobile );
 			}
 
 				wp_send_json_success( array( 'message' => 'OTP sent successfully via WhatsApp.' ) );
@@ -934,67 +919,61 @@ function hcotp_send_otp_ajax() {
 
 add_action( 'wp_ajax_hcotp_send_otp_ajax', 'hcotp_send_otp_ajax' );
 add_action( 'wp_ajax_nopriv_hcotp_send_otp_ajax', 'hcotp_send_otp_ajax' );
-add_action( 'wp_ajax_hcotp_auto_login_user', 'hcotp_auto_login_user' );
-add_action( 'wp_ajax_nopriv_hcotp_auto_login_user', 'hcotp_auto_login_user' );
+
+// NOTE: hcotp_auto_login_user is intentionally NOT registered as an AJAX endpoint.
+// It is an internal helper called only after a confirmed server-side OTP verification.
 
 /**
- * Automatically logs in a user based on their mobile number.
+ * Creates or retrieves a user by mobile number and logs them in.
  *
- * This function checks if a user exists based on the provided mobile number.
- * If the user does not exist, it creates a new user with the mobile number
- * as the username and a generated password. The user is then logged in and
- * their session is configured for a duration of 30 days. A cookie is set to
- * remember the verified mobile and user ID for the same duration.
+ * SECURITY: This is an internal function only. It must never be called directly
+ * from an AJAX endpoint or any public-facing request handler. It must only be
+ * invoked after the OTP has been fully verified server-side within the same
+ * request lifecycle (i.e. from hcotp_verify_otp_ajax after confirmation).
  *
- * Expects the mobile number to be provided in the $_POST data.
- *
- * Sends a JSON response indicating success or failure.
+ * @param string $mobile Verified mobile number (digits only, with country code).
+ * @return WP_User|WP_Error The logged-in user object or WP_Error on failure.
  */
-function hcotp_auto_login_user() {
-	check_ajax_referer( 'msg91_ajax_nonce_action', 'security_nonce' );
-	$mobile = sanitize_text_field( wp_unslash( isset( $_POST['mobile'] ) ? $_POST['mobile'] : '' ) );
-	if ( empty( $mobile ) ) {
-		wp_send_json_error( array( 'message' => 'Mobile number missing' ) );
-	}
-
+function hcotp_login_verified_mobile_user( $mobile ) {
 	$username = $mobile;
 	$email    = $username . '@example.com';
 
-	$user = get_user_by( 'login', $username );
+	$user        = get_user_by( 'login', $username );
+	$is_new_user = false;
 
 	if ( ! $user ) {
 		$user_id = wp_create_user( $username, wp_generate_password(), $email );
+
+		if ( is_wp_error( $user_id ) ) {
+			return $user_id;
+		}
+
 		wp_update_user(
 			array(
 				'ID'           => $user_id,
 				'display_name' => $mobile,
 			)
 		);
-		$user = get_user_by( 'ID', $user_id );
 
-			hcotp_sms_on_new_customer_registration( $user->ID );
-
-	} else {
-		$created             = strtotime( $user->user_registered );
-		$is_very_recent_user = ( time() - $created ) < 60;
-		if ( $is_very_recent_user ) {
-			hcotp_sms_on_new_customer_registration( $user->ID );
-		}
+		$user        = get_user_by( 'ID', $user_id );
+		$is_new_user = true;
 	}
+
+	if ( ! $user ) {
+		return new WP_Error( 'user_not_found', 'Could not create or retrieve user.' );
+	}
+
 	wp_set_current_user( $user->ID );
 	wp_set_auth_cookie( $user->ID, true );
 
 	setcookie( 'msg91_verified_mobile', $mobile, time() + ( 30 * 24 * 60 * 60 ), COOKIEPATH, COOKIE_DOMAIN );
 	setcookie( 'msg91_verified_user_id', $user->ID, time() + ( 30 * 24 * 60 * 60 ), COOKIEPATH, COOKIE_DOMAIN );
 
-	wp_send_json_success(
-		array(
-			'message' => 'User logged in successfully',
-			'name'    => $user->display_name,
-			'user_id' => $user->ID,
+	if ( $is_new_user ) {
+		hcotp_sms_on_new_customer_registration( $user->ID );
+	}
 
-		)
-	);
+	return $user;
 }
 add_action( 'wp_ajax_hcotp_verify_otp_ajax', 'hcotp_verify_otp_ajax' );
 add_action( 'wp_ajax_nopriv_hcotp_verify_otp_ajax', 'hcotp_verify_otp_ajax' );
@@ -1018,9 +997,6 @@ function hcotp_verify_otp_ajax() {
 		wp_send_json_error( array( 'message' => 'OTP is required.' ) );
 	}
 
-	/**
-	 * Validate required fields based on OTP process
-	 */
 	if ( in_array( $otpprocess, array( 'sms', 'whatsapp' ), true ) ) {
 
 		$mobile = sanitize_text_field( wp_unslash( $_POST['mobile'] ?? '' ) );
@@ -1043,75 +1019,65 @@ function hcotp_verify_otp_ajax() {
 	}
 
 	if ( 'sms' === $otpprocess ) {
-		$url = 'https://api.msg91.com/api/verifyRequestOTP.php?authkey=' . get_option( 'hcotp_msg91_auth_key' ) . "&mobile={$mobile}&otp={$otp}";
 
+		// Verify OTP with MSG91 server-side — this is the authoritative check.
+		$authkey  = get_option( 'hcotp_msg91_auth_key' );
+		$url      = 'https://api.msg91.com/api/verifyRequestOTP.php?authkey=' . rawurlencode( $authkey ) . '&mobile=' . rawurlencode( $mobile ) . '&otp=' . rawurlencode( $otp );
 		$response = wp_remote_get( $url );
 		$body     = wp_remote_retrieve_body( $response );
 		$result   = json_decode( $body, true );
 
-		if ( isset( $result['type'] ) && 'success' === $result['type'] ) {
-			$user = get_user_by( 'login', $mobile );
-
-			$created = strtotime( $user->user_registered );
-
-			$is_very_recent_user = ( time() - $created ) < 120;
-
-			if ( $is_very_recent_user ) {
-				hcotp_sms_on_new_customer_registration( $user->ID );
-			}
-			if ( $user ) {
-				wp_set_current_user( $user->ID );
-				wp_set_auth_cookie( $user->ID, true );
-
-				if ( ! metadata_exists( 'user', $user->ID, 'hcotp_email_verified' ) ) {
-					update_user_meta( $user->ID, 'hcotp_email_verified', 0 );
-				}
-
-				setcookie( 'msg91_verified_mobile', $mobile, time() + ( 30 * 24 * 60 * 60 ), COOKIEPATH, COOKIE_DOMAIN );
-				setcookie( 'msg91_verified_user_id', $user->ID, time() + ( 30 * 24 * 60 * 60 ), COOKIEPATH, COOKIE_DOMAIN );
-
-				wp_send_json_success(
-					array(
-						'message' => 'OTP Verified Successfully, User logged in',
-						'user_id' => $user->ID,
-					)
-				);
-			} else {
-				hcotp_auto_login_user();
-			}
-			setcookie( 'msg91_verified_mobile', $mobile, time() + ( 30 * 24 * 60 * 60 ), COOKIEPATH, COOKIE_DOMAIN );
-			setcookie( 'msg91_verified_user_id', $user->ID, time() + ( 30 * 24 * 60 * 60 ), COOKIEPATH, COOKIE_DOMAIN );
-
-			wp_send_json_success(
-				array(
-					'message' => 'OTP Verified Successfully',
-					'user_id' => get_current_user_id(),
-				)
-			);
-		} else {
-			wp_send_json_error( array( 'message' => $result['message'] ?? 'OTP verification failed' ) );
+		if ( ! isset( $result['type'] ) || 'success' !== $result['type'] ) {
+			wp_send_json_error( array( 'message' => $result['message'] ?? 'OTP verification failed.' ) );
 		}
+
+		// OTP confirmed by MSG91 — now create/retrieve and log in the user.
+		$user = hcotp_login_verified_mobile_user( $mobile );
+
+		if ( is_wp_error( $user ) ) {
+			wp_send_json_error( array( 'message' => $user->get_error_message() ) );
+		}
+
+		if ( ! metadata_exists( 'user', $user->ID, 'hcotp_email_verified' ) ) {
+			update_user_meta( $user->ID, 'hcotp_email_verified', 0 );
+		}
+
+		wp_send_json_success(
+			array(
+				'message' => 'OTP Verified Successfully, User logged in',
+				'user_id' => $user->ID,
+			)
+		);
+
 	} elseif ( 'whatsapp' === $otpprocess ) {
 
-		$user    = get_user_by( 'login', $mobile );
-		$created = strtotime( $user->user_registered );
+		// Verify OTP from transient (set at send time) or from user meta for existing accounts.
+		$saved_otp = get_transient( 'hcotp_wa_otp_' . $mobile );
 
-		$is_very_recent_user = ( time() - $created ) < 120;
-
-		if ( $is_very_recent_user ) {
-			hcotp_sms_on_new_customer_registration( $user->ID );
+		if ( false === $saved_otp ) {
+			// Fallback: check user meta for existing users.
+			$existing_user = get_user_by( 'login', $mobile );
+			if ( $existing_user ) {
+				$saved_otp = get_user_meta( $existing_user->ID, 'otp_code', true );
+			}
 		}
-		$saved_otp = get_user_meta( $user->ID, 'otp_code', true );
 
-		if ( $otp !== $saved_otp ) {
+		if ( empty( $saved_otp ) || $otp !== (string) $saved_otp ) {
 			wp_send_json_error( array( 'message' => 'Invalid OTP for WhatsApp.' ) );
 		}
 
-		wp_set_current_user( $user->ID );
-		wp_set_auth_cookie( $user->ID, true );
+		// OTP confirmed — consume it immediately to prevent replay attacks.
+		delete_transient( 'hcotp_wa_otp_' . $mobile );
 
-		setcookie( 'msg91_verified_mobile', $mobile, time() + ( 30 * 24 * 60 * 60 ), COOKIEPATH, COOKIE_DOMAIN );
-		setcookie( 'msg91_verified_user_id', $user->ID, time() + ( 30 * 24 * 60 * 60 ), COOKIEPATH, COOKIE_DOMAIN );
+		// Now create/retrieve and log in the user after OTP is verified.
+		$user = hcotp_login_verified_mobile_user( $mobile );
+
+		if ( is_wp_error( $user ) ) {
+			wp_send_json_error( array( 'message' => $user->get_error_message() ) );
+		}
+
+		// Clear stored OTP from user meta too.
+		delete_user_meta( $user->ID, 'otp_code' );
 
 		wp_send_json_success(
 			array(
@@ -1119,6 +1085,7 @@ function hcotp_verify_otp_ajax() {
 				'user_id' => $user->ID,
 			)
 		);
+
 	} elseif ( 'email' === $otpprocess ) {
 
 		$email = sanitize_email( wp_unslash( $_POST['email'] ?? '' ) );

@@ -3,6 +3,7 @@ function updateOtpMethodButtons($container, otpprocess) {
     const $emailBtn = $buttons.find('.email-button');
     const $smsBtn = $buttons.find('.sms-button');
     const $whatsappBtn = $buttons.find('.whatsapp-button');
+    const whatsappEnabled = hcotp_params.whatsapp_enabled || false;
 
     if (otpprocess === 'email') {
         $emailBtn.show();
@@ -14,31 +15,29 @@ function updateOtpMethodButtons($container, otpprocess) {
     if (otpprocess === 'sms') {
         $emailBtn.hide();
         $smsBtn.show();
-        $whatsappBtn.show();
+        whatsappEnabled ? $whatsappBtn.show() : $whatsappBtn.hide();
         return;
     }
 
     if (otpprocess === 'whatsapp') {
         $emailBtn.hide();
         $smsBtn.show();
-        $whatsappBtn.show();
+        whatsappEnabled ? $whatsappBtn.show() : $whatsappBtn.hide();
         return;
     }
 
     $emailBtn.show();
     $smsBtn.show();
-    $whatsappBtn.show();
+    whatsappEnabled ? $whatsappBtn.show() : $whatsappBtn.hide();
 }
 
 jQuery(document).ready(function ($) {
           
     $(document).on('click', '#msg91_send_otp', function () {
 
-        let $button = $(this); 
-        let $container = $button.closest('#hcotp-otp-form-wrap, .edit-account'); 
+        let $button = $(this);
+        let $container = $button.closest('#hcotp-otp-form-wrap, .edit-account');
         const otpprocess = $container.find('#otpprocess').val();
-
-        $button.prop('disabled', true).text('Sending...');
 
         // EMAIL RESEND
         if (otpprocess === 'email') {
@@ -48,9 +47,10 @@ jQuery(document).ready(function ($) {
             if (!email) {
                 $container.find('#hcotp-otp-send-status')
                     .html('<span class="woocommerce-error">Invalid email.</span>');
-                $button.prop('disabled', false);
                 return;
             }
+
+            $button.prop('disabled', true).text('Sending...');
 
             $.post(hcotp_params.ajax_url, {
                 action: 'hcotp_send_email_otp',
@@ -64,21 +64,24 @@ jQuery(document).ready(function ($) {
                 } else {
                     $container.find('#hcotp-otp-send-status')
                         .html('<span class="woocommerce-error">' + res.data.message + '</span>');
-                    $button.prop('disabled', false);
+                    $button.prop('disabled', false).text(hcotp_params.send_otp_text || 'Send OTP');
                 }
             });
 
             return;
         }
-    
+
         let mobile = $container.find('#msg91_mobile').val().trim();
         let countryCode = $container.find('#msg91_country_code').val();
         let msg = hcotp_params.sendotp_validation_msg || 'Please enter a valid mobile number (between 5 and 12 digits).';
-    
+
+        // Validate before changing button state
         if (!mobile || mobile.length < 5 || mobile.length > 12) {
             $container.find('#hcotp-otp-send-status').html('<span style="color:red;">' + msg + '</span>');
             return;
         }
+
+        $button.prop('disabled', true).text('Sending...');
     
         let mobileWithCode = countryCode + mobile;
 

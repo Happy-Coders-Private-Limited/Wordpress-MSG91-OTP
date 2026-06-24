@@ -2,9 +2,9 @@
 * Contributors: happycoders, kombiahrk, muthupandi2002, imgopi2002, sureshkumar22
 * Tags: otp, woocommerce, msg91, whatsapp otp, email otp
 * Requires at least: 5.0
-* Tested up to: 6.9
+* Tested up to: 7.0
 * Requires PHP: 7.4
-* Stable tag: 2.7
+* Stable tag: 2.8
 * License: GPLv2 or later
 * License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -127,6 +127,14 @@ Users must first register using Mobile OTP. On the first login after registratio
 
 == Changelog ==
 
+= 2.8 =
+* Security: Fixed a critical authentication bypass vulnerability (CVSS 9.8) reported by the WPScan security team (discovered by moonge). The auto-login handler was incorrectly exposed as a public unauthenticated AJAX endpoint, allowing any visitor with the publicly available nonce to log in as any existing user — including administrators — without OTP verification. The handler is no longer registered as an AJAX endpoint; login is now performed exclusively within the OTP verification handler after server-side confirmation.
+* Security: WhatsApp OTP flow no longer creates a WordPress user account at OTP send time. Account creation is now deferred until after the OTP is successfully verified, preventing phantom account creation for unverified numbers.
+* Security: WhatsApp OTPs are now stored as short-lived transients (10-minute expiry) and are deleted immediately upon successful verification to prevent replay attacks.
+* Security: Resolved a logical flaw in the SMS OTP verification path where the fallback code path could bypass the user-existence check.
+* Fix: Send OTP button no longer changes to "Sending..." state when the mobile number field is empty. Validation now runs before the button state changes, so the form correctly shows the error message without disabling the button.
+* Fix: WhatsApp option no longer appears in the Resend OTP section when WhatsApp OTP is disabled in settings. The resend buttons now correctly reflect the admin configuration.
+
 = 2.7 =
 * Fix: Updated blocked numbers table queries to use the active WordPress database prefix instead of hardcoded `wp_hcotp_blocked_numbers`.
 
@@ -183,6 +191,9 @@ Users must first register using Mobile OTP. On the first login after registratio
 * Initial release with OTP login features (full-screen and popup) and core MSG91 integration.
 
 == Upgrade Notice ==
+
+= 2.8 =
+CRITICAL SECURITY UPDATE. This version fixes a critical authentication bypass (CVSS 9.8) that allowed unauthenticated attackers to log in as any user, including administrators, without OTP verification. All users must update immediately.
 
 = 2.7 =
 This version fixes blocked numbers table queries for sites using custom WordPress database prefixes.
