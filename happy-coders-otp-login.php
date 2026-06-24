@@ -775,7 +775,8 @@ function hcotp_send_otp_ajax() {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 		$otp_count_today = (int) $wpdb->get_var(
 			$wpdb->prepare(
-					"SELECT COUNT(*) FROM {$table_name} WHERE mobile_number = %s AND DATE(created_at) = %s",
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table_name is derived from $wpdb->prefix, not user input.
+				"SELECT COUNT(*) FROM {$table_name} WHERE mobile_number = %s AND DATE(created_at) = %s",
 				$mobile,
 				$today
 			)
@@ -819,7 +820,8 @@ function hcotp_send_otp_ajax() {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 			$wpdb->query(
 				$wpdb->prepare(
-						"INSERT INTO {$table_name} (mobile_number, ip_address, created_at) VALUES (%s, %s, %s)",
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table_name is derived from $wpdb->prefix, not user input.
+					"INSERT INTO {$table_name} (mobile_number, ip_address, created_at) VALUES (%s, %s, %s)",
 					$mobile,
 					$ip_address,
 					current_time( 'mysql' )
@@ -895,6 +897,7 @@ function hcotp_send_otp_ajax() {
 				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 				$wpdb->query(
 					$wpdb->prepare(
+						// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table_name is derived from $wpdb->prefix, not user input.
 						"INSERT INTO {$table_name} (mobile_number, ip_address, created_at) VALUES (%s, %s, %s)",
 						$mobile,
 						$ip_address,
